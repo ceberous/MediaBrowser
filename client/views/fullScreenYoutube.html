@@ -1,0 +1,78 @@
+<h1 id="waitingMessage">Loading Full Screen Youtube</h1>
+
+<script type="text/javascript">
+
+	var wPlayer , wIFrame;
+
+	var searchKeyword = function(wParam) {
+
+		var wResults = [];
+
+		var request = gapi.client.youtube.search.list({
+			q: wParam,
+			part: 'snippet'
+		});
+
+		request.execute(function(response) {
+			
+			for ( var i = 0; i < response.result.items.length; ++i ) {
+				var item = {};
+				item.title = response.result.items[i].snippet.title;
+				item.description = response.result.items[i].snippet.description;
+				item.id = response.result.items[i].id.videoId;
+				wResults.push(item);
+			}
+
+			showVideo(wResults[0]);
+
+		});
+	};
+
+	var getChannelLatest = function() {
+		console.log("blah");
+	};
+
+	var showVideo = function(wVideo) {
+
+		$("#waitingMessage").hide();
+
+		var wThis = $(window);
+		var wHeight = wThis.height();
+		var wWidth = wThis.width();
+
+		wPlayer = new YT.Player( 'player', {
+		    height: wHeight,
+		    width: wWidth,
+		    videoId: wVideo.id,
+		    events: {
+		      'onReady': onPlayerReady,
+		      'onStateChange': onPlayerStateChange
+		    }
+		});
+
+	};
+
+	function onPlayerStateChange(event) {
+		console.log( event.data );
+		if ( event.data == YT.PlayerState.ENDED ) {
+			console.log(" video is over ");
+			$(document).trigger( "closefirefoxtab" );
+		}
+	}
+
+	function onPlayerReady(event) {
+		console.log("player is supposedly ready");
+		wPlayer.playVideo();
+		setTimeout(function(){
+			$(document).trigger( "togglefkey" );
+		} , 1300 );
+
+	}
+
+	//searchKeyword("walrus");
+	var temp1 = {id: "5de1gB9QtaY"};
+	showVideo(temp1);
+
+</script>
+
+<div id="player"></div>
