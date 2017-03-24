@@ -29,7 +29,7 @@ $(document).ready( function() {
 
 //$(document).on( "closefirefoxtab" , function( event , einfo ) { socket.emit( 'firefox-close-tab' ); });
 $(document).on( "closefirefoxtab" , function( event , einfo ) { closeChildView(); });
-$(document).on( "togglefkey" , function( event , einfo ) { socket.emit( 'firefox-f-key' ); });
+$(document).on( "glitchIntoFullScreen" , function( event , einfo ) { socket.emit( 'firefox-f-key' ); });
 $(document).on( "ytDataClientReady" , function( event , einfo ) { wInit(); });
 
 function wInit() {
@@ -70,3 +70,8 @@ function wMain() {
 
 //https://github.com/justintv/Twitch-API/blob/master/embed-video.md
 //https://dev.twitch.tv/docs/v5/guides/embed-video/
+//https://github.com/danmactough/node-feedparser
+
+//https://addons.mozilla.org/en-US/firefox/addon/procon-latte/reviews/
+//https://help.ubuntu.com/community/AppArmor
+

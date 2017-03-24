@@ -1,77 +1,125 @@
-<h1 id="waitingMessage">Loading Full Screen Youtube</h1>
+<h1 id="waitingMessage">Watch Full Screen Youtube Here</h1>
 
 <script type="text/javascript">
 
-	var wPlayer , wIFrame;
+	var YTDataManager = {
 
-	var searchKeyword = function(wParam) {
+		"searchKeywordComplete" : false,
+		"searchKeywordResults" : [],
 
-		var wResults = [];
+		searchKeyword: function(wParam) {
 
-		var request = gapi.client.youtube.search.list({
-			q: wParam,
-			part: 'snippet'
-		});
+			var request = gapi.client.youtube.search.list({
+				q: wParam,
+				part: 'snippet'
+			});
 
-		request.execute(function(response) {
-			
-			for ( var i = 0; i < response.result.items.length; ++i ) {
-				var item = {};
-				item.title = response.result.items[i].snippet.title;
-				item.description = response.result.items[i].snippet.description;
-				item.id = response.result.items[i].id.videoId;
-				wResults.push(item);
-			}
+			request.execute(function(response) {
+				
+				for ( var i = 0; i < response.result.items.length; ++i ) {
+					var item = {};
+					item.title = response.result.items[i].snippet.title;
+					item.description = response.result.items[i].snippet.description;
+					item.id = response.result.items[i].id.videoId;
+					YTDataManager.searchKeywordResults.push(item);
+				}
 
-			showVideo(wResults[0]);
+				YTDataManager.searchKeywordComplete = true;
+				$(document).trigger( "ytdatapisearchcomplete" );
 
-		});
-	};
+			});
+		},
 
-	var getChannelLatest = function() {
-		console.log("blah");
-	};
+		getChannelLatest: function() {
 
-	var showVideo = function(wVideo) {
-
-		$("#waitingMessage").hide();
-
-		var wThis = $(window);
-		var wHeight = wThis.height();
-		var wWidth = wThis.width();
-
-		wPlayer = new YT.Player( 'player', {
-		    height: wHeight,
-		    width: wWidth,
-		    videoId: wVideo.id,
-		    events: {
-		      'onReady': onPlayerReady,
-		      'onStateChange': onPlayerStateChange
-		    }
-		});
-
-	};
-
-	function onPlayerStateChange(event) {
-		console.log( event.data );
-		if ( event.data == YT.PlayerState.ENDED ) {
-			console.log(" video is over ");
-			$(document).trigger( "closefirefoxtab" );
 		}
-	}
 
-	function onPlayerReady(event) {
-		console.log("player is supposedly ready");
-		wPlayer.playVideo();
-		setTimeout(function(){
-			$(document).trigger( "togglefkey" );
-		} , 1300 );
+	};
 
-	}
+	var YTIFrameManager = {
 
-	//searchKeyword("walrus");
+		"wPlayer" : null,
+		"playlist" : {items: null, index: null},
+
+		tearDown: function() {
+			YTIFrameManager.wPlayer.destroy();
+			setTimeout(function(){
+				YTIFrameManager.wPlayer = null,
+				$("#waitingMessage").show();
+			} , 1000 );
+		},
+
+		showVideo: function(wVideo) {
+
+			$("#waitingMessage").hide();
+
+			var wThis = $(window);
+			var wHeight = wThis.height();
+			var wWidth = wThis.width();
+
+			YTIFrameManager.wPlayer = new YT.Player( 'player', {
+			    height: wHeight,
+			    width: wWidth,
+			    videoId: wVideo.id,
+			    events: {
+			      'onReady': YTIFrameManager.onPlayerReady,
+			      'onStateChange': YTIFrameManager.onPlayerStateChange
+			    }
+			});
+
+		},
+
+		onPlayerStateChange: function(event) {
+			switch ( event.data ) {
+				case -1:
+					console.log(" video is unstarted ");
+					break;
+				case 0:
+					console.log(" video is over ");
+					YTIFrameManager.tearDown();
+					break;
+				case 1:
+					console.log(" video is now playing ");
+					break;
+				case 2:
+					console.log(" video is paused ");
+					break;
+				case 3:
+					console.log(" video is buffering ");
+					break;
+				case 5:
+					console.log(" new video is cued ");
+					break;
+			}
+		},
+
+		onPlayerReady: function(event) {
+			console.log("player is supposedly ready");
+			YTIFrameManager.getCurrentPlaylistInfo();
+			YTIFrameManager.wPlayer.playVideo();
+			setTimeout(function(){
+				$(document).trigger( "glitchIntoFullScreen" );
+			} , 1300 );
+		},
+
+		getCurrentPlaylistInfo: function() {
+			YTIFrameManager.playlist.items = YTIFrameManager.wPlayer.getPlaylist();
+			YTIFrameManager.playlist.index = YTIFrameManager.wPlayer.getPlaylistIndex();
+			console.log( "Current Playlist Index = " + YTIFrameManager.playlist.index.toString() );
+			if ( YTIFrameManager.playlist.index >= 1 ) {
+				for( var i = 0; i < YTIFrameManager.playlist.items.length; ++i ) {
+					console.log( YTIFrameManager.playlist.items[i] );
+				}
+			}
+		},
+
+	};
+
+	$(document).on( "ytdatapisearchcomplete" , function( event , einfo ) { YTIFrameManager.showVideo(YTDataManager.searchKeywordResults[0]); });
+	
+	//YTDataManager.searchKeyword("walrus");
 	var temp1 = {id: "5de1gB9QtaY"};
-	showVideo(temp1);
+	YTIFrameManager.showVideo(temp1);
 
 </script>
 
