@@ -30,10 +30,6 @@
 			});
 		},
 
-		getChannelLatest: function() {
-
-		}
-
 	};
 
 	var YTIFrameManager = {
@@ -98,7 +94,7 @@
 			YTIFrameManager.getCurrentPlaylistInfo();
 			YTIFrameManager.wPlayer.playVideo();
 			setTimeout(function(){
-				$(document).trigger( "glitchIntoFullScreen" );
+				//$(document).trigger( "glitchIntoFullScreen" );
 			} , 1300 );
 		},
 
@@ -115,11 +111,15 @@
 
 	};
 
-	$(document).on( "ytdatapisearchcomplete" , function( event , einfo ) { YTIFrameManager.showVideo(YTDataManager.searchKeywordResults[0]); });
+	$(document).on( "ytdatapisearchcomplete" , function( event , einfo ) { 
+		YTIFrameManager.showVideo(YTDataManager.searchKeywordResults[0]); 
+	});
 	
 	//YTDataManager.searchKeyword("walrus");
-	var temp1 = {id: "5de1gB9QtaY"};
-	YTIFrameManager.showVideo(temp1);
+	//var temp1 = {id: "5de1gB9QtaY"};
+	//YTIFrameManager.showVideo(temp1);
+
+	YTDataManager.getChannelLive("UCzQUP1qoWDoEbmsQxvdjxgQ");
 
 </script>
 

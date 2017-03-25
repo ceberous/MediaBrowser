@@ -1,4 +1,7 @@
 var wFM = require("./ffManager.js");
+var YTLiveSearch = require("./ytLiveSearch.js");
+
+var schedule = require('node-schedule');
 
 var express = require("express");
 var path = require("path");
@@ -38,9 +41,28 @@ app.get( "/" , function( req , res , next ) {
 	res.render( 'index.html' );
 });
 
+// Scheduled Tasks every 15 Minutes
+var checkYTLiveVideos = schedule.scheduleJob( "*/15 * * * *" , function(){
+        console.log('scheduled start');
+        getLatestVideos();
+});
+
+//  will replace later , but patching in for now
+function getLatestVideos() {
+	YTLiveSearch.searchUserName("MontereyBayAquarium");
+	var results;
+	setTimeout(function(){
+		results = YTLiveSearch.returnSearchResults("MontereyBayAquarium");
+		console.log(results);
+	} , 3000 );
+	
+}
+
 // Client-Interaction
 var io = require('socket.io')(server);
 io.sockets.on( 'connection' , function (socket) {
+
+	getLatestVideos();
 	
 	var wC = socket.request.connection._peername;
     console.log( wC.address.toString() +  " connected" );
