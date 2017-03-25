@@ -3,6 +3,8 @@ var port = wCreds.socketIOPort;
 var OAUTH2_CLIENT_ID = wCreds.webBrowser;
 var socket = null;
 
+var standardYTChannels = null;
+
 var viewFiles = {
 	path: "../views",
 	active: false,
@@ -23,7 +25,20 @@ $(document).ready( function() {
 
 	socket.on( 'newConnection' , function (data) {
 		console.log(data.message);
+		standardYTChannels = data.standardYTChannels;
+		console.log(standardYTChannels);
 	});
+
+	socket.on( 'latestvideos' , function (data) {
+		console.log(data.videos);
+	});
+
+	socket.on( 'getlatestpublishedyoutube' , function (data) {
+		console.log(data.message);
+		$(document).trigger( "getlatestpublishedyoutube" );
+	});			
+
+	
 	
 });
 

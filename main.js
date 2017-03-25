@@ -1,5 +1,5 @@
 var wFM = require("./ffManager.js");
-var YTLiveSearch = require("./ytLiveSearch.js");
+var wVM = require("./videoManager.js");
 
 var schedule = require('node-schedule');
 
@@ -41,32 +41,18 @@ app.get( "/" , function( req , res , next ) {
 	res.render( 'index.html' );
 });
 
-// Scheduled Tasks every 15 Minutes
-var checkYTLiveVideos = schedule.scheduleJob( "*/15 * * * *" , function(){
-        console.log('scheduled start');
-        getLatestVideos();
-});
-
-//  will replace later , but patching in for now
-function getLatestVideos() {
-	YTLiveSearch.searchUserName("MontereyBayAquarium");
-	var results;
-	setTimeout(function(){
-		results = YTLiveSearch.returnSearchResults("MontereyBayAquarium");
-		console.log(results);
-	} , 3000 );
-	
-}
 
 // Client-Interaction
 var io = require('socket.io')(server);
 io.sockets.on( 'connection' , function (socket) {
-
-	getLatestVideos();
 	
 	var wC = socket.request.connection._peername;
-    console.log( wC.address.toString() +  " connected" );
-	socket.emit( 'newConnection', { message: 'you are now connected to the sock.io server' } );
+	console.log( wC.address.toString() +  " connected" );
+	socket.emit( 'newConnection', { 
+		message: 'you are now connected to the sock.io server',
+		standardYTChannels: wVM.getStandardYTChannelList() ,
+		twitchChannels: null
+	});
 
 	socket.on( 'firefox-close-tab' , function( data ){
 		wFM.closeCurrentTab();
@@ -78,7 +64,30 @@ io.sockets.on( 'connection' , function (socket) {
 
 	socket.on( 'firefox-f-key' , function( data ){
 		wFM.toggleFKeyPress();
-	});	
+	});
+
+	// Check for new LiveYT and TwitchAPI Videos every 30 seconds (for testing) // will change to ~15 minutes ? = "*/15 * * * *"
+	var updateVideoList = schedule.scheduleJob( "*/30 * * * * *" , function() {
+		
+		console.log("running scheduled updateVideoList task");
+
+		wVM.updateAllSources();
+
+		setTimeout( function() {
+			var results = wVM.returnAllSources();
+			socket.emit( 'latestvideos' , { videos: results } );
+		} , 5000 );
+
+	});
+	
+	// Check for new YT Published Videos Every 1 - Hour = "* */1 * * *"
+	var updateYouTubePublishedList = schedule.scheduleJob( "*/30 * * * * *" , function() {
+		
+		console.log("running scheduled updateYouTubePublishedList task");
+		socket.emit( 'getlatestpublishedyoutube' , { message: "time to update all folowing youtube sources" } );
+
+	});
+
 
 });
 
