@@ -1,5 +1,5 @@
-var wFM = require("./ffManager.js");
-var wVM = require("./videoManager.js");
+var wFM = require("./server/ffManager.js");
+var wVM = require("./server/videoManager.js");
 
 var schedule = require('node-schedule');
 
@@ -69,7 +69,7 @@ io.sockets.on( 'connection' , function (socket) {
 	// Check for new LiveYT and TwitchAPI Videos every 30 seconds (for testing) // will change to ~15 minutes ? = "*/15 * * * *"
 	var updateVideoList = schedule.scheduleJob( "*/30 * * * * *" , function() {
 		
-		console.log("running scheduled updateVideoList task");
+		console.log("running scheduled updateLiveTYVideoList and TwitchAPI task");
 
 		wVM.updateAllSources();
 
