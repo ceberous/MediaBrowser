@@ -19,7 +19,6 @@ var wSources = wVM.returnAllSources();
 var io = require('socket.io')(server);
 io.sockets.on( 'connection' , function (socket) {
 
-
 	var wC = socket.request.connection._peername;
 	console.log( wC.address.toString() +  " connected" );
 	socket.emit( 'newConnection', { 
@@ -51,8 +50,8 @@ io.sockets.on( 'connection' , function (socket) {
 
 	wEmitter.on( 'publishTwitchLiveList' , function() {
 		socket.emit( 'latestTwitchLiveList', { 
-			message: 'here is the latest ytLiveList',
-			twitchLiveList: wSources.twitchLiveList,
+			message: 'here is the latest twitchLiveList',
+			twitchLiveList: wVM.returnTwitchLiveList(),
 		});
 	});
 

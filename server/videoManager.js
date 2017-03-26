@@ -16,8 +16,8 @@ var twitchStandardList 	= jsonfile.readFileSync( bSPath + "/twitchStandardList.j
 var YTLiveManager = {
 
 	followers: followers.ytLive,
-	lastSearch: null,
-	searchResults: ytLiveList,
+	newResults: {},
+	computedUnWatchedList: ytLiveList,
 
 	enumerateFollowers: function() {
 
@@ -37,15 +37,45 @@ var YTLiveManager = {
 	        if (err) throw err;
 	        var $ = cheerio.load(body);
 	        $('.yt-lockup-title > a').each(function () {
-	        	wResults.push( { title: $(this).text() , url: $(this).attr('href') } );
+	        	var wID = $(this).attr('href');
+	        	wID = wID.substring( wID.length - 11 , wID.length );
+	        	wResults.push( { title: $(this).text() , id: wID } );
 	        });
-        	YTLiveManager.lastSearch = wUserName;
-        	YTLiveManager.searchResults[wUserName] = wResults;
 
-        	jsonfile.writeFileSync( bSPath + "/ytLiveList.json" , YTLiveManager.searchResults );
+        	YTLiveManager.newResults[wUserName] = wResults;
+
+        	YTLiveManager.updateComputedUnWatchedList(wUserName);
+        	
     	});
 
 	},
+
+	updateComputedUnWatchedList: function(wProp) {
+
+		for ( var i = 0; i < YTLiveManager.newResults[wProp].length; ++i ) {
+
+			if ( !YTLiveManager.computedUnWatchedList[wProp] ) {
+				YTLiveManager.computedUnWatchedList[wProp] = {};
+			}
+
+			if ( !YTLiveManager.computedUnWatchedList[wProp][YTLiveManager.newResults[wProp][i]["id"]] ) {
+				
+				console.log("we need to store this id");
+				YTLiveManager.computedUnWatchedList[wProp][YTLiveManager.newResults[wProp][i]["id"]] = {
+					
+					title: YTLiveManager.newResults[wProp][i].title,
+					watched: false,
+
+				};
+
+			} 
+			
+		}
+
+
+		jsonfile.writeFileSync( bSPath + "/ytLiveList.json" , YTLiveManager.computedUnWatchedList );
+
+	}
 
 };
 
@@ -155,7 +185,7 @@ var YTFeedManager = {
 					watched: false,
 					completed: false,
 					resumeTime: null
-					
+
 				};
 
 			} 
@@ -170,19 +200,8 @@ var YTFeedManager = {
 
 
 
-function updateAllSources() {
-	YTLiveManager.enumerateFollowers();
-	//twitchAPI.enumerateFollowing();
-}
 
-function returnAllSources() {
-	var wOBJ = {
-		ytLiveList: YTLiveManager.searchResults,
-		twitchLiveList: null,
-		standardList: { ytStandard: YTFeedManager.computedUnWatchedList , twitchStandard: null },
-	};
-	return wOBJ;
-}
+
 
 
 
@@ -210,16 +229,26 @@ wEmitter.on( 'updateStandardList' , function() {
 
 
 
-module.exports.updateAllSources = function() {
-	updateAllSources();
-};
+function returnAllSources() {
+	var wOBJ = {
+		ytLiveList: YTLiveManager.computedUnWatchedList,
+		twitchLiveList: null,
+		standardList: { ytStandard: YTFeedManager.computedUnWatchedList , twitchStandard: null },
+	};
+	return wOBJ;
+}
+
 
 module.exports.returnAllSources = function() {
 	return returnAllSources();
 };
 
 module.exports.returnYTLiveList = function() {
-	return YTLiveManager.searchResults;
+	return YTLiveManager.computedUnWatchedList;
+};
+
+module.exports.returnTwitchLiveList = function() {
+	return null;
 };
 
 module.exports.returnStandardList = function() {
