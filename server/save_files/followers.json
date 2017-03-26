@@ -1,11 +1,9 @@
 {
-	"ytStandard": [
-
-		"PowerfulJRE", 
-		"kylelandry", 
-		"brtvofficial"
-
-	],
+	"ytStandard": {
+		"PowerfulJRE": "UCzQUP1qoWDoEbmsQxvdjxgQ", 
+		"kylelandry": "UCk0UErv9b4Hn5ucNNjqD1UQ", 
+		"brtvofficial" : "UCGBpxWJr9FNOcFYA5GkKrMg"
+	},
 
 	"ytLive": [
 		"ouramazingspace", 

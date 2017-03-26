@@ -1,5 +1,5 @@
 var schedule = require('node-schedule');
-var wEmitter = require('../xmain.js').wEmitter;
+var wEmitter = require('../main.js').wEmitter;
 
 
 // [TESTING]Every 30 Seconds = "*/30 * * * * *"

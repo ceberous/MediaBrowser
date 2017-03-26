@@ -43,7 +43,7 @@ $(document).ready( function() {
 		console.log(data.twitchLiveList);
 	});			
 
-	socket.on( 'latestStanardList' , function (data) {
+	socket.on( 'latestStandardList' , function (data) {
 		console.log(data.message);
 		console.log(data.standardList);
 	});			

@@ -45,7 +45,7 @@ io.sockets.on( 'connection' , function (socket) {
 	wEmitter.on( 'publishYTLiveList' , function() {
 		socket.emit( 'latestYTLiveList', { 
 			message: 'here is the latest ytLiveList',
-			ytLiveList: wSources.ytLiveList,
+			ytLiveList: wVM.returnYTLiveList()
 		});
 	});
 
@@ -59,7 +59,7 @@ io.sockets.on( 'connection' , function (socket) {
 	wEmitter.on( 'publishStandardList' , function() {
 		socket.emit( 'latestStandardList', { 
 			message: 'here is the latest standardList',
-			standardList: wSources.standardList
+			standardList: wVM.returnStandardList()
 		});
 	});	
 
