@@ -1,18 +1,27 @@
+var wEmitter = require('../xmain.js').wEmitter;
+
 var request = require("request");
 var cheerio = require('cheerio');
 
-var standardYTChannelList = [ "PowerfulJRE" , "kylelandry" , "brtvofficial" ];
+var path = require("path");
+var bSPath = path.join( __dirname , "save_files" );
+var jsonfile = require("jsonfile");
+var followers 			= jsonfile.readFileSync( bSPath + "/followers.json" );
+var ytLiveList 			= jsonfile.readFileSync( bSPath + "/ytLiveList.json");
+var ytStandardList 		= jsonfile.readFileSync( bSPath + "/ytStandardList.json" );
+var twitchLiveList 		= jsonfile.readFileSync( bSPath + "/twitchLiveList.json" );
+var twitchStandardList 	= jsonfile.readFileSync( bSPath + "/twitchStandardList.json");
 
 var YTLiveManager = {
 
-	followingUsers: [ "ouramazingspace" , "MontereyBayAquarium" ],
+	followers: followers.ytLive,
 	lastSearch: null,
-	searchResults: {},
+	searchResults: ytLiveList,
 
-	enumerateFollowing: function() {
+	enumerateFollowers: function() {
 
-		for( var i = 0; i < YTLiveManager.followingUsers.length; ++i ) {
-			YTLiveManager.searchUserName( YTLiveManager.followingUsers[i] );
+		for( var i = 0; i < YTLiveManager.followers.length; ++i ) {
+			YTLiveManager.searchUserName( YTLiveManager.followers[i] );
 		}
 
 	},
@@ -31,6 +40,8 @@ var YTLiveManager = {
 	        });
         	YTLiveManager.lastSearch = wUserName;
         	YTLiveManager.searchResults[wUserName] = wResults;
+
+        	jsonfile.writeFileSync( bSPath + "/ytLiveList.json" , YTLiveManager.searchResults );
     	});
 
 	},
@@ -38,17 +49,39 @@ var YTLiveManager = {
 };
 
 function updateAllSources() {
-	YTLiveManager.enumerateFollowing();
+	YTLiveManager.enumerateFollowers();
 	//twitchAPI.enumerateFollowing();
 }
 
 function returnAllSources() {
 	var wOBJ = {
-		ytLiveVideos: YTLiveManager.searchResults,
-		//twitchVideos: "",
+		ytLiveList: YTLiveManager.searchResults,
+		twitchLiveList: null,
+		standardList: null,
 	};
 	return wOBJ;
 }
+
+
+
+wEmitter.on( 'updateYTLiveList' , function() {
+	console.log("SCHEDULED-> updateYTLiveList");
+	YTLiveManager.enumerateFollowers();
+	setTimeout(function(){
+		wEmitter.emit('publishYTLiveList');
+	} , 3000 );
+});
+
+wEmitter.on( 'updateTwitchLiveList' , function() {
+	console.log("SCHEDULED-> updateTwitchLiveList");
+});
+
+wEmitter.on( 'updateStandardList' , function() {
+	console.log("SCHEDULED-> updateStandardList");
+});
+
+
+
 
 
 module.exports.updateAllSources = function() {
@@ -57,8 +90,4 @@ module.exports.updateAllSources = function() {
 
 module.exports.returnAllSources = function() {
 	return returnAllSources();
-};
-
-module.exports.getStandardYTChannelList = function() {
-	return standardYTChannelList; 
 };

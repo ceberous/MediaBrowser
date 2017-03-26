@@ -3,7 +3,7 @@ var port = wCreds.socketIOPort;
 var OAUTH2_CLIENT_ID = wCreds.webBrowser;
 var socket = null;
 
-var standardYTChannels = null;
+var ytLiveList , ytStandardList , twitchList = null;
 
 var viewFiles = {
 	path: "../views",
@@ -25,19 +25,28 @@ $(document).ready( function() {
 
 	socket.on( 'newConnection' , function (data) {
 		console.log(data.message);
-		standardYTChannels = data.standardYTChannels;
-		console.log(standardYTChannels);
+		ytLiveList 			= data.ytLiveList;
+		twitchLiveList 		= data.twitchList;
+		standardList 		= data.standardList;
+		console.log(ytLiveList);
+		console.log(twitchLiveList);
+		console.log(standardList);
 	});
 
-	socket.on( 'latestvideos' , function (data) {
-		console.log(data.videos);
-	});
-
-	socket.on( 'getlatestpublishedyoutube' , function (data) {
+	socket.on( 'latestYTLiveList' , function (data) {
 		console.log(data.message);
-		$(document).trigger( "getlatestpublishedyoutube" );
+		console.log(data.ytLiveList);
+	});
+
+	socket.on( 'latestTwitchLiveList' , function (data) {
+		console.log(data.message);
+		console.log(data.twitchLiveList);
 	});			
 
+	socket.on( 'latestStanardList' , function (data) {
+		console.log(data.message);
+		console.log(data.standardList);
+	});			
 	
 	
 });
@@ -89,4 +98,3 @@ function wMain() {
 
 //https://addons.mozilla.org/en-US/firefox/addon/procon-latte/reviews/
 //https://help.ubuntu.com/community/AppArmor
-
