@@ -2,51 +2,13 @@
 
 <script type="text/javascript">
 
-	var YTDataManager = {
-
-		"channelResults": {},
-		"searchKeywordResults" : [],
-
-		searchKeyword: function(wParam) {
-
-			var request = gapi.client.youtube.search.list({
-				q: wParam,
-				part: 'snippet'
-			});
-
-			request.execute(function(response) {
-				
-				for ( var i = 0; i < response.result.items.length; ++i ) {
-					var item = {};
-					item.title = response.result.items[i].snippet.title;
-					item.description = response.result.items[i].snippet.description;
-					item.id = response.result.items[i].id.videoId;
-					YTDataManager.searchKeywordResults.push(item);
-				}
-
-				$(document).trigger( "ytdatapisearchcomplete" );
-
-			});
-		},
-
-		enumerateAllFollowing: function() {
-
-			for( var i = 0; i < standardYTChannels.length; ++i ) {
-				console.log(standardYTChannels[i]);
-			}
-
-		},
-
-		getChannelsLatest: function() {
-
-		}
-
-	};
+	var wPlaylist = [];
 
 	var YTIFrameManager = {
 
 		"wPlayer" : null,
 		"playlist" : {items: null, index: null},
+		"needToCuePlaylist": false,
 
 		tearDown: function() {
 			YTIFrameManager.wPlayer.destroy();
@@ -60,6 +22,10 @@
 
 			$("#waitingMessage").hide();
 
+			if ( !wVideo ){
+				var wVideo = { id: "o2Qmc8Sb6Ws" };
+			}
+
 			var wThis = $(window);
 			var wHeight = wThis.height();
 			var wWidth = wThis.width();
@@ -67,13 +33,19 @@
 			YTIFrameManager.wPlayer = new YT.Player( 'player', {
 			    height: wHeight,
 			    width: wWidth,
-			    videoId: wVideo.id,
+			    videoId: wVideo.id ,
 			    events: {
 			      'onReady': YTIFrameManager.onPlayerReady,
 			      'onStateChange': YTIFrameManager.onPlayerStateChange
 			    }
 			});
 
+		},
+
+		cuePlaylist: function() {
+
+			YTIFrameManager.wPlayer.cuePlaylist( wPlaylist );
+			
 		},
 
 		onPlayerStateChange: function(event) {
@@ -102,18 +74,26 @@
 
 		onPlayerReady: function(event) {
 			console.log("player is supposedly ready");
-			YTIFrameManager.getCurrentPlaylistInfo();
-			YTIFrameManager.wPlayer.playVideo();
-			setTimeout(function(){
-				//$(document).trigger( "glitchIntoFullScreen" );
-			} , 1300 );
+			if ( YTIFrameManager.needToCuePlaylist ) { 
+				YTIFrameManager.cuePlaylist();
+				setTimeout(function(){
+					YTIFrameManager.needToCuePlaylist = false;
+					$(document).trigger( "toggle-f-keypress" );
+					YTIFrameManager.getCurrentPlaylistInfo();
+				} , 2000 );
+
+			}
+			else {
+				YTIFrameManager.wPlayer.playVideo();
+				$(document).trigger( "toggle-f-keypress" );
+			}
 		},
 
 		getCurrentPlaylistInfo: function() {
 			YTIFrameManager.playlist.items = YTIFrameManager.wPlayer.getPlaylist();
 			YTIFrameManager.playlist.index = YTIFrameManager.wPlayer.getPlaylistIndex();
 			console.log( "Current Playlist Index = " + YTIFrameManager.playlist.index.toString() );
-			if ( YTIFrameManager.playlist.index >= 1 ) {
+			if ( YTIFrameManager.playlist.items ) {
 				for( var i = 0; i < YTIFrameManager.playlist.items.length; ++i ) {
 					console.log( YTIFrameManager.playlist.items[i] );
 				}
@@ -122,18 +102,46 @@
 
 	};
 
-	$(document).on( "ytdatapisearchcomplete" , function( event , einfo ) { 
-		YTIFrameManager.showVideo(YTDataManager.searchKeywordResults[0]); 
-	});
+	function generateRandomLivePlaylist() {
 
-	$(document).on( "getlatestpublishedyoutube" , function( event , einfo ) { 
-		YTDataManager.enumerateAllFollowing();
-	});
-	
-	//YTDataManager.searchKeyword("walrus");
-	//var temp1 = {id: "5de1gB9QtaY"};
-	//YTIFrameManager.showVideo(temp1);
+		console.log("generating random ytLiveList");
 
+		for ( var iprop in ytLiveList ) {
+			for ( var jprop in ytLiveList[iprop] ) {
+				wPlaylist.push( jprop );
+			}
+		}
+
+		function shuffle(array) {
+			var currentIndex = array.length, temporaryValue, randomIndex;
+
+			  // While there remain elements to shuffle...
+			  while (0 !== currentIndex) {
+
+			    // Pick a remaining element...
+			    randomIndex = Math.floor(Math.random() * currentIndex);
+			    currentIndex -= 1;
+
+			    // And swap it with the current element.
+			    temporaryValue = array[currentIndex];
+			    array[currentIndex] = array[randomIndex];
+			    array[randomIndex] = temporaryValue;
+			  }
+
+			  return array;			
+		}
+
+		wPlaylist = shuffle(wPlaylist);
+
+		YTIFrameManager.showVideo();
+		YTIFrameManager.needToCuePlaylist = true;
+		
+
+	}
+
+	$(document).on( "randomYTLive" , function( event , einfo ) { 
+		generateRandomLivePlaylist();
+	});
 
 </script>
 

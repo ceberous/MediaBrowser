@@ -110,7 +110,7 @@ var ffWrapper = {
 		exec( spaceKey , {silent:true}).stdout;
 	},
 
-	toggleFKeyPress: function() {
+	glitchFullScreen: function() {
 		ffWrapper.resetFocus();
 		ffWrapper.moveMouseToCenterOfWindow();
 		ffWrapper.mouseLeftClick();
@@ -121,7 +121,20 @@ var ffWrapper = {
 			ffWrapper.pressSpaceKey();
 		} , 1000 ); 
 		
-	}
+	},
+
+	toggleFKeyPress: function() {
+		ffWrapper.resetFocus();
+		ffWrapper.moveMouseToCenterOfWindow();
+		ffWrapper.mouseLeftClick();		
+		setTimeout(function() {
+			var fKeyPress = 'xdotool key f';
+			exec( fKeyPress , {silent:true}).stdout;
+			console.log(fKeyPress);
+			//ffWrapper.pressSpaceKey();
+		} , 1000 ); 
+		
+	}	
 
 };
 
@@ -144,4 +157,8 @@ module.exports.closeCurrentTab = function() {
 
 module.exports.toggleFKeyPress = function() {
     ffWrapper.toggleFKeyPress();
+};
+
+module.exports.glitchFullScreen = function() {
+    ffWrapper.glitchFullScreen();
 };

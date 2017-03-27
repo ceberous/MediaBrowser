@@ -2,7 +2,8 @@ var port = wCreds.socketIOPort;
 var OAUTH2_CLIENT_ID = wCreds.webBrowser;
 var socket = null;
 
-var ytLiveList , ytStandardList , twitchList = null;
+var ytLiveList , twitchLiveList , standardList = null;
+var ytLiveSwapDuration = null;
 
 var viewFiles = {
 	path: "../views",
@@ -17,7 +18,6 @@ $(document).ready( function() {
 
 	$("#vAPP").hide();
 
-	var messages = [];
 	socket = io.connect( socketIOServerAddress + ":" + port.toString() );
 	console.log(socket.id);
 
@@ -30,6 +30,14 @@ $(document).ready( function() {
 		console.log(twitchLiveList);
 		console.log(standardList);
 	});
+
+	socket.on( 'playBackgroundYTLive', function(data) {
+		ytLiveSwapDuration = data.swapDuration;
+		addChildView( viewFiles.fullScreenYT );
+		setTimeout(function() {
+			$(document).trigger( "randomYTLive" );
+		} , 3000 );
+	})
 
 	socket.on( 'latestYTLiveList' , function (data) {
 		console.log(data.message);
@@ -46,19 +54,20 @@ $(document).ready( function() {
 		console.log(data.standardList);
 	});			
 	
-	
+	wInit();
+
 });
 
-//$(document).on( "closefirefoxtab" , function( event , einfo ) { socket.emit( 'firefox-close-tab' ); });
+
+$(document).on( "glitchIntoFullScreen" , function( event , einfo ) { socket.emit( 'firefox-glitch-fullscreen' ); });
+$(document).on( "toggle-f-keypress" , function( event , einfo ) { socket.emit( 'firefox-f-key' ); });
 $(document).on( "closefirefoxtab" , function( event , einfo ) { closeChildView(); });
-$(document).on( "glitchIntoFullScreen" , function( event , einfo ) { socket.emit( 'firefox-f-key' ); });
-$(document).on( "ytDataClientReady" , function( event , einfo ) { wInit(); });
 
 function wInit() {
 
 	$("#wPlaceHolder").hide();
 	$("#vAPP").show();
-	wMain();
+	//wMain();
 
 }
 
@@ -86,7 +95,7 @@ function closeChildView() {
 
 function wMain() {
 	
-	addChildView( viewFiles.fullScreenYT );
+	//addChildView( viewFiles.fullScreenYT );
 	
 }
 

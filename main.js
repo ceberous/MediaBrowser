@@ -41,8 +41,20 @@ io.sockets.on( 'connection' , function (socket) {
 		wFM.quit();
 	});
 
+	socket.on( 'firefox-glitch-fullscreen' , function( data ){
+		wFM.glitchFullScreen();
+	});
+
 	socket.on( 'firefox-f-key' , function( data ){
 		wFM.toggleFKeyPress();
+	});	
+
+
+	wEmitter.on( 'button1Press' , function() { 
+		console.log("we got a button1Press");
+		socket.emit( 'playBackgroundYTLive' , { 
+			swapDuration: 10
+		}); 
 	});
 
 	
@@ -75,4 +87,7 @@ server.listen( port , function() {
 	setTimeout(function(){
 		wFM.openNewTab("http://localhost:6969");
 	} , 2500 );
+	setTimeout(function(){
+		wEmitter.emit("button1Press"); // Testing
+	} , 8000 );
 });
