@@ -1,4 +1,3 @@
-var sockServerAddr = wCreds.socketIOServer;
 var port = wCreds.socketIOPort;
 var OAUTH2_CLIENT_ID = wCreds.webBrowser;
 var socket = null;
@@ -10,23 +9,22 @@ var viewFiles = {
 	active: false,
 	photoWall: "photoWall.html",
 	fullScreenYT: "fullScreenYoutube.html",
+	fullScreenTwitch: "fullScreenTwitch.html",
 	error: "error.html"
 };
-
-
 
 $(document).ready( function() {
 
 	$("#vAPP").hide();
 
 	var messages = [];
-	socket = io.connect( sockServerAddr + ":" + port.toString() );
+	socket = io.connect( socketIOServerAddress + ":" + port.toString() );
 	console.log(socket.id);
 
 	socket.on( 'newConnection' , function (data) {
 		console.log(data.message);
 		ytLiveList 			= data.ytLiveList;
-		twitchLiveList 		= data.twitchList;
+		twitchLiveList 		= data.twitchLiveList;
 		standardList 		= data.standardList;
 		console.log(ytLiveList);
 		console.log(twitchLiveList);

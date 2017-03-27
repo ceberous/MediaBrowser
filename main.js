@@ -1,22 +1,27 @@
+var fs = require('fs');
+var path = require("path");
 var schedule = require('node-schedule');
 var wEmitter = new (require('events').EventEmitter);
 module.exports.wEmitter = wEmitter;
 
 var ip = require("ip");
 var localIP = ip.address();
+var wSIP = 'var socketIOServerAddress = "http://' + localIP + '";';
+fs.writeFileSync( path.join( __dirname , "client" , "js" , "sockioServerAddress.js" ) , wSIP );
 var app = require("./server/expressApp.js");
 var server = require("http").createServer(app);
 var port = process.env.PORT || 6969;
 
+var wFM = require("./server/ffManager.js");		// Firefox-Manager
+var wVM = require("./server/videoManager.js"); 	// Video-Manager
+var wTM = require("./server/taskManager.js"); 	// Task-Manager
+//var wBM = require("./server/buttonManager.js"); 	// Button-Manager
+//var wMM = require("./server/mopidyManager.js"); // Mopidy-Manager
+//var wUM = require("./server/usbIRManager.js"); // USB_IR-Manager
 
+var wSources = wVM.returnAllSources(); // Initialize Sources-List
 
-var wFM 	= require("./server/ffManager.js");
-var wVM 	= require("./server/videoManager.js");
-var wTM 	= require("./server/taskManager.js");
-
-var wSources = wVM.returnAllSources();
-
-var io = require('socket.io')(server);
+var io = require('socket.io')(server); // Client-Interaction
 io.sockets.on( 'connection' , function (socket) {
 
 	var wC = socket.request.connection._peername;
@@ -63,11 +68,6 @@ io.sockets.on( 'connection' , function (socket) {
 	});	
 
 });
-
-
-
-
-
 
 
 server.listen( port , function() {
