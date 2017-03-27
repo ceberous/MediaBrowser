@@ -7,8 +7,8 @@
 	var YTIFrameManager = {
 
 		"wPlayer" : null,
-		"playlist" : {items: null, index: null},
-		"needToCuePlaylist": false,
+		"playlist" : null,
+		"usingPlaylist": false,
 
 		tearDown: function() {
 			YTIFrameManager.wPlayer.destroy();
@@ -22,30 +22,26 @@
 
 			$("#waitingMessage").hide();
 
-			if ( !wVideo ){
-				var wVideo = { id: "o2Qmc8Sb6Ws" };
-			}
+			if ( !wVideo ){ var wVideo = { id: "o2Qmc8Sb6Ws" }; } 
 
 			var wThis = $(window);
-			var wHeight = wThis.height();
-			var wWidth = wThis.width();
+			var wOptions = { version: 3 , height: wThis.height() , width: wThis.width() , videoId: wVideo.id };
+			if ( YTIFrameManager.usingPlaylist ) {
+				wOptions.videoId = YTIFrameManager.playlist[0];
+				wOptions.loop = 1;
+			}
+			wOptions.events = {
+				'onReady': YTIFrameManager.onPlayerReady,
+			    'onStateChange': YTIFrameManager.onPlayerStateChange,
+			    'onError': YTIFrameManager.errorHandler,
+			};
 
-			YTIFrameManager.wPlayer = new YT.Player( 'player', {
-			    height: wHeight,
-			    width: wWidth,
-			    videoId: wVideo.id ,
-			    events: {
-			      'onReady': YTIFrameManager.onPlayerReady,
-			      'onStateChange': YTIFrameManager.onPlayerStateChange
-			    }
-			});
+			YTIFrameManager.wPlayer = new YT.Player( 'player', wOptions );
 
 		},
 
-		cuePlaylist: function() {
-
-			YTIFrameManager.wPlayer.cuePlaylist( wPlaylist );
-			
+		errorHandler: function(event) {
+			console.log( "error = " + event.data.toString() );
 		},
 
 		onPlayerStateChange: function(event) {
@@ -55,7 +51,10 @@
 					break;
 				case 0:
 					console.log(" video is over ");
-					YTIFrameManager.tearDown();
+					if ( YTIFrameManager.usingPlaylist ) {
+						console.log( YTIFrameManager.wPlayer.getPlaylistIndex() );
+					}
+					//YTIFrameManager.tearDown();
 					break;
 				case 1:
 					console.log(" video is now playing ");
@@ -74,19 +73,19 @@
 
 		onPlayerReady: function(event) {
 			console.log("player is supposedly ready");
-			if ( YTIFrameManager.needToCuePlaylist ) { 
-				YTIFrameManager.cuePlaylist();
-				setTimeout(function(){
-					YTIFrameManager.needToCuePlaylist = false;
-					$(document).trigger( "toggle-f-keypress" );
-					YTIFrameManager.getCurrentPlaylistInfo();
-				} , 2000 );
 
+			if ( YTIFrameManager.usingPlaylist ) { 
+				YTIFrameManager.wPlayer.cuePlaylist( wPlaylist );
+				setTimeout( function() {
+					YTIFrameManager.wPlayer.setLoop(true);
+					$(document).trigger( "toggle-f-keypress" );
+				} , 2000 );
 			}
 			else {
-				YTIFrameManager.wPlayer.playVideo();
-				$(document).trigger( "toggle-f-keypress" );
+				$(document).trigger( "toggle-f-keypress" );	
 			}
+
+
 		},
 
 		getCurrentPlaylistInfo: function() {
@@ -102,46 +101,57 @@
 
 	};
 
+	function shuffleArray(array) {
+		var currentIndex = array.length, temporaryValue, randomIndex;
+
+		// While there remain elements to shuffle...
+		while (0 !== currentIndex) {
+
+			// Pick a remaining element...
+			randomIndex = Math.floor(Math.random() * currentIndex);
+			currentIndex -= 1;
+
+			// And swap it with the current element.
+			temporaryValue = array[currentIndex];
+			array[currentIndex] = array[randomIndex];
+			array[randomIndex] = temporaryValue;
+		}
+
+		return array;			
+	}
+
 	function generateRandomLivePlaylist() {
 
 		console.log("generating random ytLiveList");
-
 		for ( var iprop in ytLiveList ) {
 			for ( var jprop in ytLiveList[iprop] ) {
 				wPlaylist.push( jprop );
 			}
 		}
 
-		function shuffle(array) {
-			var currentIndex = array.length, temporaryValue, randomIndex;
-
-			  // While there remain elements to shuffle...
-			  while (0 !== currentIndex) {
-
-			    // Pick a remaining element...
-			    randomIndex = Math.floor(Math.random() * currentIndex);
-			    currentIndex -= 1;
-
-			    // And swap it with the current element.
-			    temporaryValue = array[currentIndex];
-			    array[currentIndex] = array[randomIndex];
-			    array[randomIndex] = temporaryValue;
-			  }
-
-			  return array;			
-		}
-
-		wPlaylist = shuffle(wPlaylist);
-
+		YTIFrameManager.playlist = shuffleArray(wPlaylist);
+		YTIFrameManager.usingPlaylist = true;
 		YTIFrameManager.showVideo();
-		YTIFrameManager.needToCuePlaylist = true;
 		
-
 	}
 
-	$(document).on( "randomYTLive" , function( event , einfo ) { 
-		generateRandomLivePlaylist();
+	$(document).on( "randomYTLive" , function( event , einfo ) {
+		console.log("YT Live List = ");
+		console.log(ytLiveList);
+		if ( ytLiveList === null ) {
+			setTimeout(function(){ console.log("waiting on first-time-result update"); generateRandomLivePlaylist(); } , 13000 );
+		}
+		else {
+			generateRandomLivePlaylist();
+		}
+		
 	});
+
+	$(document).on( "showYTVideoID" , function( event , einfo ) { 
+		//generateRandomLivePlaylist();
+	});
+
+	$(document).on( "nextYTLiveVideo" , function( event , einfo ) { YTIFrameManager.wPlayer.nextVideo(); });
 
 </script>
 

@@ -79,7 +79,7 @@ var ffWrapper = {
 
 	setFullScreen: function() {
 	
-		var setToMaximumWindowDualScreen = 'xdotool windowsize %0' + ffWrapper.windowID + ' 50% 100%';
+		var setToMaximumWindowDualScreen = 'xdotool windowsize %0' + ffWrapper.windowID + ' 100% 100%';
 		// var setToMaximumWindowSingleScreen = 'xdotool windowsize ' + ffWrapper.windowID + ' 100% 100%';
 		exec( setToMaximumWindowDualScreen , {silent:true}).stdout;
 		

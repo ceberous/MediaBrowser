@@ -8,7 +8,7 @@ var path = require("path");
 var bSPath = path.join( __dirname , "save_files" );
 var jsonfile = require("jsonfile");
 var followers 			= jsonfile.readFileSync( bSPath + "/followers.json" );
-var ytLiveList 			= jsonfile.readFileSync( bSPath + "/ytLiveList.json");
+var ytLiveList 			= null;
 var ytStandardList 		= jsonfile.readFileSync( bSPath + "/ytStandardList.json" );
 var twitchLiveList 		= jsonfile.readFileSync( bSPath + "/twitchLiveList.json" );
 var twitchStandardList 	= jsonfile.readFileSync( bSPath + "/twitchStandardList.json");
@@ -53,6 +53,8 @@ var YTLiveManager = {
 	updateComputedUnWatchedList: function(wProp) {
 
 		for ( var i = 0; i < YTLiveManager.newResults[wProp].length; ++i ) {
+
+			if ( YTLiveManager.computedUnWatchedList == null ) { YTLiveManager.computedUnWatchedList = {}; }
 
 			if ( !YTLiveManager.computedUnWatchedList[wProp] ) {
 				YTLiveManager.computedUnWatchedList[wProp] = {};
@@ -171,10 +173,12 @@ var YTFeedManager = {
 
 		for ( var i = 0; i < YTFeedManager.newFeedResults[wProp].length; ++i ) {
 
+			// If UserName Does not Exist Already
 			if ( !YTFeedManager.computedUnWatchedList[wProp] ) {
 				YTFeedManager.computedUnWatchedList[wProp] = {};
 			}
 
+			// If ID is not in UserName
 			if ( !YTFeedManager.computedUnWatchedList[wProp][YTFeedManager.newFeedResults[wProp][i]["id"]] ) {
 				
 				console.log("we need to store this id");
@@ -188,7 +192,7 @@ var YTFeedManager = {
 
 				};
 
-			} 
+			}
 			
 		}
 

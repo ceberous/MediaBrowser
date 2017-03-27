@@ -50,10 +50,11 @@ io.sockets.on( 'connection' , function (socket) {
 	});	
 
 
+
 	wEmitter.on( 'button1Press' , function() { 
 		console.log("we got a button1Press");
 		socket.emit( 'playBackgroundYTLive' , { 
-			swapDuration: 10
+			swapDuration: 1
 		}); 
 	});
 
@@ -79,6 +80,14 @@ io.sockets.on( 'connection' , function (socket) {
 		});
 	});	
 
+	wEmitter.on( 'nextYTLiveVideo' , function() {
+		console.log("SCHEDULED--> nextYTLiveVideo");
+		socket.emit( 'nextYTLiveVideo', { 
+			message: 'goto nextYTLiveVideo',
+		});
+	});	
+	
+
 });
 
 
@@ -86,8 +95,9 @@ server.listen( port , function() {
 	console.log( "Server Started on : \nhttp://" + localIP + ":" + port + "\n \t or \nhttp://localhost:" + port + "\n" );
 	setTimeout(function(){
 		wFM.openNewTab("http://localhost:6969");
-	} , 2500 );
+		wEmitter.emit('updateYTLiveList');
+	} , 3000 );
 	setTimeout(function(){
 		wEmitter.emit("button1Press"); // Testing
-	} , 8000 );
+	} , 6000 );
 });

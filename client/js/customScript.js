@@ -42,17 +42,25 @@ $(document).ready( function() {
 	socket.on( 'latestYTLiveList' , function (data) {
 		console.log(data.message);
 		console.log(data.ytLiveList);
+		ytLiveList = data.ytLiveList;
 	});
 
 	socket.on( 'latestTwitchLiveList' , function (data) {
 		console.log(data.message);
 		console.log(data.twitchLiveList);
+		twitchLiveList = data.twitchLiveList;
 	});			
 
 	socket.on( 'latestStandardList' , function (data) {
 		console.log(data.message);
 		console.log(data.standardList);
-	});			
+		standardList = data.standardList;
+	});
+
+	socket.on( 'nextYTLiveVideo' , function (data) {
+		console.log(data.message);
+		$(document).trigger( "nextYTLiveVideo" );
+	});						
 	
 	wInit();
 
@@ -66,7 +74,6 @@ $(document).on( "closefirefoxtab" , function( event , einfo ) { closeChildView()
 function wInit() {
 
 	$("#wPlaceHolder").hide();
-	$("#vAPP").show();
 	//wMain();
 
 }
@@ -76,6 +83,7 @@ function addChildView(viewName) {
 	var wName = viewName || viewFiles.error;
 	if ( viewFiles.active ) { closeChildView(); }
 
+	$("#vAPP").show();
 	$("#vAPP").append("<div id=wChildView></div>");
 	$("#wChildView").load( viewFiles.path + "/" + wName );
 	viewFiles.active = true;

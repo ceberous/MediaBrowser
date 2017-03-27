@@ -26,3 +26,11 @@ var updateStandardList = schedule.scheduleJob( "*/30 * * * * *" , function() {
 	wEmitter.emit('updateStandardList');
 
 });
+
+
+
+var gotoNextYTLiveVideo = schedule.scheduleJob( "*/10 * * * * *" , function() {
+	
+	wEmitter.emit('nextYTLiveVideo');
+
+});
