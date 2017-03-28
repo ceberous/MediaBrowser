@@ -32,7 +32,6 @@ $(document).ready( function() {
 	});
 
 	socket.on( 'playBackgroundYTLive', function(data) {
-		ytLiveSwapDuration = data.swapDuration;
 		addChildView( viewFiles.fullScreenYT );
 		setTimeout(function() {
 			$(document).trigger( "randomYTLive" );

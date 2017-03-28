@@ -53,9 +53,13 @@ io.sockets.on( 'connection' , function (socket) {
 
 	wEmitter.on( 'button1Press' , function() { 
 		console.log("we got a button1Press");
-		socket.emit( 'playBackgroundYTLive' , { 
-			swapDuration: 1
-		}); 
+		socket.emit( 'playBackgroundYTLive' );
+		setTimeout( function() {
+			wEmitter.emit('startYTShuffleTask');
+		} , 10000 );
+		setTimeout( function() {
+			wEmitter.emit("stopYTShuffleTask");
+		} , 35000 );
 	});
 
 	
@@ -96,8 +100,8 @@ server.listen( port , function() {
 	setTimeout(function(){
 		wFM.openNewTab("http://localhost:6969");
 		wEmitter.emit('updateYTLiveList');
-	} , 3000 );
+	} , 2000 );
 	setTimeout(function(){
 		wEmitter.emit("button1Press"); // Testing
-	} , 6000 );
+	} , 5000 );
 });

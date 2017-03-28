@@ -28,9 +28,15 @@ var updateStandardList = schedule.scheduleJob( "*/30 * * * * *" , function() {
 });
 
 
+var gotoNextYTLiveVideo;
+wEmitter.on( 'startYTShuffleTask' , function() {
+	//console.log("were starting yt shuffle task");
+	gotoNextYTLiveVideo = schedule.scheduleJob( "*/10 * * * * *" , function() { // every 10 seconds [TESTING]
+		wEmitter.emit('nextYTLiveVideo');
+	});
+});
 
-var gotoNextYTLiveVideo = schedule.scheduleJob( "*/10 * * * * *" , function() {
-	
-	wEmitter.emit('nextYTLiveVideo');
-
+wEmitter.on( 'stopYTShuffleTask' , function() {
+	//console.log("were stopping yt shuffle task");
+	gotoNextYTLiveVideo.cancel();
 });
