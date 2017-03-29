@@ -5,13 +5,14 @@ var schedule = require('node-schedule');
 var wEmitter = new (require('events').EventEmitter);
 module.exports.wEmitter = wEmitter;
 
+var port = process.env.PORT || 6969;
 var ip = require("ip");
 var localIP = ip.address();
-var wSIP = 'var socketIOServerAddress = "http://' + localIP + '";';
+var wSIP = 'var socketIOServerAddress = "http://' + localIP + '"; var socketIOPORT = "' + port + '";';
 fs.writeFileSync( path.join( __dirname , "client" , "js" , "sockioServerAddress.js" ) , wSIP );
 var app = require("./server/expressApp.js");
 var server = require("http").createServer(app);
-var port = process.env.PORT || 6969;
+
 
 var wFM = require("./server/ffManager.js");		// Firefox-Manager
 var wVM = require("./server/videoManager.js"); 	// Video-Manager

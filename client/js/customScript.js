@@ -1,5 +1,3 @@
-var port = wCreds.socketIOPort;
-var OAUTH2_CLIENT_ID = wCreds.webBrowser;
 var socket = null;
 
 var ytLiveList , twitchLiveList , standardList = null;
@@ -18,7 +16,7 @@ $(document).ready( function() {
 
 	$("#vAPP").hide();
 
-	socket = io.connect( socketIOServerAddress + ":" + port.toString() );
+	socket = io.connect( socketIOServerAddress + ":" + socketIOPORT );
 	console.log(socket.id);
 
 	socket.on( 'newConnection' , function (data) {
