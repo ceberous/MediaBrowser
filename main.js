@@ -1,5 +1,6 @@
 var fs = require('fs');
 var path = require("path");
+var sleep = require("sleep");
 var schedule = require('node-schedule');
 var wEmitter = new (require('events').EventEmitter);
 module.exports.wEmitter = wEmitter;
@@ -19,7 +20,9 @@ var wTM = require("./server/taskManager.js"); 	// Task-Manager
 //var wMM = require("./server/mopidyManager.js"); // Mopidy-Manager
 //var wUM = require("./server/usbIRManager.js"); // USB_IR-Manager
 
-var wSources = wVM.returnAllSources(); // Initialize Sources-List
+wEmitter.emit('updateYTLiveList');
+sleep.sleep(2);
+var wSources = wVM.returnAllSources();
 
 var io = require('socket.io')(server); // Client-Interaction
 io.sockets.on( 'connection' , function (socket) {
@@ -47,61 +50,113 @@ io.sockets.on( 'connection' , function (socket) {
 
 	socket.on( 'firefox-f-key' , function( data ){
 		wFM.toggleFKeyPress();
+		// Client-Player is supposedly Ready by this point
+		setTimeout( ()=> { wEmitter.emit('startYTShuffleTask'); } , 3000 );
+		setTimeout( ()=> { wEmitter.emit('stopYTShuffleTask'); } , 15000 ); // TESTING
+		setTimeout( ()=> { wEmitter.emit('closeChildView'); } , 20000 ); // TESTING
 	});	
 
 
-
-	wEmitter.on( 'button1Press' , function() { 
-		console.log("we got a button1Press");
-		socket.emit( 'playBackgroundYTLive' );
-		setTimeout( function() {
-			wEmitter.emit('startYTShuffleTask');
-		} , 10000 );
-		setTimeout( function() {
-			wEmitter.emit("stopYTShuffleTask");
-		} , 35000 );
-	});
-
-	
-	wEmitter.on( 'publishYTLiveList' , function() {
-		socket.emit( 'latestYTLiveList', { 
-			message: 'here is the latest ytLiveList',
-			ytLiveList: wVM.returnYTLiveList()
+	// Button-Event Handling
+	// --------------------------------------------------
+		wEmitter.on( 'button1Press' , function() { 
+			console.log("now-playing--> random-edm-vocal");
+			// wEmitter.emit("mopidy-random-edm-vocal")
+			socket.emit( 'playBackgroundYTLive' );
 		});
-	});
 
-	wEmitter.on( 'publishTwitchLiveList' , function() {
-		socket.emit( 'latestTwitchLiveList', { 
-			message: 'here is the latest twitchLiveList',
-			twitchLiveList: wVM.returnTwitchLiveList(),
+		wEmitter.on( 'button2Press' , function() { 
+			console.log("now-playing--> random-edm-nonvocal");
+			// wEmitter.emit("mopidy-random-edm-nonvocal")
+			socket.emit( 'playBackgroundYTLive' );
 		});
-	});
 
-	wEmitter.on( 'publishStandardList' , function() {
-		socket.emit( 'latestStandardList', { 
-			message: 'here is the latest standardList',
-			standardList: wVM.returnStandardList()
+		wEmitter.on( 'button3Press' , function() { 
+			console.log("now-playing--> random-classic-rock");
+			// wEmitter.emit("mopidy-random-classic-rock")
+			socket.emit( 'playBackgroundYTLive' );
 		});
-	});	
 
-	wEmitter.on( 'nextYTLiveVideo' , function() {
-		console.log("SCHEDULED--> nextYTLiveVideo");
-		socket.emit( 'nextYTLiveVideo', { 
-			message: 'goto nextYTLiveVideo',
+		wEmitter.on( 'button4Press' , function() { 
+			console.log("skype call cameron");
+			// wEmitter.emit("")
+			socket.emit( 'stopBackgroundYTLive' );
 		});
-	});	
-	
+
+		wEmitter.on( 'button5Press' , function() { 
+			console.log("skype call collin");
+			// wEmitter.emit("")
+			socket.emit( 'stopBackgroundYTLive' );
+		});
+
+		wEmitter.on( 'button8Press' , function() { 
+			console.log("play standard YT Stream");
+			// wEmitter.emit("")
+			socket.emit( 'stopBackgroundYTLive' );
+			socket.emit( 'startStandardYTStream' );
+		});
+
+		wEmitter.on( 'button9Press' , function() { 
+			console.log("play standard Twitch Stream");
+			// wEmitter.emit("")
+			socket.emit( 'stopBackgroundYTLive' );
+			socket.emit( 'startStandardYTStream' );
+		});
+
+		wEmitter.on( 'button10Press' , function() { 
+			console.log("stop all client tasks and play local-movie");
+			// wEmitter.emit("")
+			socket.emit( 'stopBackgroundYTLive' );
+		});				
+
+	// --------------------------------------------------
+
+
+	// Task-Event Handling
+	// --------------------------------------------------
+		wEmitter.on( 'publishYTLiveList' , function() {
+			socket.emit( 'latestYTLiveList', { 
+				message: 'here is the latest ytLiveList',
+				ytLiveList: wVM.returnYTLiveList()
+			});
+		});
+
+		wEmitter.on( 'publishTwitchLiveList' , function() {
+			socket.emit( 'latestTwitchLiveList', { 
+				message: 'here is the latest twitchLiveList',
+				twitchLiveList: wVM.returnTwitchLiveList(),
+			});
+		});
+
+		wEmitter.on( 'publishStandardList' , function() {
+			socket.emit( 'latestStandardList', { 
+				message: 'here is the latest standardList',
+				standardList: wVM.returnStandardList()
+			});
+		});	
+
+		wEmitter.on( 'nextYTLiveVideo' , function() {
+			console.log("SCHEDULED--> nextYTLiveVideo");
+			socket.emit( 'nextYTLiveVideo', { 
+				message: 'goto nextYTLiveVideo',
+			});
+		});	
+
+						// Testing 
+		wEmitter.on( 'closeChildView' , function() {
+			console.log("closing all client views");
+			socket.emit( 'closeChildView', { });
+		});	
+		
+	// --------------------------------------------------
 
 });
 
 
 server.listen( port , function() {
 	console.log( "Server Started on : \nhttp://" + localIP + ":" + port + "\n \t or \nhttp://localhost:" + port + "\n" );
-	setTimeout(function(){
-		wFM.openNewTab("http://localhost:6969");
-		wEmitter.emit('updateYTLiveList');
-	} , 2000 );
+	wFM.openNewTab("http://localhost:6969"); 
 	setTimeout(function(){
 		wEmitter.emit("button1Press"); // Testing
-	} , 5000 );
+	} , 6000 );
 });

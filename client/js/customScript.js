@@ -31,36 +31,49 @@ $(document).ready( function() {
 		console.log(standardList);
 	});
 
-	socket.on( 'playBackgroundYTLive', function(data) {
-		addChildView( viewFiles.fullScreenYT );
-		setTimeout(function() {
-			$(document).trigger( "randomYTLive" );
-		} , 3000 );
-	})
+	// Button - Controls
+	// -------------------------------------------------------
+		socket.on( 'playBackgroundYTLive', function(data) {
+			addChildView( viewFiles.fullScreenYT );
+			setTimeout(function() {
+				$(document).trigger( "randomYTLive" );
+			} , 3000 );
+		});
 
-	socket.on( 'latestYTLiveList' , function (data) {
-		console.log(data.message);
-		console.log(data.ytLiveList);
-		ytLiveList = data.ytLiveList;
-	});
+		socket.on( 'closeChildView', function(data) {
+			$(document).trigger( "tearDownPlayer" );
+			setTimeout( function() {
+				closeChildView();
+			} , 3000 );
+		});	
+	// -------------------------------------------------------
 
-	socket.on( 'latestTwitchLiveList' , function (data) {
-		console.log(data.message);
-		console.log(data.twitchLiveList);
-		twitchLiveList = data.twitchLiveList;
-	});			
+	// Sheduled-Updates
+	// -----------------------------------------------------
+		socket.on( 'latestYTLiveList' , function (data) {
+			console.log(data.message);
+			console.log(data.ytLiveList);
+			ytLiveList = data.ytLiveList;
+		});
 
-	socket.on( 'latestStandardList' , function (data) {
-		console.log(data.message);
-		console.log(data.standardList);
-		standardList = data.standardList;
-	});
+		socket.on( 'latestTwitchLiveList' , function (data) {
+			console.log(data.message);
+			console.log(data.twitchLiveList);
+			twitchLiveList = data.twitchLiveList;
+		});			
 
-	socket.on( 'nextYTLiveVideo' , function (data) {
-		console.log(data.message);
-		$(document).trigger( "nextYTLiveVideo" );
-	});						
-	
+		socket.on( 'latestStandardList' , function (data) {
+			console.log(data.message);
+			console.log(data.standardList);
+			standardList = data.standardList;
+		});
+
+		socket.on( 'nextYTLiveVideo' , function (data) {
+			console.log(data.message);
+			$(document).trigger( "nextYTLiveVideo" );
+		});						
+	// -----------------------------------------------------
+
 	wInit();
 
 });
@@ -69,6 +82,7 @@ $(document).ready( function() {
 $(document).on( "glitchIntoFullScreen" , function( event , einfo ) { socket.emit( 'firefox-glitch-fullscreen' ); });
 $(document).on( "toggle-f-keypress" , function( event , einfo ) { socket.emit( 'firefox-f-key' ); });
 $(document).on( "closefirefoxtab" , function( event , einfo ) { closeChildView(); });
+$(document).on( "yt-player-destoyed" , function( event , einfo ) { socket.emit( 'yt-player-destoyed' ); });
 
 function wInit() {
 

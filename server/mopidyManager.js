@@ -14,7 +14,6 @@ var MopidyManager = {
 
 	},
 
-
 	playbackManager: {
 
 		currentState: "",
@@ -242,7 +241,6 @@ var MopidyManager = {
 
 };
 
-
 mopidy.on('state:online', function () {
     
     MopidyManager.init();
@@ -256,6 +254,19 @@ mopidy.on( 'event:trackPlaybackEnded' , function(data) {
 	} , 1000 );
 
 });
+
+
+wEmitter.on( 'button6Press' , function() { 
+	console.log("mopidy--> previousSong");
+	// wEmitter.emit("")
+});	
+
+wEmitter.on( 'button7Press' , function() { 
+	console.log("mopidy--> nextSong");
+	// wEmitter.emit("")
+});	
+
+
 
 /*
 process.on('SIGINT', function () {

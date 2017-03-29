@@ -5,7 +5,7 @@ var StringDecoder = require('string_decoder').StringDecoder;
 var decoder = new StringDecoder('utf8');
 var spawn = require('child_process').spawn;
 
-var buttonScript = path.join( __dirname , "py_scripts" ) + "./buttonWatcher.py";
+var buttonScript = path.join( __dirname , "py_scripts" , "buttonWatcher.py" );
 var ButtonManager = spawn( 'python' , [buttonScript] );
 
 var handleButtonInput = function(wInput) {
