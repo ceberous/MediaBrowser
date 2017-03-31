@@ -16,10 +16,10 @@ var server = require("http").createServer(app);
 
 var wFM = require("./server/ffManager.js");		// Firefox-Manager
 var wVM = require("./server/videoManager.js"); 	// Video-Manager
+//var wMM = require("./server/mopidyManager.js"); // Mopidy-Manager
 var wTM = require("./server/taskManager.js"); 	// Task-Manager
 //var wBM = require("./server/buttonManager.js"); 	// Button-Manager
-//var wMM = require("./server/mopidyManager.js"); // Mopidy-Manager
-//var wUM = require("./server/usbIRManager.js"); // USB_IR-Manager
+var wUM = require("./server/usbIRManager.js"); // USB_IR-Manager
 
 wEmitter.emit('updateYTLiveList');
 sleep.sleep(2);

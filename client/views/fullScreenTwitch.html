@@ -1,3 +1,25 @@
+<!--
 https://github.com/justintv/Twitch-API/blob/master/embed-video.md
-
 https://github.com/justintv/Twitch-API/blob/master/v3_resources/channel_feed.md
+-->
+
+<script src= "http://player.twitch.tv/js/embed/v1.js"></script>
+<div id="tPlayer"></div>
+
+<script type="text/javascript">
+	
+	var options = {
+		width: 854,
+		height: 480,
+		//channel: "acerook",
+		video: "v132083659",
+		//access_token: "nkzwh4xppmh404w6qgdw3oj915vdm6"
+	};
+	
+	var tPlayer = new Twitch.Player("{PLAYER_DIV_ID}", options);
+
+	//tPlayer.setVolume(0.5);
+	tPlayer.addEventListener( Twitch.Player.PAUSE, () => { console.log('Player is paused!'); });
+
+</script>
+

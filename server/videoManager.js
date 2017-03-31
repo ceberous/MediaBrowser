@@ -13,6 +13,63 @@ var ytStandardList 		= jsonfile.readFileSync( bSPath + "/ytStandardList.json" );
 var twitchLiveList 		= jsonfile.readFileSync( bSPath + "/twitchLiveList.json" );
 var twitchStandardList 	= jsonfile.readFileSync( bSPath + "/twitchStandardList.json");
 
+/*
+var TwitchManager = {
+
+	followers: followers.twitch,
+	newResults: {},
+	computedUnWatchedList: twitchStandardList,
+
+	enumerateFollowers: function() {
+
+		for( var i = 0; i < TwitchManager.followers.length; ++i ) {
+			console.log( TwitchManager.followers[i] )
+			TwitchManager.checkLive( TwitchManager.followers[i] );
+			//TwitchManager.checkPublishedVideos( TwitchManager.followers[i] );
+		}
+
+
+	},
+
+	checkLive: function(wUserName) {
+
+		var wURL = "https://www.twitch.tv/" + wUserName;
+		
+		var wResults = [];
+
+		//recent-past-broadcast__message
+
+		request( wURL , function ( err , response , body ) {
+	        
+	        if (err) throw err;
+	        var $ = cheerio.load(body);
+	     
+	        var liveTest = $('.recent-past-broadcast__message_sub').html();//.children().length;
+	        console.log(liveTest);
+	        if ( liveTest > 0 ) {
+
+	        	console.log( wUserName + " is offline");
+	        }
+
+        	//YTLiveManager.newResults[wUserName] = wResults;
+
+        	//YTLiveManager.updateComputedUnWatchedList(wUserName);
+        	
+    	});		
+
+	},
+
+	checkPublishedVideos: function() {
+
+	},
+
+
+
+};
+
+//TwitchManager.enumerateFollowers();
+*/
+
 var YTLiveManager = {
 
 	followers: followers.ytLive,
@@ -204,11 +261,6 @@ var YTFeedManager = {
 
 
 
-
-
-
-
-
 wEmitter.on( 'updateYTLiveList' , function() {
 	console.log("SCHEDULED-> updateYTLiveList");
 	YTLiveManager.enumerateFollowers();
@@ -258,3 +310,4 @@ module.exports.returnTwitchLiveList = function() {
 module.exports.returnStandardList = function() {
 	return { ytStandard: YTFeedManager.computedUnWatchedList , twitchStandard: null };
 };
+

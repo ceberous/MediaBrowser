@@ -117,10 +117,3 @@ function wMain() {
 	//addChildView( viewFiles.fullScreenYT );
 	
 }
-
-//https://github.com/justintv/Twitch-API/blob/master/embed-video.md
-//https://dev.twitch.tv/docs/v5/guides/embed-video/
-//https://github.com/danmactough/node-feedparser
-
-//https://addons.mozilla.org/en-US/firefox/addon/procon-latte/reviews/
-//https://help.ubuntu.com/community/AppArmor
