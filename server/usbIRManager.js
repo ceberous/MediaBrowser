@@ -1,5 +1,5 @@
 var wEmitter = require('../main.js').wEmitter;
-
+var path = require("path");
 require('shelljs/global');
 
 var USBIRManager = {
@@ -23,9 +23,35 @@ var USBIRManager = {
 			USBIRManager.killExistingLirc( USBIRManager.LIRC_PID );
 		}
 
+		USBIRManager.createRunFolder();
+
+		USBIRManager.startIguanaIRService();
+
 		USBIRManager.startLirc();
 
 		USBIRManager.setTransmitters();
+
+	},
+
+	createRunFolder: function() {
+
+		console.log("Creating Run Folder");
+		var runDIR = "/var/run/lirc/";
+		var mkdirCmd = "sudo mkdir " + runDIR;
+		var runCMD1 = exec( mkdirCmd , { silent:true } ).stdout;
+		console.log(runCMD1);
+		
+
+	},
+
+	startIguanaIRService: function() {
+
+		console.log("starting iguanaIR service");
+		var startServiceCMD = "sudo service iguanaIR start";
+		var output1 = exec( startServiceCMD , { silent:true } ).stdout;
+		setTimeout(function(){
+			console.log(output1);
+		} , 1000 );
 
 	},
 
@@ -73,6 +99,7 @@ var USBIRManager = {
 
 	startLirc: function() {
 
+		console.log("starting lirc");
 		var startLircCmd = "sudo /usr/sbin/lircd --output=/run/lirc/lircd --driver=iguanaIR /etc/lirc/lircd.conf";
 		var startLirc = exec( startLircCmd , { silent: true } ).stdout;
 		console.log(startLirc);
@@ -102,7 +129,4 @@ var USBIRManager = {
                  
 USBIRManager.init();
 
-
-module.exports.pressButton = function( wButton ) {
-	USBIRManager.pressButton( USBIRManager.buttons[wButton] );
-};
+USBIRManager.pressButton( USBIRManager.buttons.power );
