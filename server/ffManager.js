@@ -65,6 +65,11 @@ var ffWrapper = {
 		ffWrapper.setFocusWindow();
 	},
 
+	restoreFullScreen: function() {
+		ffWrapper.resetFocus();
+		ffWrapper.setFullScreen();
+	},
+
 	activateWindowID: function() {
 		var activateFFWindow = 'xdotool windowactivate ' + ffWrapper.windowID;
 		exec( activateFFWindow , {silent:true}).stdout;
@@ -148,6 +153,10 @@ ffWrapper.init();
 
 module.exports.minimizeWindow = function() {
     ffWrapper.minimizeWindow();
+};
+
+module.exports.restoreFullScreen = function() {
+    ffWrapper.restoreFullScreen();
 };
 
 module.exports.quit = function() {

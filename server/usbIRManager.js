@@ -129,4 +129,11 @@ var USBIRManager = {
                  
 USBIRManager.init();
 
+
+module.exports.togglePower = function() {
+    
+	USBIRManager.pressButton( USBIRManager.buttons.power );
+
+};
+
 //USBIRManager.pressButton( USBIRManager.buttons.power );

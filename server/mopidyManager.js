@@ -256,20 +256,27 @@ mopidy.on( 'event:trackPlaybackEnded' , function(data) {
 });
 
 
-wEmitter.on( 'button6Press' , function() { 
-	console.log("mopidy--> previousSong");
-	// wEmitter.emit("")
-});	
 
-wEmitter.on( 'button7Press' , function() { 
-	console.log("mopidy--> nextSong");
-	// wEmitter.emit("")
-});	
-
+module.exports.stop = function() {
+	MopidyManager.playbackManager.stop();
+};
 
 module.exports.pause = function() {
 	MopidyManager.playbackManager.pause();
 };
+
+module.exports.nextTrack = function() {
+	MopidyManager.playbackManager.next();
+};
+
+module.exports.previousTrack = function() {
+	MopidyManager.playbackManager.previous();
+};
+
+module.exports.randomPlaylist = function() {
+	MopidyManager.tracklistManager.setRandomList();
+};
+
 
 
 

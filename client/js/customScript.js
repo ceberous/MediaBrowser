@@ -34,7 +34,7 @@ $(document).ready( function() {
 		socket.on( 'playBackgroundYTLive', function(data) {
 			addChildView( viewFiles.fullScreenYT );
 			setTimeout(function() {
-				$(document).trigger( "randomYTLive" );
+				$(document).trigger( "randomYTLiveBG" );
 			} , 3000 );
 		});
 

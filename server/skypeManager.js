@@ -47,9 +47,9 @@ var windowWrapper = {
 
 	setFullScreen: function() {
 		
-		var setToMaximumWindowDualScreen = 'xdotool windowsize %0' + windowWrapper.windowID + ' 100% 100%';
-		// var setToMaximumWindowSingleScreen = 'xdotool windowsize ' + windowWrapper.windowID + ' 100% 100%';
-		exec( setToMaximumWindowDualScreen , {silent:true}).stdout;
+		//var setToMaximumWindowDualScreen = 'xdotool windowsize %0' + windowWrapper.windowID + ' 100% 100%';
+		var setToMaximumWindowSingleScreen = 'xdotool windowsize ' + windowWrapper.windowID + ' 100% 100%';
+		exec( setToMaximumWindowSingleScreen , {silent:true}).stdout;
 		
 	},
 
@@ -80,12 +80,13 @@ var childWrapper = {
 
 			case "Call status: Finished":
 				// ensure child process gets killed
+				wEmitter.emit("restoreFFWindow");
 				break;
 
 			case "Call status: Voicemail Has Been Sent":
 				// kill child process
+				wEmitter.emit("restoreFFWindow");
 				break;
-
 
 		}
 

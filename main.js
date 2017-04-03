@@ -19,7 +19,7 @@ var wVM = require("./server/videoManager.js"); 	// Video-Manager
 //var wMM = require("./server/mopidyManager.js"); // Mopidy-Manager
 var wSM = require("./server/skypeManager.js"); 	// Skype-Manager
 //var wBM = require("./server/buttonManager.js"); 	// Button-Manager
-//var wUM = require("./server/usbIRManager.js"); // USB_IR-Manager
+//var wIM = require("./server/usbIRManager.js"); // USB_IR-Manager
 
 var clientManager =  {
 
@@ -35,16 +35,26 @@ var clientManager =  {
 
 	prepare: function(wAction) {
 
+		if ( !clientManager.state.tvON ) {
+			//wIM.togglePower();
+			clientManager.state.tvON = true;
+		}
+
 		switch (wAction) {
 
 			case "skype":
+				if ( clientManager.state.skype.activeCall ) { break; }
 				console.log("preparing skype call");
 				clientManager.pauseAll();
+				clientManager.state.skype.activeCall = true;
 				wSM.startCall();
 				break;
 
 			case "mopidyBGYT":
-
+				if ( clientManager.state.skype.activeCall ) { break; }
+				console.log("preparing mopidy with YTLive Background Video");
+				clientManager.state.mopidy.playing = true;
+				wMM.randomPlayList();
 				break;
 
 			case "mopidy":
@@ -110,6 +120,11 @@ var clientManager =  {
 
 };
 
+wEmitter.on( 'restoreFFWindow' , function() {
+	console.log("restoring FF Window");
+	wFF.restoreFullScreen();
+});
+
 
 wEmitter.emit('updateYTLiveList');
 sleep.sleep(2);
@@ -143,8 +158,8 @@ io.sockets.on( 'connection' , function (socket) {
 		wFM.toggleFKeyPress();
 		// Client-Player is supposedly Ready by this point
 		setTimeout( ()=> { wEmitter.emit('startYTShuffleTask'); } , 3000 );
-		setTimeout( ()=> { wEmitter.emit('stopYTShuffleTask'); } , 15000 ); // TESTING
-		setTimeout( ()=> { wEmitter.emit('closeChildView'); } , 20000 ); // TESTING
+		//setTimeout( ()=> { wEmitter.emit('stopYTShuffleTask'); } , 15000 ); // TESTING
+		//setTimeout( ()=> { wEmitter.emit('closeChildView'); } , 20000 ); // TESTING
 	});	
 
 
@@ -152,7 +167,7 @@ io.sockets.on( 'connection' , function (socket) {
 	// --------------------------------------------------
 		wEmitter.on( 'button1Press' , function() { 
 			console.log("now-playing--> random-edm-vocal");
-			// wEmitter.emit("mopidy-random-edm-vocal")
+			clientManager.prepare( "mopidyBGYT" );
 			socket.emit( 'playBackgroundYTLive' );
 		});
 
@@ -179,6 +194,16 @@ io.sockets.on( 'connection' , function (socket) {
 			fs.writeFileSync( path.join( __dirname , "server" , "py_scripts" , "wUserName.py" ) , "callingName = 'collin.cerbus'" );
 			clientManager.prepare( "skype" );
 		});
+
+		wEmitter.on( 'button6Press' , function() { 
+			console.log("mopidy--> previousSong");
+			// wEmitter.emit("")
+		});	
+
+		wEmitter.on( 'button7Press' , function() { 
+			console.log("mopidy--> nextSong");
+			// wEmitter.emit("")
+		});	
 
 		wEmitter.on( 'button8Press' , function() { 
 			console.log("play standard YT Stream");
