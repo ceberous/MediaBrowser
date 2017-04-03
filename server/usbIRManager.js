@@ -129,4 +129,4 @@ var USBIRManager = {
                  
 USBIRManager.init();
 
-USBIRManager.pressButton( USBIRManager.buttons.power );
+//USBIRManager.pressButton( USBIRManager.buttons.power );

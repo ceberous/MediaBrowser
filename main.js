@@ -13,13 +13,103 @@ fs.writeFileSync( path.join( __dirname , "client" , "js" , "sockioServerAddress.
 var app = require("./server/expressApp.js");
 var server = require("http").createServer(app);
 
-
+var wTM = require("./server/taskManager.js"); 	// Task-Manager
 var wFM = require("./server/ffManager.js");		// Firefox-Manager
 var wVM = require("./server/videoManager.js"); 	// Video-Manager
 //var wMM = require("./server/mopidyManager.js"); // Mopidy-Manager
-var wTM = require("./server/taskManager.js"); 	// Task-Manager
+var wSM = require("./server/skypeManager.js"); 	// Skype-Manager
 //var wBM = require("./server/buttonManager.js"); 	// Button-Manager
-var wUM = require("./server/usbIRManager.js"); // USB_IR-Manager
+//var wUM = require("./server/usbIRManager.js"); // USB_IR-Manager
+
+var clientManager =  {
+
+	state: {
+		yt: { live: false , standard: false , paused: false },
+		twitch: { live: false , standard: false , paused: false },
+		vlcVideo: { playing: false , paused: false },
+		mopidy: { playing: false , paused: false },
+		podcast: { playing: false , paused: false },
+		skype: { activeCall: false },
+		tvON: false,
+	},
+
+	prepare: function(wAction) {
+
+		switch (wAction) {
+
+			case "skype":
+				console.log("preparing skype call");
+				clientManager.pauseAll();
+				wSM.startCall();
+				break;
+
+			case "mopidyBGYT":
+
+				break;
+
+			case "mopidy":
+
+				break;
+
+			case "youtubeFG":
+
+				break;
+
+			case "twitchFG":
+
+				break;
+
+			case "savedVideo":
+
+				break;
+
+			case "podcast":
+
+				break;
+
+		}
+
+	},
+
+	pauseAll: function() {
+		clientManager.pauseMopidy();
+		clientManager.pausePodcast();
+		clientManager.pauseVideo();
+	},
+
+	pauseMopidy: function() {
+		if ( clientManager.state.mopidy.playing ) { /*wMM.pause();*/ }
+		clientManager.state.mopidy.paused = true;
+	},
+
+	pausePodcast: function() {
+		if ( clientManager.state.podcast.playing ) { /*wPM.pause();*/ }
+		clientManager.state.podcast.paused = true;
+	},	
+
+	pauseVideo: function() {
+
+		if ( clientManager.state.yt.live ) {
+			wEmitter.emit('stopYTShuffleTask');
+			wEmitter.emit('closeChildView');
+		}
+		else if ( clientManager.state.yt.standard ) {
+
+		}
+		else if ( clientManager.state.twitch.live ) {
+
+		}
+		else if ( clientManager.state.twitch.standard ) {
+
+		}		
+		else if ( clientManager.state.vlcVideo.playing ) {
+
+		}
+
+	},
+
+};
+
 
 wEmitter.emit('updateYTLiveList');
 sleep.sleep(2);
@@ -80,14 +170,14 @@ io.sockets.on( 'connection' , function (socket) {
 
 		wEmitter.on( 'button4Press' , function() { 
 			console.log("skype call cameron");
-			// wEmitter.emit("")
-			socket.emit( 'stopBackgroundYTLive' );
+			fs.writeFileSync( path.join( __dirname , "server" , "py_scripts" , "wUserName.py" ) , "callingName = 'ccerb96'" );
+			clientManager.prepare( "skype" );
 		});
 
 		wEmitter.on( 'button5Press' , function() { 
 			console.log("skype call collin");
-			// wEmitter.emit("")
-			socket.emit( 'stopBackgroundYTLive' );
+			fs.writeFileSync( path.join( __dirname , "server" , "py_scripts" , "wUserName.py" ) , "callingName = 'collin.cerbus'" );
+			clientManager.prepare( "skype" );
 		});
 
 		wEmitter.on( 'button8Press' , function() { 
@@ -158,6 +248,6 @@ server.listen( port , function() {
 	console.log( "Server Started on : \nhttp://" + localIP + ":" + port + "\n \t or \nhttp://localhost:" + port + "\n" );
 	wFM.openNewTab("http://localhost:6969"); 
 	setTimeout(function(){
-		wEmitter.emit("button1Press"); // Testing
+		wEmitter.emit("button5Press"); // Testing
 	} , 6000 );
 });

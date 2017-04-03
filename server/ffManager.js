@@ -84,6 +84,11 @@ var ffWrapper = {
 		exec( setToMaximumWindowDualScreen , {silent:true}).stdout;
 		
 	},
+	
+	minimizeWindow: function() {
+		var minimizeCMD = 'xdotool windowminimize ' + ffWrapper.windowID;
+		exec( minimizeCMD , {silent:true}).stdout;
+	},
 
 	openNewTab: function(w_URL) {
 		var openNewTab = 'firefox -new-tab ' + w_URL;
@@ -141,15 +146,17 @@ var ffWrapper = {
 
 ffWrapper.init();
 
+module.exports.minimizeWindow = function() {
+    ffWrapper.minimizeWindow();
+};
+
 module.exports.quit = function() {
     ffWrapper.terminateFF();
 };
 
-
 module.exports.openNewTab = function(wURL) {
     ffWrapper.openNewTab(wURL);
 };
-
 
 module.exports.closeCurrentTab = function() {
     ffWrapper.closeCurrentTab();

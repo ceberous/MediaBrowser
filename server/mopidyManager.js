@@ -267,6 +267,11 @@ wEmitter.on( 'button7Press' , function() {
 });	
 
 
+module.exports.pause = function() {
+	MopidyManager.playbackManager.pause();
+};
+
+
 
 /*
 process.on('SIGINT', function () {
