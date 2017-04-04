@@ -9,6 +9,7 @@ var bSPath = path.join( __dirname , "save_files" );
 var jsonfile = require("jsonfile");
 var followers 			= jsonfile.readFileSync( bSPath + "/followers.json" );
 var ytLiveList 			= null;
+var ytLiveBlackList 	= jsonfile.readFileSync( bSPath + "/ytLiveBlackList.json" );
 var ytStandardList 		= jsonfile.readFileSync( bSPath + "/ytStandardList.json" );
 var twitchLiveList 		= jsonfile.readFileSync( bSPath + "/twitchLiveList.json" );
 var twitchStandardList 	= jsonfile.readFileSync( bSPath + "/twitchStandardList.json");
@@ -118,19 +119,27 @@ var YTLiveManager = {
 			}
 
 			if ( !YTLiveManager.computedUnWatchedList[wProp][YTLiveManager.newResults[wProp][i]["id"]] ) {
-				
-				console.log("we need to store this id");
-				YTLiveManager.computedUnWatchedList[wProp][YTLiveManager.newResults[wProp][i]["id"]] = {
-					
-					title: YTLiveManager.newResults[wProp][i].title,
-					watched: false,
 
-				};
+				var wStoring = true;
+				for ( var j = 0; j < ytLiveBlackList[wProp].length; ++j ) {
+					if ( YTLiveManager.newResults[wProp][i]["id"] === ytLiveBlackList[wProp][j] ) { wStoring = false; }
+				}
+
+				if ( wStoring ) {
+
+					console.log( "Storing--> YTLiveID: " + YTLiveManager.newResults[wProp][i]["id"] );
+					YTLiveManager.computedUnWatchedList[wProp][YTLiveManager.newResults[wProp][i]["id"]] = {
+						
+						title: YTLiveManager.newResults[wProp][i].title,
+						watched: false,
+
+					};
+
+				}
 
 			} 
 			
 		}
-
 
 		jsonfile.writeFileSync( bSPath + "/ytLiveList.json" , YTLiveManager.computedUnWatchedList );
 
@@ -261,42 +270,13 @@ var YTFeedManager = {
 
 
 
-wEmitter.on( 'updateYTLiveList' , function() {
-	console.log("SCHEDULED-> updateYTLiveList");
-	YTLiveManager.enumerateFollowers();
-	setTimeout(function(){
-		wEmitter.emit('publishYTLiveList');
-	} , 3000 );
-});
 
-wEmitter.on( 'updateTwitchLiveList' , function() {
-	console.log("SCHEDULED-> updateTwitchLiveList");
-});
-
-wEmitter.on( 'updateStandardList' , function() {
-	console.log("SCHEDULED-> updateStandardList");
-	YTFeedManager.enumerateFollowers();
-	setTimeout(function(){
-		wEmitter.emit('publishStandardList');
-	} , 5000 );
-});
-
-
-
-
-
-function returnAllSources() {
-	var wOBJ = {
+module.exports.returnAllSources = function() {
+	return {
 		ytLiveList: YTLiveManager.computedUnWatchedList,
 		twitchLiveList: null,
 		standardList: { ytStandard: YTFeedManager.computedUnWatchedList , twitchStandard: null },
 	};
-	return wOBJ;
-}
-
-
-module.exports.returnAllSources = function() {
-	return returnAllSources();
 };
 
 module.exports.returnYTLiveList = function() {
@@ -311,3 +291,15 @@ module.exports.returnStandardList = function() {
 	return { ytStandard: YTFeedManager.computedUnWatchedList , twitchStandard: null };
 };
 
+module.exports.updateYTLiveList = function() {
+	YTLiveManager.enumerateFollowers();
+};
+
+module.exports.updateTwitchLiveList = function() {
+	//YTLiveManager.enumerateFollowers();
+};
+
+module.exports.updateStandardList = function() {
+	YTFeedManager.enumerateFollowers();
+	//TwitchFeedManager.enumerateFollowers();
+};

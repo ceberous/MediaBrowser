@@ -1,0 +1,76 @@
+									Button Box
+									
+								10		11 		12	
+								 _______________
+						  	  6 | 4			  5 | 8	
+								|	  (top)		|
+								|				| 
+								|				| 
+								| 1		2	  3 |
+							  7 |_______________| 9
+								  
+
+									Button Guide
+	--------------------------------------------------------------------------
+	|1.)	Mopidy-Run EDM-Vocal		|	7.) Next Song					 |
+	|2.)	Mopidy-Run EDM-NonVocal		|	8.) Play Standard Youtube Stream |
+	|3.)	Mopidy-Run Classic-Rock		|	9.) Play Standard Twitch Stream  |
+	|4.)	Call Cameron				|	10.) Play Archived Movie		 |
+	|5.)	Call Collin					|	11.) Play Podcast / AudioBook ?	 |
+	|6.)	Previous Song				|	12.) "Emergency" Stop Everything |
+	--------------------------------------------------------------------------
+
+
+
+
+
+								Flow Control Graph
+							------------------------
+
+		 "A"[Scheduled Update Tasks]	   "B"[12-Button Control Box]
+								   \	  /
+									\    /
+									 \  /
+									  ||	
+						   "C"[Sock-IO-Express-Server]
+							 		  ||
+							 		 /  \
+							 		/    \ 
+							 	   /      \	
+						"D"[USB-IR]       "E"[Web-Client]
+
+
+
+
+
+									Event Chain
+							--------------------------
+
+		"A": 1.) update YT and Twitch Published-Lists 
+			 2.) Call Next-Video to Web-Client For Next YT-Live-Random
+
+		"B": 1-3-->sockio.emit('playBackgroundYTLive') 
+			 4-5-->sockio.emit('closeChildView') 
+			 6-7--> if(mopidy){next->mopiy}else{next->Web-Client}
+
+		"C": //
+		"D": //
+
+		"E": if(playing standard video && not playlist){ closeChildView }else( Next-Video )
+
+
+
+wEmitter
+		-->
+			button1Press-> 
+			button2Press->
+			button3Press->
+			button4Press->
+			button5Press->
+			button6Press->
+			button7Press->
+			button8Press->
+			button9Press->
+			button10Press->
+			button11Press->
+			button12Press->

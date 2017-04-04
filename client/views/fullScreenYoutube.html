@@ -129,7 +129,7 @@
 		YTIFrameManager.muted = true;
 
 		if ( ytLiveList === null ) {
-			setTimeout(function(){ console.log("waiting on first-time-result update"); generateRandomLivePlaylist(); } , 5000 );
+			setTimeout( ()=> { console.log("waiting on first-time-result update"); generateRandomLivePlaylist(); } , 5000 );
 		}
 		else {
 			generateRandomLivePlaylist();

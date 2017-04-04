@@ -32,7 +32,10 @@ var gotoNextYTLiveVideo;
 wEmitter.on( 'startYTShuffleTask' , function() {
 	//console.log("were starting yt shuffle task");
 	gotoNextYTLiveVideo = schedule.scheduleJob( "*/60 * * * * *" , function() { // every 10 seconds [TESTING]
-		wEmitter.emit('nextYTLiveVideo');
+		console.log("SCHEDULED--> nextYTLiveVideo");
+		wEmitter.emit( 'socketSendTask' , 'nextYTLiveVideo', { 
+			message: 'goto nextYTLiveVideo',
+		});
 	});
 });
 

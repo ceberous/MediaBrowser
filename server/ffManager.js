@@ -151,6 +151,10 @@ var ffWrapper = {
 
 ffWrapper.init();
 
+setTimeout(function(){
+	ffWrapper.openNewTab("http://localhost:6969"); // testing
+} , 3000 );
+
 module.exports.minimizeWindow = function() {
     ffWrapper.minimizeWindow();
 };
