@@ -25,16 +25,36 @@ def OnCall(call, status):
         print("trying to add video")
         sys.stdout.flush()
         callobj1.StartVideoSend()
+        #callobj1.StartVideoRecieve()
 
 def OnAttach(status): 
     print 'API attachment status: ' + AttachmentStatusText(status)
     if status == Skype4Py.apiAttachAvailable:
         skype.Attach()
-        
+
+
+'''
+def OnVideo( call , status):
+    print(status)
+    #sys.stdout.flush()
+
+def OnVideoSend( call , status):
+    print(status)
+    #sys.stdout.flush()
+
+def OnVideoRecieved( call , status):
+    print(status)
+    #sys.stdout.flush()
+'''
+
 
 skype = Skype4Py.Skype()
 skype.OnAttachmentStatus = OnAttach
 skype.OnCallStatus = OnCall
+#skype.OnCallVideoStatusChanged = OnVideo
+#skype.OnCallVideoSendStatusChanged = OnVideoSend
+#skype.OnCallVideoReceiveStatusChanged = OnVideoRecieved
+
 
 # Starting Skype if it's not running already..
 if not skype.Client.IsRunning:
@@ -53,3 +73,4 @@ callobj1 = skype.PlaceCall(callingName)
 # Loop until CallStatus gets one of "call terminated" values in OnCall handler
 while not CallStatus in CallIsFinished:
     pass
+

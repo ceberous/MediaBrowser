@@ -77,7 +77,7 @@
 
 		onPlayerReady: function(event) {
 			console.log("player is supposedly ready");
-
+			console.log(YTIFrameManager.wPlayer);
 			if ( YTIFrameManager.usingPlaylist ) { 
 				YTIFrameManager.wPlayer.cuePlaylist( wPlaylist );
 				YTIFrameManager.wPlayer.setShuffle( true );
@@ -125,6 +125,8 @@
 	$(document).on( "tearDownPlayer" , function( event , einfo ) { YTIFrameManager.tearDown(); });
 
 	$(document).on( "randomYTLiveBG" , function( event , einfo ) {
+
+		console.log(ytLiveList);
 
 		YTIFrameManager.muted = true;
 

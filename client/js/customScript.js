@@ -35,7 +35,7 @@ $(document).ready( function() {
 			addChildView( viewFiles.fullScreenYT );
 			setTimeout(function() {
 				$(document).trigger( "randomYTLiveBG" );
-			} , 3000 );
+			} , 5000 );
 		});
 
 		socket.on( 'closeChildView', function(data) {
@@ -51,7 +51,9 @@ $(document).ready( function() {
 		socket.on( 'latestYTLiveList' , function (data) {
 			console.log(data.message);
 			console.log(data.ytLiveList);
-			ytLiveList = data.ytLiveList;
+			if ( data.ytLiveList != null ) {
+				ytLiveList = data.ytLiveList;
+			}
 		});
 
 		socket.on( 'latestTwitchLiveList' , function (data) {
@@ -90,6 +92,8 @@ function wInit() {
 }
 
 function addChildView(viewName) {
+
+	$("#wPlaceHolder").hide();	
 
 	var wName = viewName || viewFiles.error;
 	if ( viewFiles.active ) { closeChildView(); }

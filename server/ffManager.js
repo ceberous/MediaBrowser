@@ -149,11 +149,19 @@ var ffWrapper = {
 };
 
 
+// On Module-Import
 ffWrapper.init();
-
 setTimeout(function(){
 	ffWrapper.openNewTab("http://localhost:6969"); // testing
 } , 3000 );
+
+
+module.exports.init = function() {
+	ffWrapper.init();
+	setTimeout(function(){
+		ffWrapper.openNewTab("http://localhost:6969"); // testing
+	} , 3000 ); 
+};
 
 module.exports.minimizeWindow = function() {
     ffWrapper.minimizeWindow();

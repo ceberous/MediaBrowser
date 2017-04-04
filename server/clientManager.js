@@ -1,3 +1,6 @@
+var fs = require('fs');
+var path = require("path");
+
 var wEmitter = require('../main.js').wEmitter;
 
 var wTM = require("./taskManager.js"); 	// Task-Manager
@@ -20,6 +23,9 @@ var wCM =  {
 		podcast: { playing: false , paused: false },
 		skype: { activeCall: false },
 		tvON: false,
+		lastAction: null,
+		currentAction: null,
+		firefoxOpen: true,
 	},
 
 	prepare: function(wAction) {
@@ -29,11 +35,19 @@ var wCM =  {
 			wCM.state.tvON = true;
 		}
 
+		if ( wCM.state.lastAction == null ) { wCM.state.lastAction = wAction; }
+		else { wCM.state.lastAction = wCM.state.currentAction }
+		wCM.state.currentAction = wAction;
+
+		console.log( "LastAction = " + wCM.state.lastAction );
+		console.log( "CurrentAction = " + wCM.state.currentAction );
+
 		switch (wAction) {
 
 			case "skype":
 				if ( wCM.state.skype.activeCall ) { break; }
 				console.log("preparing skype call");
+				if ( wCM.state.firefoxOpen ) { wFM.quit(); wCM.state.firefoxOpen = false; }
 				wCM.pauseAll();
 				wCM.state.skype.activeCall = true;
 				wSM.startCall();
@@ -45,7 +59,16 @@ var wCM =  {
 				wCM.state.yt.background = true;
 				wCM.state.mopidy.playing = true;
 				//wMM.randomPlayList();
-				break;
+				if ( !wCM.state.firefoxOpen ) { 
+					wCM.state.firefoxOpen = true;
+					wFM.init();
+					wEmitter.emit( 'queClientTaskOnReady' , 'playBackgroundYTLive' );
+					break;
+				}
+				else {
+					wEmitter.emit( 'socketSendTask' , 'playBackgroundYTLive' );
+					break;
+				}
 
 			case "mopidy":
 
@@ -89,8 +112,8 @@ var wCM =  {
 
 	pauseVideo: function() {
 
-		if ( wCM.state.yt.live ) {
-			wEmitter.emit('stopYTShuffleTask');
+		if ( wCM.state.yt.background || wCM.state.yt.live.background  ) {
+			wTM.stopYTShuffleTask();
 			wEmitter.emit('closeChildView');
 		}
 		else if ( wCM.state.yt.standard ) {
@@ -108,6 +131,7 @@ var wCM =  {
 
 	},
 
+
 };
 
 // 				Button-Event Handling
@@ -115,7 +139,7 @@ var wCM =  {
 	wEmitter.on( 'button1Press' , function() { 
 		console.log("now-playing--> random-edm-vocal");
 		wCM.prepare( "mopidyBGYT" );
-		wEmitter.emit( 'socketSendTask' , 'playBackgroundYTLive' );
+		//wEmitter.emit( 'socketSendTask' , 'playBackgroundYTLive' );
 	});
 
 	wEmitter.on( 'button2Press' , function() { 
@@ -132,13 +156,13 @@ var wCM =  {
 
 	wEmitter.on( 'button4Press' , function() { 
 		console.log("skype call cameron");
-		fs.writeFileSync( path.join( __dirname , "server" , "py_scripts" , "wUserName.py" ) , "callingName = 'ccerb96'" );
+		fs.writeFileSync( path.join( __dirname , "py_scripts" , "wUserName.py" ) , "callingName = 'ccerb96'" );
 		wCM.prepare( "skype" );
 	});
 
 	wEmitter.on( 'button5Press' , function() { 
 		console.log("skype call collin");
-		fs.writeFileSync( path.join( __dirname , "server" , "py_scripts" , "wUserName.py" ) , "callingName = 'collin.cerbus'" );
+		fs.writeFileSync( path.join( __dirname , "py_scripts" , "wUserName.py" ) , "callingName = 'haley.cerbus'" );
 		wCM.prepare( "skype" );
 	});
 
@@ -225,9 +249,11 @@ var wCM =  {
 	});	
 
 
-	wEmitter.on( 'restoreFFWindow' , function() {
-		console.log("restoring FF Window");
-		wFM.restoreFullScreen();
+	wEmitter.on( 'skypeCallOver' , function() {
+		console.log("skype call is over");
+		wCM.state.skype.activeCall = false;
+		console.log( "restoring previous action --> " + wCM.state.lastAction );
+		wCM.prepare( wCM.state.lastAction );
 	});
 // --------------------------------------------------------------
 

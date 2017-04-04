@@ -24,7 +24,6 @@ var windowWrapper = {
 		var findCallWindow = 'xdotool search --name "Call with"';
 		var activeWindowID = exec( findCallWindow , {silent:true}).stdout;
 		windowWrapper.windowID = activeWindowID.trim();
-		console.log(windowWrapper.windowID);
 
 	},
 
@@ -53,6 +52,18 @@ var windowWrapper = {
 		
 	},
 
+	closeWindow: function() {
+
+		var closeWindowCMD = 'xdotool windowkill ' + windowWrapper.windowID;
+		exec( closeWindowCMD , {silent:true}).stdout;
+
+	},
+
+	minimizeWindow: function() {
+		var minimizeWindowCMD = 'xdotool windowminimize ' + windowWrapper.windowID;
+		exec( minimizeWindowCMD , {silent:true}).stdout;
+	},
+
 };
 
 var callScript = path.join( __dirname , "py_scripts" , "callFriend.py" );
@@ -79,19 +90,43 @@ var childWrapper = {
 				break;
 
 			case "Call status: Finished":
-				// ensure child process gets killed
-				wEmitter.emit("restoreFFWindow");
+				childWrapper.regularCleanup();
+				break;
+
+			case "Call status: Cancelled":
+				childWrapper.regularCleanup();
+				break;
+
+			case "Call status: Recording":
+				childWrapper.voicemailCleanUp();
 				break;
 
 			case "Call status: Voicemail Has Been Sent":
-				// kill child process
-				wEmitter.emit("restoreFFWindow");
+				childWrapper.regularCleanup();
 				break;
 
 		}
 
-		
 	},
+
+	regularCleanup: function() {
+		// skype freaks out if you close the window ubruptly with xdotool so... we have to just minimize it
+		// and wait for it to close on it's own.
+		//windowWrapper.closeWindow();
+		windowWrapper.minimizeWindow();
+		childPROC.kill();
+		wEmitter.emit("skypeCallOver");
+	},
+
+	voicemailCleanUp: function() {
+		console.log("waiting 10 seconds to record voicemail");
+		setTimeout( function() {
+			//windowWrapper.closeWindow();
+			windowWrapper.minimizeWindow();
+			childPROC.kill();
+			wEmitter.emit("skypeCallOver");
+		} , 10000 );
+	}
 
 
 };

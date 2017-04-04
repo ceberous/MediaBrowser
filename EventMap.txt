@@ -83,8 +83,22 @@ wEmitter
 		button12Press->
 
 
-socket
+socket.server
 	--> ["on"]
 		newConnection-> socket.emit('newConnection')
 		
-				
+
+customScript
+	socket.client
+		--> ["on"]
+			playBackgroundYTLive-> document.trigger('randomTYLiveBG')
+
+	document
+		--> ["on"]
+			toggle-f-keypress-> socket.emit('firefox-f-key')
+
+
+fullScreenYT.document
+	--> ["on"]
+		onPlayerReady-> document.trigger('toggle-f-keypress')
+					

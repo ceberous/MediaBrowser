@@ -16,6 +16,12 @@ var server = require("http").createServer(app);
 
 var clientManager = require("./server/clientManager.js");
 
+var clientReadyQuedTask  , clientReadyQuedTaskOptions = null;
+wEmitter.on( 'queClientTaskOnReady' , function( wTask , wOptions ) {
+	clientReadyQuedTask = wTask;
+	clientReadyQuedTaskOptions = wOptions;
+});
+
 var io = require('socket.io')(server); // Client-Interaction
 io.sockets.on( 'connection' , function (socket) {
 
@@ -28,6 +34,11 @@ io.sockets.on( 'connection' , function (socket) {
 		twitchLiveList: clientManager.returnTwitchLiveList(),
 		standardList: clientManager.returnStandardList(),
 	});
+
+	if ( clientReadyQuedTask != null ) {
+		socket.emit( clientReadyQuedTask , clientReadyQuedTaskOptions );
+		clientReadyQuedTask , clientReadyQuedTaskOptions = null;
+	}
 
 	socket.on( 'firefox-close-tab' , function( data ){
 		clientManager.firefoxCloseTab();
@@ -59,5 +70,10 @@ server.listen( port , function() {
 		console.log("testing--> button1Press");
 		wEmitter.emit("button1Press"); // testing
 	} , 10000 );
+
+	setTimeout(function() {
+		console.log("testing--> button5Press");
+		wEmitter.emit("button5Press"); // testing
+	} , 25000 );
 
 });

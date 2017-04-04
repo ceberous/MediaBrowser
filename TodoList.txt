@@ -25,6 +25,7 @@
 
 10.) Add Public Web-Control Interface
 
+11.) Skype4Py Sucks at Starting skype on its own. So Implement an exec() to get it up and running before a call
 
 https://developers.google.com/youtube/iframe_api_reference
 https://github.com/justintv/Twitch-API/blob/master/embed-video.md
