@@ -1,5 +1,9 @@
-									Button Box
-									
+							  ----------------------
+							  |	  ["Button Box"]   |
+							  ----------------------	 
+
+								
+
 								10		11 		12	
 								 _______________
 						  	  6 | 4			  5 | 8	
@@ -61,16 +65,26 @@
 
 
 wEmitter
-		-->
-			button1Press-> 
-			button2Press->
-			button3Press->
-			button4Press->
-			button5Press->
-			button6Press->
-			button7Press->
-			button8Press->
-			button9Press->
-			button10Press->
-			button11Press->
-			button12Press->
+	--> ["main"]
+		socketSendTask(wTask)--> socket.emit(wTask)
+
+	--> ["clientManager"]
+		button1Press-> socketSendTask(playBackgroundYTLive)-->
+		button2Press->
+		button3Press->
+		button4Press->
+		button5Press->
+		button6Press->
+		button7Press->
+		button8Press->
+		button9Press->
+		button10Press->
+		button11Press->
+		button12Press->
+
+
+socket
+	--> ["on"]
+		newConnection-> socket.emit('newConnection')
+		
+				

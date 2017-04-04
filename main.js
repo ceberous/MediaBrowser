@@ -15,8 +15,6 @@ var server = require("http").createServer(app);
 
 
 var clientManager = require("./server/clientManager.js");
-//sleep.sleep(5);
-
 
 var io = require('socket.io')(server); // Client-Interaction
 io.sockets.on( 'connection' , function (socket) {
@@ -32,23 +30,17 @@ io.sockets.on( 'connection' , function (socket) {
 	});
 
 	socket.on( 'firefox-close-tab' , function( data ){
-		//wFM.closeCurrentTab();
+		clientManager.firefoxCloseTab();
 	});
 
 	socket.on( 'firefox-quit' , function( data ){
-		//wFM.quit();
-	});
-
-	socket.on( 'firefox-glitch-fullscreen' , function( data ){
-		//wFM.glitchFullScreen();
+		clientManager.firefoxQuit();
 	});
 
 	socket.on( 'firefox-f-key' , function( data ){
 		// Client-Player is supposedly Ready by this point
 		clientManager.firefoxFKey();
-		setTimeout( ()=> { wEmitter.emit('startYTShuffleTask'); } , 3000 );
 	});	
-
 
 	wEmitter.on( 'socketSendTask' , function( wTask , wOptions ) {
 		console.log( "socketEmit--> " + wTask );

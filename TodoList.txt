@@ -1,0 +1,50 @@
+					https://github.com/ceberous/MediaBrowser
+
+1.) Create YTLive BlackList Save File
+
+2.) Record Last Feed Update Time , and Skip update if below some time-threshold
+
+3.) Add "watched" to video if YT-Standard or Twitch-Standard
+4.) Add "watched" comparison on parsing XML feed
+
+// Waiting on API Credential Approval from Twitch
+5.) Implement TwitchAPI
+		--> http://livestreamer.tanuki.se/en/develop/twitch_oauth.html#access_token=nkzwh4xppmh404w6qgdw3oj915vdm6&scope=user_read+user_subscriptions
+		--> livestreamer --twitch-oauth-token nkzwh4xppmh404w6qgdw3oj915vdm6 <url> <quality>
+
+6.) Implement Sending Standard-Video Play Cues to Web-Client 
+7.) Implement Sending Single StandardVideo to Web-Client
+
+
+8.) Improve Mopid-Manager Functionality. 
+		--> Sorting EDM-NonVocal , EDM-Vocal , Classic-Rock , other
+		--> Cache Results && SetTimeout for next update  
+
+9.) Add a function to find the correct /dev/input/eventID 
+	--> by finding where the symlink points from /dev/input/by-id/usb-DragonRise_Inc._Generic_USB_Joystick-event-joystick
+
+10.) Add Public Web-Control Interface
+
+
+https://developers.google.com/youtube/iframe_api_reference
+https://github.com/justintv/Twitch-API/blob/master/embed-video.md
+https://dev.twitch.tv/docs/v5/guides/embed-video/
+https://github.com/danmactough/node-feedparser
+
+https://addons.mozilla.org/en-US/firefox/addon/procon-latte/reviews/
+https://help.ubuntu.com/community/AppArmor
+
+
+
+Google Hangouts ???
+
+https://developers.google.com/+/hangouts/sample-apps
+
+https://github.com/jimmywarting/node-hangups/blob/master/src/client.js
+
+https://cloud.google.com/appengine/docs/standard/python/download
+
+https://code.google.com/archive/p/google-plus-hangout-samples/downloads
+
+
+

@@ -1,45 +1,38 @@
 var schedule = require('node-schedule');
 var wEmitter = require('../main.js').wEmitter;
 
+var ytLiveList 		= "*/60 * * * * *"; // every 60 seconds [TESTING]
+var twitchLiveList 	= "*/60 * * * * *"; // every 60 seconds [TESTING]
+var standardList 	= "*/60 * * * * *"; // every 60 seconds [TESTING]
+var ytShuffle 		= "*/10 * * * * *"; // every 10 seconds [TESTING]
 
-// [TESTING]Every 30 Seconds = "*/30 * * * * *"
-// Every 10 - Minutes = "*/10 * * * *"
-var updateYouTubeLiveList = schedule.scheduleJob( "*/60 * * * * *" , function() {
-	
+
+var updateYouTubeLiveList = schedule.scheduleJob( ytLiveList , function() {
 	wEmitter.emit('updateYTLiveList');
-
 });
 
-// [TESTING]Every 30 Seconds = "*/30 * * * * *"
-// Every 10 - Minutes = "*/10 * * * *"
-var updateTwitchLiveList = schedule.scheduleJob( "*/60 * * * * *" , function() {
-	
+
+var updateTwitchLiveList = schedule.scheduleJob( twitchLiveList , function() {
 	wEmitter.emit('updateTwitchLiveList');
-
 });
 
 
-// [TESTING]Every 30 Seconds = "*/30 * * * * *"
-// Every 30 Minutes = "*/30 * * * *"
-var updateStandardList = schedule.scheduleJob( "*/60 * * * * *" , function() {
-	
+var updateStandardList = schedule.scheduleJob( standardList , function() {	
 	wEmitter.emit('updateStandardList');
-
 });
 
 
 var gotoNextYTLiveVideo;
-wEmitter.on( 'startYTShuffleTask' , function() {
-	//console.log("were starting yt shuffle task");
-	gotoNextYTLiveVideo = schedule.scheduleJob( "*/60 * * * * *" , function() { // every 10 seconds [TESTING]
+module.exports.startYTShuffleTask = function() {
+	gotoNextYTLiveVideo = schedule.scheduleJob( ytShuffle , function() { 
 		console.log("SCHEDULED--> nextYTLiveVideo");
 		wEmitter.emit( 'socketSendTask' , 'nextYTLiveVideo', { 
 			message: 'goto nextYTLiveVideo',
 		});
 	});
-});
+};
 
-wEmitter.on( 'stopYTShuffleTask' , function() {
+module.exports.stopYTShuffleTask = function() {
 	//console.log("were stopping yt shuffle task");
 	gotoNextYTLiveVideo.cancel();
-});
+};

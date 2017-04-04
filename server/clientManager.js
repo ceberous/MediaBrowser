@@ -13,7 +13,7 @@ wVM.updateYTLiveList();
 var wCM =  {
 
 	state: {
-		yt: { live: false , standard: false , paused: false },
+		yt: { background: false , live: false , standard: false , paused: false },
 		twitch: { live: false , standard: false , paused: false },
 		vlcVideo: { playing: false , paused: false },
 		mopidy: { playing: false , paused: false },
@@ -42,6 +42,7 @@ var wCM =  {
 			case "mopidyBGYT":
 				if ( wCM.state.skype.activeCall ) { break; }
 				console.log("preparing mopidy with YTLive Background Video");
+				wCM.state.yt.background = true;
 				wCM.state.mopidy.playing = true;
 				//wMM.randomPlayList();
 				break;
@@ -110,7 +111,7 @@ var wCM =  {
 };
 
 // 				Button-Event Handling
-// --------------------------------------------------
+// --------------------------------------------------------------------
 	wEmitter.on( 'button1Press' , function() { 
 		console.log("now-playing--> random-edm-vocal");
 		wCM.prepare( "mopidyBGYT" );
@@ -171,12 +172,12 @@ var wCM =  {
 		wEmitter.emit( 'socketSendTask' , 'stopBackgroundYTLive' );
 	});				
 
-// --------------------------------------------------
+// --------------------------------------------------------------------
 
 
 
 // Task-Event Handling
-// --------------------------------------------------
+// --------------------------------------------------------------------
 
 	wEmitter.on( 'updateYTLiveList' , function() {
 		console.log("SCHEDULED-> updateYTLiveList");
@@ -186,7 +187,7 @@ var wCM =  {
 				message: 'here is the latest ytLiveList',
 				ytLiveList: wVM.returnYTLiveList()
 			});
-		} , 3000 );
+		} , 5000 );
 	});
 
 	wEmitter.on( 'updateTwitchLiveList' , function() {
@@ -211,13 +212,13 @@ var wCM =  {
 		} , 5000 );
 	});
 	
-// --------------------------------------------------
+// --------------------------------------------------------------------
 
 
 
 
 // 					Testing / MISC
-// -------------------------------------------------- 
+// --------------------------------------------------------------
 	wEmitter.on( 'closeChildView' , function() {
 		console.log("closing all client views");
 		wEmitter.emit( 'socketSendTask' , 'closeChildView', { });
@@ -228,13 +229,25 @@ var wCM =  {
 		console.log("restoring FF Window");
 		wFM.restoreFullScreen();
 	});
+// --------------------------------------------------------------
+
+
+// Firefox-Specific
+// --------------------------------------------------
+	module.exports.firefoxFKey = function() {
+		wFM.toggleFKeyPress();
+		if ( wCM.state.yt.background ) { setTimeout( ()=> { wTM.startYTShuffleTask(); } , 3000 ); }
+	};
+
+	module.exports.firefoxCloseTab = function() {
+		wFM.closeCurrentTab();
+	};
+
+	module.exports.firefoxQuit = function() {
+		wFM.quit();
+	};
 // --------------------------------------------------
 
-
-
-module.exports.firefoxFKey = function() {
-	wFM.toggleFKeyPress();
-};
 
 
 module.exports.prepare = function(wAction) {
