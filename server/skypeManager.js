@@ -85,6 +85,10 @@ var childWrapper = {
 		console.log(wMesssage);
 		switch( wMesssage ) {
 
+			case "API attachment status: Refused":
+				childWrapper.regularCleanup();
+				break;
+
 			case "trying to add video":
 				windowWrapper.init();
 				break;

@@ -6,7 +6,7 @@ var wEmitter = require('../main.js').wEmitter;
 var wTM = require("./taskManager.js"); 	// Task-Manager
 var wFM = require("./ffManager.js");		// Firefox-Manager
 var wVM = require("./videoManager.js"); 	// Video-Manager
-//var wMM = require("./mopidyManager.js"); // Mopidy-Manager
+var wMM = require("./mopidyManager.js"); // Mopidy-Manager
 var wSM = require("./skypeManager.js"); 	// Skype-Manager
 //var wBM = require("./buttonManager.js"); 	// Button-Manager
 //var wIM = require("./usbIRManager.js"); // USB_IR-Manager
@@ -58,7 +58,7 @@ var wCM =  {
 				console.log("preparing mopidy with YTLive Background Video");
 				wCM.state.yt.background = true;
 				wCM.state.mopidy.playing = true;
-				//wMM.randomPlayList();
+				wMM.randomPlaylist();
 				if ( !wCM.state.firefoxOpen ) { 
 					wCM.state.firefoxOpen = true;
 					wFM.init();
@@ -294,4 +294,8 @@ module.exports.returnTwitchLiveList = function() {
 
 module.exports.returnStandardList = function() {
 	return wVM.returnStandardList();
+};
+
+module.exports.properShutdown = function() {
+	wMM.closeMopidy();
 };

@@ -2,6 +2,7 @@ var wEmitter = require('../main.js').wEmitter;
 var Mopidy = require("mopidy");
 var mopidy = new Mopidy({webSocketUrl: "ws://localhost:6690/mopidy/ws/"});
 
+// https://docs.mopidy.com/en/latest/api/js/
 
 var MopidyManager = {
 
@@ -10,7 +11,7 @@ var MopidyManager = {
 		MopidyManager.playlistManager.getRawPlaylists();
 		MopidyManager.playbackManager.getState();
 		MopidyManager.tracklistManager.setConsumeMode(true);
-		MopidyManager.tracklistManager.getCurrentList();
+		//MopidyManager.tracklistManager.getCurrentList();
 
 	},
 
@@ -185,6 +186,7 @@ var MopidyManager = {
 		    	console.log( MopidyManager.tracklistManager.currentListName );
 		    	setTimeout(function(){
 					console.log( MopidyManager.tracklistManager.currentList[index].name + "\n[" + index + "] of " + MopidyManager.tracklistManager.currentListLength.toString() + " || SHUFFLE = " + MopidyManager.tracklistManager.currentRandomMode.toString() );
+		    		//console.log(MopidyManager.tracklistManager.currentList[index]);
 		    	} , 500 );
 		    });
 		},
@@ -244,6 +246,7 @@ var MopidyManager = {
 mopidy.on('state:online', function () {
     
     MopidyManager.init();
+    //MopidyManager.tracklistManager.setRandomList();
 
 });
 
@@ -277,15 +280,13 @@ module.exports.randomPlaylist = function() {
 	MopidyManager.tracklistManager.setRandomList();
 };
 
-
-
-
-/*
-process.on('SIGINT', function () {
+module.exports.closeMopidy = function() {
+	MopidyManager.playbackManager.stop();
 	mopidy.close();
 	mopidy.off();
 	mopidy = null;
-	ButtonManager.kill('SIGHUP');
-	console.log("\nShutting Everything Down\n");
-});
-*/
+	console.log("mopidy session terminated");
+};
+
+
+

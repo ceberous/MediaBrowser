@@ -71,9 +71,18 @@ server.listen( port , function() {
 		wEmitter.emit("button1Press"); // testing
 	} , 10000 );
 
+	/*
 	setTimeout(function() {
 		console.log("testing--> button5Press");
 		wEmitter.emit("button5Press"); // testing
 	} , 25000 );
+	*/
 
+});
+
+
+
+process.on('SIGINT', function () {
+	console.log("\nShutting Everything Down\n");
+	clientManager.properShutdown();
 });
