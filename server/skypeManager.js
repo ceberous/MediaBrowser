@@ -89,6 +89,10 @@ var childWrapper = {
 				childWrapper.regularCleanup();
 				break;
 
+			case "Call status: Sorry, call failed!":
+				childWrapper.regularCleanup();
+				break;
+
 			case "trying to add video":
 				windowWrapper.init();
 				break;
@@ -135,8 +139,10 @@ var childWrapper = {
 
 };
 
-module.exports.startCall = function() {
-    
+module.exports.startCall = function() {  
 	childWrapper.start();
+};
 
+module.exports.stopCall = function() {  
+	childWrapper.regularCleanup();
 };

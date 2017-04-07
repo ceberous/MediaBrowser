@@ -1,10 +1,11 @@
-var wEmitter = require('../main.js').wEmitter;
+//var wEmitter = require('../main.js').wEmitter;
 var path = require("path");
 require('shelljs/global');
 
 var USBIRManager = {
 
 	LIRC_OPEN: false,
+	LIRC_OPEN_ERROR: "",
 	LIRC_PID: null,
 
 	buttons: { 
@@ -29,8 +30,15 @@ var USBIRManager = {
 
 		USBIRManager.startLirc();
 
-		USBIRManager.setTransmitters();
-
+		setTimeout(function(){
+			if ( USBIRManager.LIRC_OPEN ) {
+				USBIRManager.setTransmitters();
+			}
+			else {
+				console.log( "couldn't start LIRC because: \"" + USBIRManager.LIRC_OPEN_ERROR + "\"" );
+			}
+		} , 1000 );
+		
 	},
 
 	createRunFolder: function() {
@@ -39,8 +47,6 @@ var USBIRManager = {
 		var runDIR = "/var/run/lirc/";
 		var mkdirCmd = "sudo mkdir " + runDIR;
 		var runCMD1 = exec( mkdirCmd , { silent:true } ).stdout;
-		console.log(runCMD1);
-		
 
 	},
 
@@ -49,10 +55,7 @@ var USBIRManager = {
 		console.log("starting iguanaIR service");
 		var startServiceCMD = "sudo service iguanaIR start";
 		var output1 = exec( startServiceCMD , { silent:true } ).stdout;
-		setTimeout(function(){
-			console.log(output1);
-		} , 1000 );
-
+		
 	},
 
 	isLircOpen: function() {
@@ -68,7 +71,7 @@ var USBIRManager = {
 			
 				if ( wT[j] === "/usr/sbin/lircd" ) {
 
-					USBIRManager.LIRC_OPEN = true;;
+					USBIRManager.LIRC_OPEN = true;
 					USBIRManager.LIRC_PID = isLircOpen[i].split( /[\s,]+/ )[1];
 
 					console.log( "Lirc is running @ PID: " + USBIRManager.LIRC_PID );
@@ -101,9 +104,16 @@ var USBIRManager = {
 
 		console.log("starting lirc");
 		var startLircCmd = "sudo /usr/sbin/lircd --output=/run/lirc/lircd --driver=iguanaIR /etc/lirc/lircd.conf";
-		var startLirc = exec( startLircCmd , { silent: true } ).stdout;
-		console.log(startLirc);
-		USBIRManager.isLircOpen();
+		exec( startLircCmd , { silent: true , async: false } , function( code , stdout , stderr ) {
+			if ( stderr.length > 5 ) { 
+				var check = stderr.split("\n");
+				if ( check[0] === "Driver `iguanaIR' not supported." ) {
+					USBIRManager.LIRC_OPEN = false;
+					USBIRManager.LIRC_OPEN_ERROR = check[0];
+				}
+			}
+			else USBIRManager.LIRC_OPEN = true;
+		});
 
 	},
 

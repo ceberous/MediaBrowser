@@ -3,13 +3,14 @@ var path = require("path");
 
 var wEmitter = require('../main.js').wEmitter;
 
-var wTM = require("./taskManager.js"); 	// Task-Manager
+var wTM = require("./taskManager.js"); 		// Task-Manager
 var wFM = require("./ffManager.js");		// Firefox-Manager
 var wVM = require("./videoManager.js"); 	// Video-Manager
-var wMM = require("./mopidyManager.js"); // Mopidy-Manager
+var wMM = require("./mopidyManager.js"); 	// Mopidy-Manager
 var wSM = require("./skypeManager.js"); 	// Skype-Manager
-//var wBM = require("./buttonManager.js"); 	// Button-Manager
-//var wIM = require("./usbIRManager.js"); // USB_IR-Manager
+var wBM = require("./buttonManager.js"); 	// Button-Manager
+var wIM = require("./usbIRManager.js"); 	// USB_IR-Manager
+//var wVV = require("./vlcManager.js")		// VLC-Manager
 
 wVM.updateYTLiveList();
 
@@ -94,6 +95,22 @@ var wCM =  {
 
 	},
 
+	stopEverything: function() {
+
+		if ( wCM.state.tvON ) {
+			wIM.togglePower();
+			wCM.state.tvON = false;
+		}
+
+		if ( wCM.state.yt.background ) { wTM.stopYTShuffleTask(); wCM.state.yt.background = false; }
+		if ( wCM.state.firefoxOpen ) { wFM.quit(); wCM.state.firefoxOpen = false; }
+		if ( wCM.state.mopidy.playing ) { wMM.closeMopidy(); wCM.state.mopidy.playing = false; }
+		//if ( wCM.state.skype.activeCall ) { wSM.stopCall(); wCM.state.skype.activeCall = false; }
+		//if ( wCM.state.vlcVideo.playing ) { wVV.stop(); wCM.state.vlcVideo.playing = false;  }
+
+
+	},
+
 	pauseAll: function() {
 		wCM.pauseMopidy();
 		wCM.pausePodcast();
@@ -103,6 +120,7 @@ var wCM =  {
 	pauseMopidy: function() {
 		if ( wCM.state.mopidy.playing ) { /*wMM.pause();*/ }
 		wCM.state.mopidy.paused = true;
+		wMM.pause();
 	},
 
 	pausePodcast: function() {
@@ -156,19 +174,19 @@ var wCM =  {
 
 	wEmitter.on( 'button4Press' , function() { 
 		console.log("skype call cameron");
-		fs.writeFileSync( path.join( __dirname , "py_scripts" , "wUserName.py" ) , "callingName = 'ccerb96'" );
+		fs.writeFileSync( path.join( __dirname , "py_scripts" , "wUserName.py" ) , "callingName = 'live:ccerb96'" );
 		wCM.prepare( "skype" );
 	});
 
 	wEmitter.on( 'button5Press' , function() { 
 		console.log("skype call collin");
-		fs.writeFileSync( path.join( __dirname , "py_scripts" , "wUserName.py" ) , "callingName = 'haley.cerbus'" );
+		fs.writeFileSync( path.join( __dirname , "py_scripts" , "wUserName.py" ) , "callingName = 'collin.cerbus'" );
 		wCM.prepare( "skype" );
 	});
 
 	wEmitter.on( 'button6Press' , function() { 
-		console.log("mopidy--> previousSong");
-		// wEmitter.emit("")
+		console.log("\"Emergency\" Stop Everything");
+		wCM.stopEverything();
 	});	
 
 	wEmitter.on( 'button7Press' , function() { 
@@ -252,8 +270,10 @@ var wCM =  {
 	wEmitter.on( 'skypeCallOver' , function() {
 		console.log("skype call is over");
 		wCM.state.skype.activeCall = false;
-		console.log( "restoring previous action --> " + wCM.state.lastAction );
-		wCM.prepare( wCM.state.lastAction );
+		if ( wCM.state.lastAction != "skype" ) {
+			console.log( "restoring previous action --> " + wCM.state.lastAction );
+			wCM.prepare( wCM.state.lastAction );
+		}
 	});
 // --------------------------------------------------------------
 

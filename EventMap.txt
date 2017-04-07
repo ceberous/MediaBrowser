@@ -16,14 +16,13 @@
 
 									Button Guide
 	--------------------------------------------------------------------------
-	|1.)	Mopidy-Run EDM-Vocal		|	7.) Next Song					 |
-	|2.)	Mopidy-Run EDM-NonVocal		|	8.) Play Standard Youtube Stream |
-	|3.)	Mopidy-Run Classic-Rock		|	9.) Play Standard Twitch Stream  |
-	|4.)	Call Cameron				|	10.) Play Archived Movie		 |
-	|5.)	Call Collin					|	11.) Play Podcast / AudioBook ?	 |
-	|6.)	Previous Song				|	12.) "Emergency" Stop Everything |
+	|1.) Mopidy-Random EDM-Vocal		| 7.) Play Standard Youtube /Twitch  |
+	|2.) Mopidy-Random EDM-NonVocal		| 8.) Previous Media 				 |
+	|3.) Mopidy-Random Classic-Rock		| 9.) Next Media 					 |
+	|4.) Skype Cameron					| 10.) Play Archived Movie		  	 |
+	|5.) Skype Collin					| 11.) Play Podcast  	 		 	 |
+	|6.) "Emergency" Stop Everything	| 12.) Play Audiobook				 |
 	--------------------------------------------------------------------------
-
 
 
 

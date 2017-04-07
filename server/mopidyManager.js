@@ -1,6 +1,14 @@
-var wEmitter = require('../main.js').wEmitter;
+//var wEmitter = require('../main.js').wEmitter;
 var Mopidy = require("mopidy");
 var mopidy = new Mopidy({webSocketUrl: "ws://localhost:6690/mopidy/ws/"});
+
+var path = require("path");
+var jsonfile = require("jsonfile");
+var cacheFilePath = path.join( __dirname , "save_files" , "mopidyCache.json" );
+var cachedPlaylists 	= jsonfile.readFileSync( cacheFilePath );
+
+var oneHour = 3600000;
+var oneDay = 86400000;
 
 // https://docs.mopidy.com/en/latest/api/js/
 
@@ -11,6 +19,7 @@ var MopidyManager = {
 		MopidyManager.playlistManager.getRawPlaylists();
 		MopidyManager.playbackManager.getState();
 		MopidyManager.tracklistManager.setConsumeMode(true);
+		MopidyManager.playlistManager.updateCache();
 		//MopidyManager.tracklistManager.getCurrentList();
 
 	},
@@ -133,6 +142,9 @@ var MopidyManager = {
 
 		updateCache: function() {
 		
+			var wDiff = cachedPlaylists.lastUpdateTime - ( new Date().getTime() );
+			if ( wDiff < oneHour ) { console.log( "already updated playlist cache this hour" ); return; }
+
 			mopidy.playlists.asList().then(function(list){
 				for ( var i = 0; i < list.length; ++i ) {
 					var j = {};
@@ -141,7 +153,9 @@ var MopidyManager = {
 					MopidyManager.playlistManager.cachedPlaylists.push(j);
 				}
 				//MopidyManager.playlistManager.printCache();
-				MopidyManager.playlistManager.getRandomList();
+				var test1 = { lastUpdateTime: wDiff , playlists: MopidyManager.playlistManager.cachedPlaylists };
+				jsonfile.writeFileSync( cacheFilePath , test1 );
+
 			});
 
 		},
@@ -258,7 +272,13 @@ mopidy.on( 'event:trackPlaybackEnded' , function(data) {
 
 });
 
-
+function cleanCloseMopidy() {
+	MopidyManager.playbackManager.stop();
+	mopidy.close();
+	mopidy.off();
+	mopidy = null;
+	console.log("mopidy session terminated");	
+}
 
 module.exports.stop = function() {
 	MopidyManager.playbackManager.stop();
@@ -281,12 +301,11 @@ module.exports.randomPlaylist = function() {
 };
 
 module.exports.closeMopidy = function() {
-	MopidyManager.playbackManager.stop();
-	mopidy.close();
-	mopidy.off();
-	mopidy = null;
-	console.log("mopidy session terminated");
+	cleanCloseMopidy();
 };
 
 
-
+process.on('SIGINT', function () {
+	console.log("\nShutting Everything Down\n");
+	cleanCloseMopidy();
+});

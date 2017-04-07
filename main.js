@@ -66,10 +66,12 @@ server.listen( port , function() {
 	
 	console.log( "Server Started on : \nhttp://" + localIP + ":" + port + "\n \t or \nhttp://localhost:" + port + "\n" );
 	
+	/*
 	setTimeout(function() {
 		console.log("testing--> button1Press");
 		wEmitter.emit("button1Press"); // testing
 	} , 10000 );
+	*/
 
 	/*
 	setTimeout(function() {
