@@ -1,31 +1,28 @@
-					https://github.com/ceberous/MediaBrowser
 
-1.) Create YTLive BlackList Save File
-
-2.) Record Last Feed Update Time , and Skip update if below some time-threshold
-
-3.) Add "watched" to video if YT-Standard or Twitch-Standard
-4.) Add "watched" comparison on parsing XML feed
+1.) Add "watched" to video if YT-Standard or Twitch-Standard
+2.) Add "watched" comparison on parsing YouTube XML feed
 
 // Waiting on API Credential Approval from Twitch
-5.) Implement TwitchAPI
+3.) Implement TwitchAPI
 		--> http://livestreamer.tanuki.se/en/develop/twitch_oauth.html#access_token=nkzwh4xppmh404w6qgdw3oj915vdm6&scope=user_read+user_subscriptions
 		--> livestreamer --twitch-oauth-token nkzwh4xppmh404w6qgdw3oj915vdm6 <url> <quality>
 
-6.) Implement Sending Standard-Video Play Cues to Web-Client 
-7.) Implement Sending Single StandardVideo to Web-Client
+4.) Implement Sending Standard-Video Play Cues to Web-Client 
+5.) Implement Sending Single StandardVideo to Web-Client
 
 
-8.) Improve Mopid-Manager Functionality. 
+6.) Improve Mopid-Manager Functionality. 
 		--> Sorting EDM-NonVocal , EDM-Vocal , Classic-Rock , other
-		--> Cache Results && SetTimeout for next update  
+ 
+ 
+7.) Add Public Web-Control Interface
 
-9.) Add a function to find the correct /dev/input/eventID 
-	--> by finding where the symlink points from /dev/input/by-id/usb-DragonRise_Inc._Generic_USB_Joystick-event-joystick
+8.) Skype4Py Sucks at Starting skype on its own. So Implement an exec() to get it up and running before a call
 
-10.) Add Public Web-Control Interface
 
-11.) Skype4Py Sucks at Starting skype on its own. So Implement an exec() to get it up and running before a call
+
+https://github.com/ceberous/MediaBrowser
+
 
 https://developers.google.com/youtube/iframe_api_reference
 https://github.com/justintv/Twitch-API/blob/master/embed-video.md

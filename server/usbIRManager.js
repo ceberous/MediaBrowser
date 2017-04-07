@@ -7,6 +7,8 @@ var USBIRManager = {
 	LIRC_OPEN: false,
 	LIRC_OPEN_ERROR: "",
 	LIRC_PID: null,
+	IGUANAIR_SERVICE_ACTIVE: false,
+	IGUANAIR_SERVICE_STATUS: null,
 
 	buttons: { 
 		power: "KEY_POWER" , 
@@ -20,9 +22,12 @@ var USBIRManager = {
 
 	init: function() {
 
+
 		USBIRManager.createRunFolder();
 
-		USBIRManager.startIguanaIRService();
+		if ( !USBIRManager.isIguanaIRServiceRunning() ) {
+			USBIRManager.startIguanaIRService();
+		}
 
 		if ( !USBIRManager.isLircOpen() ) {
 			//USBIRManager.killExistingLirc( USBIRManager.LIRC_PID );
@@ -55,6 +60,29 @@ var USBIRManager = {
 
 	},
 
+	isIguanaIRServiceRunning: function() {
+		
+		console.log("Checking iguanaIR service status");
+		
+		var chkCMD = "sudo service iguanaIR status";
+		var wStatus = exec( chkCMD , { silent: true } ).stdout;
+		wStatus = wStatus.split("\n");
+		wStatus = wStatus[2].replace( / /g , '' );
+		wStatus = wStatus.split("Active:");
+		var wCondition = wStatus[1].split("(");
+		var wCondition2 = wCondition[1].split(")");
+
+		if ( wCondition[0] === "active" ) { 
+			USBIRManager.IGUANAIR_SERVICE_ACTIVE = true;
+			USBIRManager.IGUANAIR_SERVICE_STATUS = wCondition2[0];
+			return true; 
+		}
+		else { 
+			return false;
+		}
+
+	},
+
 	startIguanaIRService: function() {
 
 		console.log("starting iguanaIR service");
@@ -67,7 +95,7 @@ var USBIRManager = {
 
 		var checkLircOpen = 'ps aux | grep lircd';
 		var isLircOpen = exec( checkLircOpen , {silent:true}).stdout;
-		isLircOpen = isLircOpen.split("\n");
+		isLircOpen = isLircOpen.split("\n"); 
 
 		for (var i = 0; i < isLircOpen.length; ++i) {
 
