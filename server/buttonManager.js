@@ -1,9 +1,37 @@
 var wEmitter = require('../main.js').wEmitter;
-
+var fs = require("fs");
 var path = require("path");
 var StringDecoder = require('string_decoder').StringDecoder;
 var decoder = new StringDecoder('utf8');
 var spawn = require('child_process').spawn;
+require('shelljs/global');
+
+
+function getUSBDeviceEventPath() {
+
+	var usbDeviceID = "usb-DragonRise_Inc._Generic_USB_Joystick-event-joystick";
+	var findEventPath = 'ls -la /dev/input/by-id';
+	var findEventPathCMD = exec( findEventPath , {silent:true}).stdout;
+	findEventPathCMD = findEventPathCMD.split("\n");
+
+	for (var i = 0; i < findEventPathCMD.length; ++i) {
+		
+		var wT = findEventPathCMD[i].split(" ");
+		if ( wT[wT.length-3] === usbDeviceID ) {
+			var wEvent = wT[wT.length-1].split("../");
+			var wEventPath = 'eventPath = "/dev/input/' + wEvent[1] + '"';
+			console.log(wEventPath);
+			fs.writeFileSync( path.join( __dirname , "py_scripts" , "usbDevicePath.py" ) , wEventPath );
+			return true;
+		}
+		
+	}
+
+	return false;
+
+}
+
+if ( !getUSBDeviceEventPath() ) { throw new Error( "Cannot Find USB-Buttton Controller" ); }
 
 var buttonScript = path.join( __dirname , "py_scripts" , "buttonWatcher.py" );
 var ButtonManager = spawn( 'python' , [buttonScript] );

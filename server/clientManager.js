@@ -9,8 +9,9 @@ var wVM = require("./videoManager.js"); 	// Video-Manager
 var wMM = require("./mopidyManager.js"); 	// Mopidy-Manager
 var wSM = require("./skypeManager.js"); 	// Skype-Manager
 var wBM = require("./buttonManager.js"); 	// Button-Manager
-var wIM = require("./usbIRManager.js"); 	// USB_IR-Manager
+//var wIM = require("./usbIRManager.js"); 	// USB_IR-Manager
 //var wVV = require("./vlcManager.js")		// VLC-Manager
+
 
 wVM.updateYTLiveList();
 
@@ -22,11 +23,23 @@ var wCM =  {
 		vlcVideo: { playing: false , paused: false },
 		mopidy: { playing: false , paused: false },
 		podcast: { playing: false , paused: false },
+		audioBook: { playing: false , paused: false },
 		skype: { activeCall: false },
 		tvON: false,
 		lastAction: null,
 		currentAction: null,
 		firefoxOpen: true,
+	},
+
+	managerMap: {
+		"skype": wSM,
+		"mopidy": wMM,
+		"mopidyBGYT": wMM,
+		//"youtubeFG": wVM,
+		//"twitchFG": wVM,
+		//"savedVideo": wVV,
+		//"podcast": wVV,
+		//"audioBook": wVV,
 	},
 
 	prepare: function(wAction) {
@@ -91,6 +104,10 @@ var wCM =  {
 
 				break;
 
+			case "audioBook":
+
+				break;	
+
 		}
 
 	},
@@ -149,6 +166,18 @@ var wCM =  {
 
 	},
 
+	nextMedia: function() {
+		if ( wCM.state.currentAction != "skype" ) {
+			wCM.managerMap[wCM.state.currentAction].nextMedia();
+		}
+	},
+
+	previousMedia: function() {
+		if ( wCM.state.currentAction != "skype" ) {
+			wCM.managerMap[wCM.state.currentAction].previousMedia();
+		}
+	},
+
 
 };
 
@@ -202,10 +231,8 @@ var wCM =  {
 	});
 
 	wEmitter.on( 'button9Press' , function() { 
-		console.log("play standard Twitch Stream");
-		// wEmitter.emit("")
-		wEmitter.emit( 'socketSendTask' , 'stopBackgroundYTLive' );
-		wEmitter.emit( 'socketSendTask' , 'startStandardYTStream' );
+		console.log("play Next-Media");
+		wCM.nextMedia();
 	});
 
 	wEmitter.on( 'button10Press' , function() { 

@@ -1,4 +1,4 @@
-//var wEmitter = require('../main.js').wEmitter;
+var wEmitter = require('../main.js').wEmitter;
 var path = require("path");
 require('shelljs/global');
 
