@@ -19,23 +19,28 @@ var USBIRManager = {
 	},
 
 	init: function() {
-		
-		if ( USBIRManager.isLircOpen() ) {
-			USBIRManager.killExistingLirc( USBIRManager.LIRC_PID );
-		}
 
 		USBIRManager.createRunFolder();
 
 		USBIRManager.startIguanaIRService();
 
-		USBIRManager.startLirc();
+		if ( !USBIRManager.isLircOpen() ) {
+			//USBIRManager.killExistingLirc( USBIRManager.LIRC_PID );
+			USBIRManager.startLirc();
+		}
+
+		USBIRManager.pressButton( USBIRManager.buttons.power );	
 
 		setTimeout(function(){
 			if ( USBIRManager.LIRC_OPEN ) {
 				USBIRManager.setTransmitters();
+				setTimeout(function() {
+					USBIRManager.pressButton( USBIRManager.buttons.power );
+				} , 1000 );
 			}
 			else {
 				console.log( "couldn't start LIRC because: \"" + USBIRManager.LIRC_OPEN_ERROR + "\"" );
+				
 			}
 		} , 1000 );
 		
@@ -72,7 +77,7 @@ var USBIRManager = {
 				if ( wT[j] === "/usr/sbin/lircd" ) {
 
 					USBIRManager.LIRC_OPEN = true;
-					USBIRManager.LIRC_PID = isLircOpen[i].split( /[\s,]+/ )[1];
+					USBIRManager.LIRC_PID = irsendLircOpen[i].split( /[\s,]+/ )[1];
 
 					console.log( "Lirc is running @ PID: " + USBIRManager.LIRC_PID );
 
@@ -129,7 +134,7 @@ var USBIRManager = {
 
 		var pressButtonCmd = "sudo irsend -d /run/lirc/lircd send_once samsung1 " + wButton;
 		var runPressButton = exec( pressButtonCmd , { silent: true } ).stdout;
-		console.log(runPressButton);
+		console.log( "Pressed-Button: " + wButton );
 
 	}
 
@@ -139,11 +144,8 @@ var USBIRManager = {
                  
 USBIRManager.init();
 
-
 module.exports.togglePower = function() {
     
 	USBIRManager.pressButton( USBIRManager.buttons.power );
 
 };
-
-//USBIRManager.pressButton( USBIRManager.buttons.power );
