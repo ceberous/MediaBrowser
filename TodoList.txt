@@ -19,6 +19,7 @@
 
 8.) Skype4Py Sucks at Starting skype on its own. So Implement an exec() to get it up and running before a call
 
+9.) x11vnc Server setup @ http://askubuntu.com/a/304720
 
 
 https://github.com/ceberous/MediaBrowser

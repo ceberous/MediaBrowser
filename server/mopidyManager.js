@@ -1,5 +1,7 @@
-//var wEmitter = require('../main.js').wEmitter;
+var wEmitter = require('../main.js').wEmitter;
+require('shelljs/global');
 var Mopidy = require("mopidy");
+
 var mopidy = new Mopidy({webSocketUrl: "ws://localhost:6690/mopidy/ws/"});
 
 var path = require("path");
@@ -11,6 +13,7 @@ var oneHour = 3600000;
 var oneDay = 86400000;
 
 // https://docs.mopidy.com/en/latest/api/js/
+// https://github.com/mopidy/mopidy.js
 
 var MopidyManager = {
 
@@ -32,7 +35,7 @@ var MopidyManager = {
 		getState: function() {
 
 		    mopidy.playback.getState().then(function (state) {
-		        console.log(state);
+		        console.log( "mopidyState = " + state );
 		        MopidyManager.playbackManager.currentState = state;
 		    });
 
@@ -50,7 +53,7 @@ var MopidyManager = {
 		},
 
 		play: function() {
-
+			console.log("MopidyDEBUG - something tried to play");
 		    mopidy.playback.play().then(function (something) {
 		        MopidyManager.playbackManager.getState();
 		    });
@@ -60,9 +63,11 @@ var MopidyManager = {
 		next: function() {
 		    mopidy.playback.next().then(function (something) {
 		        MopidyManager.playbackManager.getState();
+		        /*
 		        setTimeout( function() {
 		        	MopidyManager.tracklistManager.getCurrentList();
 		        } , 1000 );
+				*/
 		    });
 		},
 
@@ -142,17 +147,18 @@ var MopidyManager = {
 
 		updateCache: function() {
 		
-			var wDiff = cachedPlaylists.lastUpdateTime - ( new Date().getTime() );
+			var wDiff = ( new Date().getTime() ) - cachedPlaylists.lastUpdateTime;
 			if ( wDiff < oneHour ) { console.log( "already updated playlist cache this hour" ); return; }
 
 			mopidy.playlists.asList().then(function(list){
+				
 				for ( var i = 0; i < list.length; ++i ) {
 					var j = {};
 					j.name = list[i].name;
 					j.uri = list[i].uri;
 					MopidyManager.playlistManager.cachedPlaylists.push(j);
 				}
-				//MopidyManager.playlistManager.printCache();
+
 				var test1 = { lastUpdateTime: wDiff , playlists: MopidyManager.playlistManager.cachedPlaylists };
 				jsonfile.writeFileSync( cacheFilePath , test1 );
 
@@ -187,7 +193,7 @@ var MopidyManager = {
 		    	//console.log(tracks);
 		        MopidyManager.tracklistManager.currentList = tracks;
 		        MopidyManager.tracklistManager.currentListLength = tracks.length;
-		        MopidyManager.tracklistManager.getCurrentPosition();
+		       	MopidyManager.tracklistManager.getCurrentPosition();
 		    });
 
 		},
@@ -197,9 +203,9 @@ var MopidyManager = {
 		    	if ( index === null ) { index = 0;  }
 		    	MopidyManager.tracklistManager.currentIndex = index;
 		    	MopidyManager.tracklistManager.getRandomMode();
-		    	console.log( MopidyManager.tracklistManager.currentListName );
+		    	console.log( "MopidyPlaylist = " + MopidyManager.tracklistManager.currentListName );
 		    	setTimeout(function(){
-					console.log( MopidyManager.tracklistManager.currentList[index].name + "\n[" + index + "] of " + MopidyManager.tracklistManager.currentListLength.toString() + " || SHUFFLE = " + MopidyManager.tracklistManager.currentRandomMode.toString() );
+					console.log( "MopidyTrack = " + MopidyManager.tracklistManager.currentList[index].name + "\n[" + index + "] of " + MopidyManager.tracklistManager.currentListLength.toString() + " || SHUFFLE = " + MopidyManager.tracklistManager.currentRandomMode.toString() );
 		    		//console.log(MopidyManager.tracklistManager.currentList[index]);
 		    	} , 500 );
 		    });
@@ -260,14 +266,19 @@ var MopidyManager = {
 mopidy.on('state:online', function () {
     
     MopidyManager.init();
-    //MopidyManager.tracklistManager.setRandomList();
+    wEmitter.emit("mopidyOnline");
 
 });
 
 mopidy.on( 'event:trackPlaybackEnded' , function(data) {
-	//console.log(data);
 	setTimeout(function() {
-		MopidyManager.tracklistManager.getCurrentList();
+		console.log( "Playlist Length = " + MopidyManager.tracklistManager.currentListLength.toString() );
+		if ( MopidyManager.tracklistManager.currentListLength <= 1 ) {
+			MopidyManager.tracklistManager.setRandomList();
+		}
+		else {
+			MopidyManager.tracklistManager.getCurrentList();
+		}
 	} , 1000 );
 
 });
@@ -277,14 +288,22 @@ function cleanCloseMopidy() {
 	mopidy.close();
 	mopidy.off();
 	mopidy = null;
-	console.log("mopidy session terminated");	
+	wEmitter.emit("mopidyOffline");
 }
 
 module.exports.stop = function() {
 	MopidyManager.playbackManager.stop();
 };
 
+module.exports.stopMedia = function() {
+	MopidyManager.playbackManager.stop();
+};
+
 module.exports.pause = function() {
+	MopidyManager.playbackManager.pause();
+};
+
+module.exports.pauseMedia = function() {
 	MopidyManager.playbackManager.pause();
 };
 
@@ -293,6 +312,14 @@ module.exports.nextTrack = function() {
 };
 
 module.exports.previousTrack = function() {
+	MopidyManager.playbackManager.previous();
+};
+
+module.exports.nextMedia = function() {
+	MopidyManager.playbackManager.next();
+};
+
+module.exports.previousMedia = function() {
 	MopidyManager.playbackManager.previous();
 };
 
@@ -309,3 +336,4 @@ process.on('SIGINT', function () {
 	console.log("\nShutting Everything Down\n");
 	cleanCloseMopidy();
 });
+

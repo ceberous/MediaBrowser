@@ -25,6 +25,8 @@ wEmitter.on( 'queClientTaskOnReady' , function( wTask , wOptions ) {
 var io = require('socket.io')(server); // Client-Interaction
 io.sockets.on( 'connection' , function (socket) {
 
+	wEmitter.emit('firefoxOpen');
+
 	var wC = socket.request.connection._peername;
 	console.log( wC.address.toString() +  " connected" );
 

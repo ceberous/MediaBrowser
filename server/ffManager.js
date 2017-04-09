@@ -1,3 +1,4 @@
+var wEmitter = require('../main.js').wEmitter;
 require('shelljs/global');
 var path = require("path");
 
@@ -26,7 +27,7 @@ var ffWrapper = {
 		for (var i = 0; i < isFFOpen.length; ++i) {
 			var wT = isFFOpen[i].split(" ");
 			if ( wT[wT.length-1] === ffBinaryLocation ) {
-				ffWrapper.instancePID = wT[1].toString(); 
+				ffWrapper.instancePID = wT[1].toString();
 				return true;
 			}
 			else{ 
@@ -49,6 +50,7 @@ var ffWrapper = {
 
 	terminateFF: function() {
 		exec( "pkill -9 firefox" , {silent:true}).stdout;
+		wEmitter.emit("firefoxClosed");
 	},
 
 	getWindowID: function() {
@@ -87,6 +89,7 @@ var ffWrapper = {
 		var setToMaximumWindowDualScreen = 'xdotool windowsize %0' + ffWrapper.windowID + ' 100% 100%';
 		// var setToMaximumWindowSingleScreen = 'xdotool windowsize ' + ffWrapper.windowID + ' 100% 100%';
 		exec( setToMaximumWindowDualScreen , {silent:true}).stdout;
+		wEmitter.emit("firefoxOpen");
 		
 	},
 	
@@ -153,6 +156,7 @@ var ffWrapper = {
 ffWrapper.init();
 setTimeout(function(){
 	ffWrapper.openNewTab("http://localhost:6969"); // testing
+	//wEmitter.emit('firefoxOpen');
 } , 3000 );
 
 

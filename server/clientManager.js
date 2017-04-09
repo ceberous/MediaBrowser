@@ -21,14 +21,15 @@ var wCM =  {
 		yt: { background: false , live: false , standard: false , paused: false },
 		twitch: { live: false , standard: false , paused: false },
 		vlcVideo: { playing: false , paused: false },
-		mopidy: { playing: false , paused: false },
+		mopidy: { playing: false , paused: false , playStyleToQue: null },
 		podcast: { playing: false , paused: false },
 		audioBook: { playing: false , paused: false },
 		skype: { activeCall: false },
 		tvON: false,
 		lastAction: null,
 		currentAction: null,
-		firefoxOpen: true,
+		firefoxOpen: false,
+		firefoxClientTask: { online: false , name: null },
 	},
 
 	managerMap: {
@@ -43,6 +44,8 @@ var wCM =  {
 	},
 
 	prepare: function(wAction) {
+
+		if ( wCM.state.skype.activeCall ) { return; }
 
 		if ( !wCM.state.tvON ) {
 			//wIM.togglePower();
@@ -59,30 +62,35 @@ var wCM =  {
 		switch (wAction) {
 
 			case "skype":
-				if ( wCM.state.skype.activeCall ) { break; }
 				console.log("preparing skype call");
 				if ( wCM.state.firefoxOpen ) { wFM.quit(); wCM.state.firefoxOpen = false; }
-				wCM.pauseAll();
+				wCM.pauseMedia( wCM.state.lastAction );
 				wCM.state.skype.activeCall = true;
 				wSM.startCall();
 				break;
 
 			case "mopidyBGYT":
-				if ( wCM.state.skype.activeCall ) { break; }
+
 				console.log("preparing mopidy with YTLive Background Video");
-				wCM.state.yt.background = true;
 				wCM.state.mopidy.playing = true;
+				//wMM.playQuedStyle( wCM.state.mopidy.playStyleToQue );
 				wMM.randomPlaylist();
+				
+				if ( !wCM.state.yt.background ) {
+					wCM.state.yt.background = true;
+					wCM.state.firefoxClientTask.name = 'playBackgroundYTLive';
+				}
+				
 				if ( !wCM.state.firefoxOpen ) { 
-					wCM.state.firefoxOpen = true;
-					wFM.init();
-					wEmitter.emit( 'queClientTaskOnReady' , 'playBackgroundYTLive' );
-					break;
+					wFM.init(); 
+					wEmitter.emit( 'queClientTaskOnReady' , wCM.state.firefoxClientTask.name );				
 				}
 				else {
-					wEmitter.emit( 'socketSendTask' , 'playBackgroundYTLive' );
-					break;
+					wEmitter.emit( 'socketSendTask' , wCM.state.firefoxClientTask.name );
 				}
+
+				break;
+				
 
 			case "mopidy":
 
@@ -125,45 +133,17 @@ var wCM =  {
 		//if ( wCM.state.skype.activeCall ) { wSM.stopCall(); wCM.state.skype.activeCall = false; }
 		//if ( wCM.state.vlcVideo.playing ) { wVV.stop(); wCM.state.vlcVideo.playing = false;  }
 
+		wCM.managerMap[wCM.state.currentAction].stopMedia();
 
 	},
 
-	pauseAll: function() {
-		wCM.pauseMopidy();
-		wCM.pausePodcast();
-		wCM.pauseVideo();
-	},
-
-	pauseMopidy: function() {
-		if ( wCM.state.mopidy.playing ) { /*wMM.pause();*/ }
-		wCM.state.mopidy.paused = true;
-		wMM.pause();
-	},
-
-	pausePodcast: function() {
-		if ( wCM.state.podcast.playing ) { /*wPM.pause();*/ }
-		wCM.state.podcast.paused = true;
-	},	
-
-	pauseVideo: function() {
-
-		if ( wCM.state.yt.background || wCM.state.yt.live.background  ) {
-			wTM.stopYTShuffleTask();
-			wEmitter.emit('closeChildView');
+	pauseMedia: function( wAction ) {
+		if ( wCM.state.currentAction != "skype" ) {
+			wCM.managerMap[wCM.state.currentAction].pauseMedia();
 		}
-		else if ( wCM.state.yt.standard ) {
-
+		else if ( wAction !== undefined && wAction != "skype" )	{
+			wCM.managerMap[wAction].pauseMedia();
 		}
-		else if ( wCM.state.twitch.live ) {
-
-		}
-		else if ( wCM.state.twitch.standard ) {
-
-		}		
-		else if ( wCM.state.vlcVideo.playing ) {
-
-		}
-
 	},
 
 	nextMedia: function() {
@@ -185,20 +165,20 @@ var wCM =  {
 // --------------------------------------------------------------------
 	wEmitter.on( 'button1Press' , function() { 
 		console.log("now-playing--> random-edm-vocal");
+		wCM.state.mopidy.playStyleToQue = "randomEDMVocal";
 		wCM.prepare( "mopidyBGYT" );
-		//wEmitter.emit( 'socketSendTask' , 'playBackgroundYTLive' );
 	});
 
 	wEmitter.on( 'button2Press' , function() { 
 		console.log("now-playing--> random-edm-nonvocal");
-		// wEmitter.emit("mopidy-random-edm-nonvocal")
-		wEmitter.emit( 'socketSendTask' , 'playBackgroundYTLive' );
+		wCM.state.mopidy.playStyleToQue = "randomEDMNonVocal";
+		wCM.prepare( "mopidyBGYT" );
 	});
 
 	wEmitter.on( 'button3Press' , function() { 
 		console.log("now-playing--> random-classic-rock");
-		// wEmitter.emit("mopidy-random-classic-rock")
-		wEmitter.emit( 'socketSendTask' , 'playBackgroundYTLive' );
+		wCM.state.mopidy.playStyleToQue = "randomClassicRock";
+		wCM.prepare( "mopidyBGYT" );
 	});
 
 	wEmitter.on( 'button4Press' , function() { 
@@ -219,15 +199,13 @@ var wCM =  {
 	});	
 
 	wEmitter.on( 'button7Press' , function() { 
-		console.log("mopidy--> nextSong");
+		//console.log("mopidy--> nextSong");
 		// wEmitter.emit("")
 	});	
 
 	wEmitter.on( 'button8Press' , function() { 
-		console.log("play standard YT Stream");
-		// wEmitter.emit("")
-		wEmitter.emit( 'socketSendTask' , 'stopBackgroundYTLive' );
-		wEmitter.emit( 'socketSendTask' , 'startStandardYTStream' );
+		console.log("play Previous-Media");
+		wCM.previousMedia();
 	});
 
 	wEmitter.on( 'button9Press' , function() { 
@@ -284,15 +262,10 @@ var wCM =  {
 // --------------------------------------------------------------------
 
 
-
-
-// 					Testing / MISC
-// --------------------------------------------------------------
-	wEmitter.on( 'closeChildView' , function() {
-		console.log("closing all client views");
-		wEmitter.emit( 'socketSendTask' , 'closeChildView', { });
-	});	
-
+//					State Management
+// ---------------------------------------------------------------------------------
+	wEmitter.on( 'firefoxOpen' , function() { wCM.state.firefoxOpen = true; });
+	wEmitter.on( 'firefoxClosed' , function() { wCM.state.firefoxOpen = false; });
 
 	wEmitter.on( 'skypeCallOver' , function() {
 		console.log("skype call is over");
@@ -302,13 +275,38 @@ var wCM =  {
 			wCM.prepare( wCM.state.lastAction );
 		}
 	});
+
+	wEmitter.on( 'mopidyOnline' , function() {
+		console.log("mopidy online");
+		wCM.state.mopidy.online = true;
+	});
+
+	wEmitter.on( 'mopidyOffline' , function() {
+		console.log("mopidy offline");
+		wCM.state.mopidy.online = false;
+		wCM.state.mopidy.playing = false;
+		wCM.state.mopidy.paused = false;
+	});
+// ---------------------------------------------------------------------------------
+
+
+// 					Testing / MISC
 // --------------------------------------------------------------
+	wEmitter.on( 'closeChildView' , function() {
+		console.log("closing all client views");
+		wEmitter.emit( 'socketSendTask' , 'closeChildView', { });
+	});	
+// --------------------------------------------------------------
+
+
+
 
 
 // Firefox-Specific
 // --------------------------------------------------
 	module.exports.firefoxFKey = function() {
 		wFM.toggleFKeyPress();
+		wCM.state.firefoxClientTask.online = true;
 		if ( wCM.state.yt.background ) { setTimeout( ()=> { wTM.startYTShuffleTask(); } , 3000 ); }
 	};
 
@@ -320,8 +318,6 @@ var wCM =  {
 		wFM.quit();
 	};
 // --------------------------------------------------
-
-
 
 module.exports.prepare = function(wAction) {
 	wCM.prepare(wAction);

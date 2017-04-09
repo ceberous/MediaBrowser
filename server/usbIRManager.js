@@ -30,7 +30,6 @@ var USBIRManager = {
 		}
 
 		if ( !USBIRManager.isLircOpen() ) {
-			//USBIRManager.killExistingLirc( USBIRManager.LIRC_PID );
 			USBIRManager.startLirc();
 		}
 

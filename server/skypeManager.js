@@ -146,3 +146,7 @@ module.exports.startCall = function() {
 module.exports.stopCall = function() {  
 	childWrapper.regularCleanup();
 };
+
+module.exports.stopMedia = function() {  
+	childWrapper.regularCleanup();
+};
