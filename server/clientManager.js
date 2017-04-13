@@ -72,22 +72,19 @@ var wCM =  {
 			case "mopidyBGYT":
 
 				console.log("preparing mopidy with YTLive Background Video");
-				wCM.state.mopidy.playing = true;
-				//wMM.playQuedStyle( wCM.state.mopidy.playStyleToQue );
-				wMM.randomPlaylist();
+				//wCM.state.mopidy.playing = true;
+				wMM.randomPlaylist( wCM.state.mopidy.playStyleToQue );
 				
-				if ( !wCM.state.yt.background ) {
-					wCM.state.yt.background = true;
-					wCM.state.firefoxClientTask.name = 'playBackgroundYTLive';
-				}
+				wCM.state.firefoxClientTask.name = 'playBackgroundYTLive';
 				
 				if ( !wCM.state.firefoxOpen ) { 
 					wFM.init(); 
 					wEmitter.emit( 'queClientTaskOnReady' , wCM.state.firefoxClientTask.name );				
 				}
-				else {
+				else if ( !wCM.state.yt.background ) { 
 					wEmitter.emit( 'socketSendTask' , wCM.state.firefoxClientTask.name );
 				}
+
 
 				break;
 				
@@ -123,7 +120,7 @@ var wCM =  {
 	stopEverything: function() {
 
 		if ( wCM.state.tvON ) {
-			wIM.togglePower();
+			//wIM.togglePower();
 			wCM.state.tvON = false;
 		}
 
@@ -164,20 +161,20 @@ var wCM =  {
 // 				Button-Event Handling
 // --------------------------------------------------------------------
 	wEmitter.on( 'button1Press' , function() { 
-		console.log("now-playing--> random-edm-vocal");
-		wCM.state.mopidy.playStyleToQue = "randomEDMVocal";
+		console.log("now-playing--> random-classic");
+		wCM.state.mopidy.playStyleToQue = "classic";
 		wCM.prepare( "mopidyBGYT" );
 	});
 
 	wEmitter.on( 'button2Press' , function() { 
-		console.log("now-playing--> random-edm-nonvocal");
-		wCM.state.mopidy.playStyleToQue = "randomEDMNonVocal";
+		console.log("now-playing--> random-edm");
+		wCM.state.mopidy.playStyleToQue = "edm";
 		wCM.prepare( "mopidyBGYT" );
 	});
 
 	wEmitter.on( 'button3Press' , function() { 
-		console.log("now-playing--> random-classic-rock");
-		wCM.state.mopidy.playStyleToQue = "randomClassicRock";
+		console.log("now-playing--> random-misc");
+		wCM.state.mopidy.playStyleToQue = "misc";
 		wCM.prepare( "mopidyBGYT" );
 	});
 
@@ -264,7 +261,7 @@ var wCM =  {
 
 //					State Management
 // ---------------------------------------------------------------------------------
-	wEmitter.on( 'firefoxOpen' , function() { wCM.state.firefoxOpen = true; });
+	wEmitter.on( 'firefoxOpen' , function() { console.log("FireFox Open and Ready on localhost:6969"); wCM.state.firefoxOpen = true; });
 	wEmitter.on( 'firefoxClosed' , function() { wCM.state.firefoxOpen = false; });
 
 	wEmitter.on( 'skypeCallOver' , function() {
@@ -307,6 +304,7 @@ var wCM =  {
 	module.exports.firefoxFKey = function() {
 		wFM.toggleFKeyPress();
 		wCM.state.firefoxClientTask.online = true;
+		wCM.state.yt.background = true;
 		if ( wCM.state.yt.background ) { setTimeout( ()=> { wTM.startYTShuffleTask(); } , 3000 ); }
 	};
 
