@@ -9,7 +9,7 @@ var wVM = require("./videoManager.js"); 	// Video-Manager
 var wMM = require("./mopidyManager.js"); 	// Mopidy-Manager
 var wSM = require("./skypeManager.js"); 	// Skype-Manager
 var wBM = require("./buttonManager.js"); 	// Button-Manager
-//var wIM = require("./usbIRManager.js"); 	// USB_IR-Manager
+var wIM = require("./usbIRManager.js"); 	// USB_IR-Manager
 //var wVV = require("./vlcManager.js")		// VLC-Manager
 
 
@@ -48,7 +48,7 @@ var wCM =  {
 		if ( wCM.state.skype.activeCall ) { return; }
 
 		if ( !wCM.state.tvON ) {
-			//wIM.togglePower();
+			wIM.togglePower();
 			wCM.state.tvON = true;
 		}
 
@@ -120,7 +120,7 @@ var wCM =  {
 	stopEverything: function() {
 
 		if ( wCM.state.tvON ) {
-			//wIM.togglePower();
+			wIM.togglePower();
 			wCM.state.tvON = false;
 		}
 

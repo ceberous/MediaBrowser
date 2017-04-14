@@ -33,17 +33,26 @@ var USBIRManager = {
 			USBIRManager.startLirc();
 		}
 
-		USBIRManager.pressButton( USBIRManager.buttons.power );	
-
 		setTimeout(function(){
 			if ( USBIRManager.LIRC_OPEN ) {
 				USBIRManager.setTransmitters();
-				setTimeout(function() {
-					USBIRManager.pressButton( USBIRManager.buttons.power );
-				} , 1000 );
 			}
 			else {
+				
 				console.log( "couldn't start LIRC because: \"" + USBIRManager.LIRC_OPEN_ERROR + "\"" );
+				if ( USBIRManager.LIRC_OPEN_ERROR === "Driver `iguanaIR' not supported." ) {
+					
+					console.log("trying to reinstall dev package");
+					var reinstallCMD = "sudo dpkg -i /home/haley/WORKSPACE/lirc_0.9.0-0ubuntu6_amd64.deb";
+					var runCMD2 = exec( reinstallCMD , { silent:true } ).stdout;
+
+					setTimeout( ()=> {
+						console.log("rebooting");
+						var restartCMD = "sudo reboot";
+						var runCMD3 = exec( restartCMD , { silent:true } ).stdout;
+					} , 10000 );
+
+				}
 				
 			}
 		} , 1000 );
@@ -104,7 +113,7 @@ var USBIRManager = {
 				if ( wT[j] === "/usr/sbin/lircd" ) {
 
 					USBIRManager.LIRC_OPEN = true;
-					USBIRManager.LIRC_PID = irsendLircOpen[i].split( /[\s,]+/ )[1];
+					USBIRManager.LIRC_PID = isLircOpen[i].split( /[\s,]+/ )[1];
 
 					console.log( "Lirc is running @ PID: " + USBIRManager.LIRC_PID );
 

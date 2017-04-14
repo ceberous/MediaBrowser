@@ -157,7 +157,7 @@ ffWrapper.init();
 setTimeout(function(){
 	ffWrapper.openNewTab("http://localhost:6969"); // testing
 	//wEmitter.emit('firefoxOpen');
-} , 3000 );
+} , 30000 );
 
 
 module.exports.init = function() {
