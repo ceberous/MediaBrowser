@@ -56,7 +56,7 @@ io.sockets.on( 'connection' , function (socket) {
 	});	
 
 	wEmitter.on( 'socketSendTask' , function( wTask , wOptions ) {
-		console.log( "socketEmit--> " + wTask );
+		console.log( "[MAIN] --> socketEmit--> " + wTask );
 		socket.emit( wTask , wOptions );
 	});
 
@@ -66,7 +66,7 @@ io.sockets.on( 'connection' , function (socket) {
 
 server.listen( port , function() {
 	
-	console.log( "Server Started on : \nhttp://" + localIP + ":" + port + "\n \t or \nhttp://localhost:" + port + "\n" );
+	console.log( "[MAIN] --> Server Started on : \n\thttp://" + localIP + ":" + port + "\n \t\t or \n\thttp://localhost:" + port + "\n" );
 	
 	/*
 	setTimeout(function() {

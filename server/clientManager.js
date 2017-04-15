@@ -56,13 +56,13 @@ var wCM =  {
 		else { wCM.state.lastAction = wCM.state.currentAction }
 		wCM.state.currentAction = wAction;
 
-		console.log( "LastAction = " + wCM.state.lastAction );
-		console.log( "CurrentAction = " + wCM.state.currentAction );
+		console.log( "[CLIENT_MAN] --> LastAction = " + wCM.state.lastAction );
+		console.log( "[CLIENT_MAN] --> CurrentAction = " + wCM.state.currentAction );
 
 		switch (wAction) {
 
 			case "skype":
-				console.log("preparing skype call");
+				console.log("[CLIENT_MAN] --> preparing skype call");
 				if ( wCM.state.firefoxOpen ) { wFM.quit(); wCM.state.firefoxOpen = false; }
 				wCM.pauseMedia( wCM.state.lastAction );
 				wCM.state.skype.activeCall = true;
@@ -71,7 +71,7 @@ var wCM =  {
 
 			case "mopidyBGYT":
 
-				console.log("preparing mopidy with YTLive Background Video");
+				console.log("[CLIENT_MAN] --> preparing mopidy with YTLive Background Video");
 				//wCM.state.mopidy.playing = true;
 				wMM.randomPlaylist( wCM.state.mopidy.playStyleToQue );
 				
@@ -161,25 +161,25 @@ var wCM =  {
 // 				Button-Event Handling
 // --------------------------------------------------------------------
 	wEmitter.on( 'button1Press' , function() { 
-		console.log("now-playing--> random-classic");
+		console.log("[CLIENT_MAN] --> now-playing--> random-classic");
 		wCM.state.mopidy.playStyleToQue = "classic";
 		wCM.prepare( "mopidyBGYT" );
 	});
 
 	wEmitter.on( 'button2Press' , function() { 
-		console.log("now-playing--> random-edm");
+		console.log("[CLIENT_MAN] --> now-playing--> random-edm");
 		wCM.state.mopidy.playStyleToQue = "edm";
 		wCM.prepare( "mopidyBGYT" );
 	});
 
 	wEmitter.on( 'button3Press' , function() { 
-		console.log("now-playing--> random-misc");
+		console.log("[CLIENT_MAN] --> now-playing--> random-misc");
 		wCM.state.mopidy.playStyleToQue = "misc";
 		wCM.prepare( "mopidyBGYT" );
 	});
 
 	wEmitter.on( 'button4Press' , function() { 
-		console.log("skype call cameron");
+		console.log("[CLIENT_MAN] --> skype call cameron");
 		fs.writeFileSync( path.join( __dirname , "py_scripts" , "wUserName.py" ) , "callingName = 'live:ccerb96'" );
 		wCM.prepare( "skype" );
 	});
@@ -191,7 +191,7 @@ var wCM =  {
 	});
 
 	wEmitter.on( 'button6Press' , function() { 
-		console.log("\"Emergency\" Stop Everything");
+		console.log("\"[CLIENT_MAN] --> Emergency\" Stop Everything");
 		wCM.stopEverything();
 	});	
 
@@ -201,17 +201,17 @@ var wCM =  {
 	});	
 
 	wEmitter.on( 'button8Press' , function() { 
-		console.log("play Previous-Media");
+		console.log("[CLIENT_MAN] --> play Previous-Media");
 		wCM.previousMedia();
 	});
 
 	wEmitter.on( 'button9Press' , function() { 
-		console.log("play Next-Media");
+		console.log("[CLIENT_MAN] --> play Next-Media");
 		wCM.nextMedia();
 	});
 
 	wEmitter.on( 'button10Press' , function() { 
-		console.log("stop all client tasks and play local-movie");
+		console.log("[CLIENT_MAN] --> stop all client tasks and play local-movie");
 		// wEmitter.emit("")
 		wEmitter.emit( 'socketSendTask' , 'stopBackgroundYTLive' );
 	});				
@@ -224,7 +224,6 @@ var wCM =  {
 // --------------------------------------------------------------------
 
 	wEmitter.on( 'updateYTLiveList' , function() {
-		console.log("SCHEDULED-> updateYTLiveList");
 		wVM.updateYTLiveList();
 		setTimeout(function(){
 			wEmitter.emit( 'socketSendTask' , 'latestYTLiveList', { 
@@ -235,7 +234,6 @@ var wCM =  {
 	});
 
 	wEmitter.on( 'updateTwitchLiveList' , function() {
-		console.log("SCHEDULED-> updateTwitchLiveList");
 		wVM.updateTwitchLiveList();
 		setTimeout(function(){
 			wEmitter.emit( 'socketSendTask' , 'latestTwitchLiveList', { 
@@ -246,7 +244,6 @@ var wCM =  {
 	});
 
 	wEmitter.on( 'updateStandardList' , function() {
-		console.log("SCHEDULED-> updateStandardList");
 		wVM.updateStandardList();
 		setTimeout(function(){
 			wEmitter.emit( 'socketSendTask' , 'latestStandardList', { 
@@ -261,20 +258,19 @@ var wCM =  {
 
 //					State Management
 // ---------------------------------------------------------------------------------
-	wEmitter.on( 'firefoxOpen' , function() { console.log("FireFox Open and Ready on localhost:6969"); wCM.state.firefoxOpen = true; });
+	wEmitter.on( 'firefoxOpen' , function() { console.log("[CLIENT_MAN] --> FireFox Open and Ready on localhost:6969"); wCM.state.firefoxOpen = true; });
 	wEmitter.on( 'firefoxClosed' , function() { wCM.state.firefoxOpen = false; });
 
 	wEmitter.on( 'skypeCallOver' , function() {
 		console.log("skype call is over");
 		wCM.state.skype.activeCall = false;
 		if ( wCM.state.lastAction != "skype" ) {
-			console.log( "restoring previous action --> " + wCM.state.lastAction );
+			console.log( "[CLIENT_MAN] --> restoring previous action --> " + wCM.state.lastAction );
 			wCM.prepare( wCM.state.lastAction );
 		}
 	});
 
 	wEmitter.on( 'mopidyOnline' , function() {
-		console.log("mopidy online");
 		wCM.state.mopidy.online = true;
 	});
 
@@ -290,7 +286,7 @@ var wCM =  {
 // 					Testing / MISC
 // --------------------------------------------------------------
 	wEmitter.on( 'closeChildView' , function() {
-		console.log("closing all client views");
+		console.log("[CLIENT_MAN] --> closing all client views");
 		wEmitter.emit( 'socketSendTask' , 'closeChildView', { });
 	});	
 // --------------------------------------------------------------

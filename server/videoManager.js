@@ -127,7 +127,7 @@ var YTLiveManager = {
 
 				if ( wStoring ) {
 
-					console.log( "Storing--> YTLiveID: " + YTLiveManager.newResults[wProp][i]["id"] );
+					console.log( "[VIDEO_MAN] --> Storing--> YTLiveID: " + YTLiveManager.newResults[wProp][i]["id"] );
 					YTLiveManager.computedUnWatchedList[wProp][YTLiveManager.newResults[wProp][i]["id"]] = {
 						
 						title: YTLiveManager.newResults[wProp][i].title,
@@ -247,7 +247,7 @@ var YTFeedManager = {
 			// If ID is not in UserName
 			if ( !YTFeedManager.computedUnWatchedList[wProp][YTFeedManager.newFeedResults[wProp][i]["id"]] ) {
 				
-				console.log("we need to store this id");
+				console.log("[VIDEO_MAN] --> we need to store this id");
 				YTFeedManager.computedUnWatchedList[wProp][YTFeedManager.newFeedResults[wProp][i]["id"]] = {
 					
 					title: YTFeedManager.newFeedResults[wProp][i].title,
