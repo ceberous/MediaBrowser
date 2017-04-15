@@ -7,6 +7,23 @@ var ffWrapper = {
 	instancePID: null,
 	windowID: null,
 
+	firstInit: function() {
+		console.log("BOOT-initializing ffWrapper");
+		if ( !ffWrapper.checkIfFFIsOpen() ) {
+			ffWrapper.launchFF();
+		}
+		ffWrapper.getWindowID();
+		ffWrapper.activateWindowID();
+		ffWrapper.setFocusWindow();
+		ffWrapper.setFullScreen();
+
+		setTimeout(function(){
+			ffWrapper.openNewTab("http://localhost:6969"); // testing
+			//wEmitter.emit('firefoxOpen');
+		} , 30000 );
+
+	},
+
 	init: function() {
 		console.log("initializing ffWrapper");
 		ffWrapper.terminateFF();
@@ -153,12 +170,7 @@ var ffWrapper = {
 
 
 // On Module-Import
-ffWrapper.init();
-setTimeout(function(){
-	ffWrapper.openNewTab("http://localhost:6969"); // testing
-	//wEmitter.emit('firefoxOpen');
-} , 30000 );
-
+ffWrapper.firstInit();
 
 module.exports.init = function() {
 	ffWrapper.init();

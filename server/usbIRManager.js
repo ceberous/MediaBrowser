@@ -1,4 +1,4 @@
-var wEmitter = require('../main.js').wEmitter;
+//var wEmitter = require('../main.js').wEmitter;
 var path = require("path");
 require('shelljs/global');
 
@@ -22,10 +22,9 @@ var USBIRManager = {
 
 	init: function() {
 
-
-		USBIRManager.createRunFolder();
-
-		if ( !USBIRManager.isIguanaIRServiceRunning() ) {
+		if ( !USBIRManager.createRunFolder() ) { return; }
+		
+		if ( !USBIRManager.isIguanaIRServiceRunning() ) {	
 			USBIRManager.startIguanaIRService();
 		}
 
@@ -33,48 +32,57 @@ var USBIRManager = {
 			USBIRManager.startLirc();
 		}
 
-		setTimeout(function(){
-			if ( USBIRManager.LIRC_OPEN ) {
-				USBIRManager.setTransmitters();
-			}
-			else {
+		if ( USBIRManager.LIRC_OPEN ) {
+			USBIRManager.setTransmitters();
+		}
+		else {
+			
+			console.log( "couldn't start LIRC because: \"" + USBIRManager.LIRC_OPEN_ERROR + "\"" );
+			if ( USBIRManager.LIRC_OPEN_ERROR === "Driver `iguanaIR' not supported." ) {
 				
-				console.log( "couldn't start LIRC because: \"" + USBIRManager.LIRC_OPEN_ERROR + "\"" );
-				if ( USBIRManager.LIRC_OPEN_ERROR === "Driver `iguanaIR' not supported." ) {
-					
-					console.log("trying to reinstall dev package");
-					var reinstallCMD = "sudo dpkg -i /home/haley/WORKSPACE/lirc_0.9.0-0ubuntu6_amd64.deb";
-					var runCMD2 = exec( reinstallCMD , { silent:true } ).stdout;
+				console.log("trying to reinstall dev package");
+				var reinstallCMD = "sudo dpkg -i /home/haley/WORKSPACE/lirc_0.9.0-0ubuntu6_amd64.deb";
+				var runCMD2 = exec( reinstallCMD , { silent:true  , async: false } ).stdout;
 
-					setTimeout( ()=> {
-						console.log("rebooting");
-						var restartCMD = "sudo reboot";
-						var runCMD3 = exec( restartCMD , { silent:true } ).stdout;
-					} , 10000 );
+				setTimeout( ()=> {
+					console.log("rebooting");
+					var restartCMD = "sudo reboot";
+					var runCMD3 = exec( restartCMD , { silent:true ,  async: false } ).stdout;
+				} , 10000 );
 
-				}
-				
 			}
-		} , 1000 );
-		
+			
+		}
+
 	},
 
 	createRunFolder: function() {
 
-		console.log("Creating Run Folder");
+		console.log("[USB_IR] --> Creating Run Folder");
 		var runDIR = "/var/run/lirc/";
 		var mkdirCmd = "sudo mkdir " + runDIR;
-		var runCMD1 = exec( mkdirCmd , { silent:true } ).stdout;
-
+		var runCMD1 = exec( mkdirCmd , { silent:true , async: false } );
+		if ( runCMD1.stderr.length > 1 ) {
+			var acceptableError = "mkdir: cannot create directory ‘/var/run/lirc/’: File exists\n";
+			if ( runCMD1.stderr === acceptableError ) {
+				console.log("[USB_IR] --> Run Folder Exists..... Still Procceding.....");
+				return true;
+			}
+			return false
+		}
+		return true;
 	},
 
 	isIguanaIRServiceRunning: function() {
 		
-		console.log("Checking iguanaIR service status");
+		console.log("[USB_IR] --> Checking iguanaIR service status");
 		
 		var chkCMD = "sudo service iguanaIR status";
-		var wStatus = exec( chkCMD , { silent: true } ).stdout;
-		wStatus = wStatus.split("\n");
+		var wStatus = exec( chkCMD , { silent: true , async: false } );
+		
+		if ( wStatus.stderr.length > 1 ) { return false; }
+
+		wStatus = wStatus.stdout.split("\n");
 		wStatus = wStatus[2].replace( / /g , '' );
 		wStatus = wStatus.split("Active:");
 		var wCondition = wStatus[1].split("(");
@@ -83,9 +91,11 @@ var USBIRManager = {
 		if ( wCondition[0] === "active" ) { 
 			USBIRManager.IGUANAIR_SERVICE_ACTIVE = true;
 			USBIRManager.IGUANAIR_SERVICE_STATUS = wCondition2[0];
+			console.log( "[USB_IR] --> iguanaIR Service = ACTIVE" );
 			return true; 
 		}
 		else { 
+			console.log( "[USB_IR] --> iguanaIR Service = STOPPED" );
 			return false;
 		}
 
@@ -93,18 +103,29 @@ var USBIRManager = {
 
 	startIguanaIRService: function() {
 
-		console.log("starting iguanaIR service");
 		var startServiceCMD = "sudo service iguanaIR start";
-		var output1 = exec( startServiceCMD , { silent:true } ).stdout;
+		var output1 = exec( startServiceCMD , { silent:true , async: false } )
+		if ( output1.stderr.length > 1 ) {
+			console.log("[USB_IR] --> [CRITICAL-ERROR] --> failed to start iguanaIR service");
+			console.log(output1.stderr);
+			process.exit(1);
+		}
+		else { 
+			console.log("[USB_IR] --> iguanaIR Service Started Successfully");
+			return true; 
+		}
 		
 	},
 
 	isLircOpen: function() {
 
+		console.log( "[USB_IR] --> Checking if LIRC is Open" );
 		var checkLircOpen = 'ps aux | grep lircd';
-		var isLircOpen = exec( checkLircOpen , {silent:true}).stdout;
-		isLircOpen = isLircOpen.split("\n"); 
+		var isLircOpen = exec( checkLircOpen , {silent:true , async: false});
 
+		if ( isLircOpen.stderr.length > 1 ) { console.log( isLircOpen.stderr); return false; }
+
+		isLircOpen = isLircOpen.stdout.split("\n"); 
 		for (var i = 0; i < isLircOpen.length; ++i) {
 
 			var wT = isLircOpen[i].split(" ");
@@ -115,7 +136,7 @@ var USBIRManager = {
 					USBIRManager.LIRC_OPEN = true;
 					USBIRManager.LIRC_PID = isLircOpen[i].split( /[\s,]+/ )[1];
 
-					console.log( "Lirc is running @ PID: " + USBIRManager.LIRC_PID );
+					console.log( "[USB_IR] --> Lirc is running @ PID: " + USBIRManager.LIRC_PID );
 
 					return true;
 
@@ -126,9 +147,8 @@ var USBIRManager = {
 		}
 
 		USBIRManager.LIRC_OPEN = false;
-		console.log( "Lirc is closed" );
+		console.log( "[USB_IR] --> Lirc is closed" );
 		return false;
-
 
 	},
 
@@ -136,41 +156,48 @@ var USBIRManager = {
 
 		console.log( "killing lircd @ PID: " + wPID );
 		var killLircCmd = 'sudo kill -9 ' + wPID;
-		var killLirc = exec( killLircCmd , {silent:true}).stdout;
+		var killLirc = exec( killLircCmd , { silent:true , async: false }).stdout;
 		console.log(killLirc.length);
 
 	},
 
 	startLirc: function() {
 
-		console.log("starting lirc");
+		console.log("[USB_IR] --> starting lirc");
 		var startLircCmd = "sudo /usr/sbin/lircd --output=/run/lirc/lircd --driver=iguanaIR /etc/lirc/lircd.conf";
-		exec( startLircCmd , { silent: true , async: false } , function( code , stdout , stderr ) {
-			if ( stderr.length > 5 ) { 
-				var check = stderr.split("\n");
-				if ( check[0] === "Driver `iguanaIR' not supported." ) {
-					USBIRManager.LIRC_OPEN = false;
-					USBIRManager.LIRC_OPEN_ERROR = check[0];
-				}
+		var wRun = exec( startLircCmd , { silent: true , async: false });
+
+		if ( wRun.stderr.length > 5 ) { 
+			var check = wRun.stderr.split("\n");
+			if ( check[0] === "Driver `iguanaIR' not supported." ) {
+				USBIRManager.LIRC_OPEN = false;
+				USBIRManager.LIRC_OPEN_ERROR = check[0];
 			}
-			else USBIRManager.LIRC_OPEN = true;
-		});
+		}
+		else {
+			USBIRManager.isLircOpen();
+		}
+		
 
 	},
 
 	setTransmitters: function() {
 
 		var setTransmittersCmd = "sudo irsend -d /run/lirc/lircd set_transmitters 1 2 3 4";
-		var runSetTrans = exec( setTransmittersCmd , { silent: true } ).stdout;
-		console.log(runSetTrans);
+		var runSetTrans = exec( setTransmittersCmd , { silent: true , async: false } );
+		if ( runSetTrans.stderr.length > 1 ) { console.log( runSetTrans.stderr ); return false; }
+		else { console.log("[USB_IR] --> Transmitters READY"); return true; }
 
 	},
 
 	pressButton: function(wButton) {
 
 		var pressButtonCmd = "sudo irsend -d /run/lirc/lircd send_once samsung1 " + wButton;
-		var runPressButton = exec( pressButtonCmd , { silent: true } ).stdout;
-		console.log( "Pressed-Button: " + wButton );
+		var runPressButton = exec( pressButtonCmd , { silent: true , async: false } );
+		if ( runPressButton.stderr.length > 1 ) { console.log( "[USB_IR] --> " + runPressButton.stderr.toString() ); }
+		else { 
+			console.log( "[USB_IR] --> Pressed-Button: " + wButton );
+		}
 
 	}
 
