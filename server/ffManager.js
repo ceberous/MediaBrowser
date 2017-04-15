@@ -9,6 +9,10 @@ var ffWrapper = {
 
 	firstInit: function() {
 		console.log("[FIREFOX] --> BOOT-initializing ffWrapper");
+
+		var ensureBlankScreenIsOff = "xset s off && xset -dpms";
+		exec( checkFFOpen , { silent:true , async: false });
+
 		setTimeout( ()=>{ 
 			if ( !ffWrapper.checkIfFFIsOpen() ) {
 				ffWrapper.launchFF();
