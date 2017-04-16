@@ -1,25 +1,20 @@
 
-1.) Add "watched" to video if YT-Standard or Twitch-Standard
-2.) Add "watched" comparison on parsing YouTube XML feed
+1.) Update Playlist Skip and Play Counts
+
+2.) Add "watched" to video if YT-Standard or Twitch-Standard
+3.) Add "watched" comparison on parsing YouTube XML feed
 
 // Waiting on API Credential Approval from Twitch
-3.) Implement TwitchAPI
+4.) Implement TwitchAPI
 		--> http://livestreamer.tanuki.se/en/develop/twitch_oauth.html#access_token=nkzwh4xppmh404w6qgdw3oj915vdm6&scope=user_read+user_subscriptions
 		--> livestreamer --twitch-oauth-token nkzwh4xppmh404w6qgdw3oj915vdm6 <url> <quality>
 
-4.) Implement Sending Standard-Video Play Cues to Web-Client 
-5.) Implement Sending Single StandardVideo to Web-Client
+5.) Implement Sending Standard-Video Play Cues to Web-Client 
+6.) Implement Sending Single StandardVideo to Web-Client
 
-
-6.) Improve Mopid-Manager Functionality. 
-		--> Sorting EDM-NonVocal , EDM-Vocal , Classic-Rock , other
- 
- 
 7.) Add Public Web-Control Interface
 
-8.) Skype4Py Sucks at Starting skype on its own. So Implement an exec() to get it up and running before a call
-
-9.) x11vnc Server setup @ http://askubuntu.com/a/304720
+8.) x11vnc Server setup @ http://askubuntu.com/a/304720
 
 
 https://github.com/ceberous/MediaBrowser

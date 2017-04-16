@@ -127,7 +127,7 @@ var YTLiveManager = {
 
 				if ( wStoring ) {
 
-					console.log( "[VIDEO_MAN] --> Storing--> YTLiveID: " + YTLiveManager.newResults[wProp][i]["id"] );
+					console.log( "[VIDEO_MAN] --> Storing --> YTLiveID: " + YTLiveManager.newResults[wProp][i]["id"] );
 					YTLiveManager.computedUnWatchedList[wProp][YTLiveManager.newResults[wProp][i]["id"]] = {
 						
 						title: YTLiveManager.newResults[wProp][i].title,
@@ -155,15 +155,15 @@ var YTFeedManager = {
 
 	enumerateFollowers: function() {
 
-		for( var prop in YTFeedManager.feeds ) {
+		for( var follower in YTFeedManager.feeds ) {
 			
-			YTFeedManager.fetchXML( prop , YTFeedManager.feeds[prop] );
+			YTFeedManager.fetchXML( follower , YTFeedManager.feeds[follower] );
 
 		}
 
 	},
 
-	fetchXML: function( wProp , channelID ) {
+	fetchXML: function( followerUserName , channelID ) {
 
 		var wFeedURL = "https://www.youtube.com/feeds/videos.xml?channel_id=" + channelID;
 
@@ -210,14 +210,14 @@ var YTFeedManager = {
 		});
 
 		feedparser.on( "end" , function() {
-			YTFeedManager.parseResults(  wProp , wResults );
+			YTFeedManager.parseResults(  followerUserName , wResults );
 		});
 
 	},
 
-	parseResults: function( wProp , wResults ) {
+	parseResults: function( followerUserName , wResults ) {
 
-		YTFeedManager.newFeedResults[wProp] = [];
+		YTFeedManager.newFeedResults[followerUserName] = [];
 
 		for ( var i = 0; i < wResults.length; ++i ) {
 
@@ -227,31 +227,31 @@ var YTFeedManager = {
 				id: wResults[i]["yt:videoid"]["#"]
 			};
 			
-			YTFeedManager.newFeedResults[wProp].push(wEntry);
+			YTFeedManager.newFeedResults[followerUserName].push(wEntry);
 
 		}
 
-		YTFeedManager.updateComputedUnWatchedList( wProp );
+		YTFeedManager.updateComputedUnWatchedList( followerUserName );
 
 	},
 
-	updateComputedUnWatchedList: function( wProp ) {
+	updateComputedUnWatchedList: function( followerUserName ) {
 
-		for ( var i = 0; i < YTFeedManager.newFeedResults[wProp].length; ++i ) {
+		for ( var i = 0; i < YTFeedManager.newFeedResults[followerUserName].length; ++i ) {
 
 			// If UserName Does not Exist Already
-			if ( !YTFeedManager.computedUnWatchedList[wProp] ) {
-				YTFeedManager.computedUnWatchedList[wProp] = {};
+			if ( !YTFeedManager.computedUnWatchedList[followerUserName] ) {
+				YTFeedManager.computedUnWatchedList[followerUserName] = {};
 			}
 
 			// If ID is not in UserName
-			if ( !YTFeedManager.computedUnWatchedList[wProp][YTFeedManager.newFeedResults[wProp][i]["id"]] ) {
+			if ( !YTFeedManager.computedUnWatchedList[followerUserName][YTFeedManager.newFeedResults[followerUserName][i]["id"]] ) {
 				
-				console.log("[VIDEO_MAN] --> we need to store this id");
-				YTFeedManager.computedUnWatchedList[wProp][YTFeedManager.newFeedResults[wProp][i]["id"]] = {
+				console.log( "[VIDEO_MAN] --> STORING --> ytStandardID " + YTFeedManager.newFeedResults[followerUserName][i]["id"] + " for " + followerUserName );
+				YTFeedManager.computedUnWatchedList[followerUserName][YTFeedManager.newFeedResults[followerUserName][i]["id"]] = {
 					
-					title: YTFeedManager.newFeedResults[wProp][i].title,
-					pubdate: YTFeedManager.newFeedResults[wProp][i].pubdate,
+					title: YTFeedManager.newFeedResults[followerUserName][i].title,
+					pubdate: YTFeedManager.newFeedResults[followerUserName][i].pubdate,
 					watched: false,
 					completed: false,
 					resumeTime: null
@@ -263,6 +263,7 @@ var YTFeedManager = {
 		}
 
 		jsonfile.writeFileSync( bSPath + "/ytStandardList.json" , YTFeedManager.computedUnWatchedList );
+		YTFeedManager.newFeedResults = {};
 
 	}
 
@@ -302,4 +303,8 @@ module.exports.updateTwitchLiveList = function() {
 module.exports.updateStandardList = function() {
 	YTFeedManager.enumerateFollowers();
 	//TwitchFeedManager.enumerateFollowers();
+};
+
+module.exports.nextMedia = function() {
+	wEmitter.emit( 'socketSendTask' , "nextMedia" );	
 };

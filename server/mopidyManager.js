@@ -27,7 +27,8 @@ var MM = {
 		mopidy.off();
 		mopidy = null;
 		console.log("[MOPIDY] --> CLOSED");
-		//wEmitter.emit("mopidyOffline");
+		wEmitter.emit( "mopidyNotPlaying" );
+		wEmitter.emit("mopidyOffline");
 	},
 
 	playlistManager: {
@@ -114,6 +115,9 @@ var MM = {
 		init: function() {
 
 			MM.playbackManager.getState();
+			setTimeout( ()=> { 
+				if ( MM.playbackManager.currentState === "playing" ) { MM.playbackManager.stop(); MM.playbackManager.getState(); }
+			} , 1500 );
 
 		},
 
@@ -140,36 +144,42 @@ var MM = {
 		play: function() {
 		    mopidy.playback.play().then(function (something) {
 		        //setTimeout( ()=> { MM.playbackManager.getState(); } , 1000 );
+		        wEmitter.emit( "mopidyPlaying" );
 		    });
 		},
 
 		next: function() {
 		    mopidy.playback.next().then(function (something) {
 		        //setTimeout( ()=> { MM.tracklistManager.getCurrentList(); } , 1000 );
+		        wEmitter.emit( "mopidyPlaying" );
 		    });
 		},
 
 		previous: function() {
 		    mopidy.playback.previous().then(function (something) {
 		       //setTimeout( ()=> { MM.tracklistManager.getCurrentList(); } , 1000 );
+		       wEmitter.emit( "mopidyPlaying" );
 		    });
 		},
 
 		stop: function() {
 		    mopidy.playback.stop().then(function (something) {
 		        setTimeout( ()=> { MM.playbackManager.getState(); } , 1000 );
+		        wEmitter.emit( "mopidyNotPlaying" );
 		    });
 		},
 
 		pause: function() {
 		    mopidy.playback.pause().then(function (something) {
 		        MM.playbackManager.getState();
+		        wEmitter.emit( "mopidyNotPlaying" );
 		    });
 		},
 
 		resume: function() {
 		    mopidy.playback.resume().then(function (something) {
 		        MM.playbackManager.getState();
+		        wEmitter.emit( "mopidyPlaying" );
 		    });
 		},
 
@@ -335,6 +345,7 @@ module.exports.randomPlaylist = function(wGenre) {
 
 module.exports.stopMedia = function() {
 	MM.playbackManager.stop();
+
 };
 
 module.exports.pauseMedia = function() {

@@ -65,23 +65,7 @@ io.sockets.on( 'connection' , function (socket) {
 
 
 server.listen( port , function() {
-	
 	console.log( "[MAIN] --> Server Started on : \n\thttp://" + localIP + ":" + port + "\n \t\t or \n\thttp://localhost:" + port + "\n" );
-	
-	/*
-	setTimeout(function() {
-		console.log("testing--> button1Press");
-		wEmitter.emit("button1Press"); // testing
-	} , 10000 );
-	*/
-
-	/*
-	setTimeout(function() {
-		console.log("testing--> button5Press");
-		wEmitter.emit("button5Press"); // testing
-	} , 25000 );
-	*/
-
 });
 
 

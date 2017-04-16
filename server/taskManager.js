@@ -1,10 +1,10 @@
 var schedule = require('node-schedule');
 var wEmitter = require('../main.js').wEmitter;
 
-var ytLiveList 		= "*/5 * * * *"; // every 5 minutes [TESTING]
-var twitchLiveList 	= "*/5 * * * *"; // every 5 minutes [TESTING]
-var standardList 	= "*/5 * * * *"; // every 5 minutes [TESTING]
-//var ytShuffle 		= "*/30 * * * * *"; // every 30 seconds [TESTING]
+var ytLiveList 		= "*/5 * * * *"; // every 5 minutes 
+var twitchLiveList 	= "*/1 * * *"; // every 1 hour 
+var standardList 	= "*/1 * * *"; // every 1 hour
+
 var ytShuffle 		= "*/5 * * * *"; // every 5 Minutes
 
 

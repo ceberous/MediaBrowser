@@ -7,6 +7,7 @@ var viewFiles = {
 	path: "../views",
 	active: false,
 	photoWall: "photoWall.html",
+	fullScreenYTLive: "fullScreenYoutubeLive.html",
 	fullScreenYT: "fullScreenYoutube.html",
 	fullScreenTwitch: "fullScreenTwitch.html",
 	error: "error.html"
@@ -29,14 +30,22 @@ $(document).ready( function() {
 		console.log(standardList);
 	});
 
-	// Button - Controls
+	// Child-View Management
 	// -------------------------------------------------------
 		socket.on( 'playBackgroundYTLive', function(data) {
-			addChildView( viewFiles.fullScreenYT );
+			addChildView( viewFiles.fullScreenYTLive );
 			setTimeout(function() {
 				$(document).trigger( "randomYTLiveBG" );
 			} , 5000 );
 		});
+
+		socket.on( 'playYTStandard', function(data) {
+			addChildView( viewFiles.fullScreenYT );
+		});
+
+		socket.on( 'playFullScreenTwitch', function(data) {
+			addChildView( viewFiles.fullScreenTwitch );
+		});					
 
 		socket.on( 'closeChildView', function(data) {
 			$(document).trigger( "tearDownPlayer" );
@@ -71,7 +80,13 @@ $(document).ready( function() {
 		socket.on( 'nextYTLiveVideo' , function (data) {
 			console.log(data.message);
 			$(document).trigger( "nextYTLiveVideo" );
-		});						
+		});
+
+		socket.on( 'nextMedia' , function (data) {
+			console.log(data.message);
+			$(document).trigger( "nextMedia" );
+		});
+
 	// -----------------------------------------------------
 
 	wInit();

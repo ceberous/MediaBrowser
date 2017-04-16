@@ -1,4 +1,4 @@
-<h1 id="waitingMessage">Watch Full Screen Youtube Here</h1>
+<h1 id="waitingMessage">Watch Full Screen Youtube Live Here</h1>
 
 <script type="text/javascript">
 
@@ -107,23 +107,39 @@
 	};
 
 
-	console.log("gathering stored ID's into playlist array");
-	for ( var iprop in standardList.ytStandard ) {
-		for ( var jprop in standardList.ytStandard[iprop] ) {
-			wPlaylist.push( jprop );
+	function generateRandomLivePlaylist() {
+
+		console.log("generating random ytLiveList");
+		for ( var iprop in ytLiveList ) {
+			for ( var jprop in ytLiveList[iprop] ) {
+				wPlaylist.push( jprop );
+			}
 		}
+
+		YTIFrameManager.playlist = wPlaylist;
+		YTIFrameManager.usingPlaylist = true;
+		YTIFrameManager.showVideo();
+		
 	}
 
-	if ( wPlaylist.length > 1 ) { YTIFrameManager.usingPlaylist = true; }
-	YTIFrameManager.playlist = wPlaylist;
-
-	YTIFrameManager.muted = false;
-	YTIFrameManager.playlist = wPlaylist;
-	YTIFrameManager.usingPlaylist = true;
-	YTIFrameManager.showVideo();
-
 	$(document).on( "tearDownPlayer" , function( event , einfo ) { YTIFrameManager.tearDown(); });
-	$(document).on( "nextMedia" , function( event , einfo ) { YTIFrameManager.wPlayer.nextVideo(); });
+
+	$(document).on( "randomYTLiveBG" , function( event , einfo ) {
+
+		console.log(ytLiveList);
+
+		YTIFrameManager.muted = true;
+
+		if ( ytLiveList === null ) {
+			setTimeout( ()=> { console.log("waiting on first-time-result update"); generateRandomLivePlaylist(); } , 5000 );
+		}
+		else {
+			generateRandomLivePlaylist();
+		}
+		
+	});
+
+	$(document).on( "nextYTLiveVideo" , function( event , einfo ) { YTIFrameManager.wPlayer.nextVideo(); });
 
 </script>
 

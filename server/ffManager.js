@@ -8,35 +8,51 @@ var ffWrapper = {
 	windowID: null,
 
 	firstInit: function() {
-		console.log("[FIREFOX] --> BOOT-initializing ffWrapper");
+		console.log("[FIREFOX_MAN] --> BOOT-initializing ffWrapper");
 
 		var ensureBlankScreenIsOff = "xset s off && xset -dpms";
 		exec( ensureBlankScreenIsOff , { silent:true , async: false });
 
 		setTimeout( ()=>{ 
+
 			if ( !ffWrapper.checkIfFFIsOpen() ) {
 				ffWrapper.launchFF();
 			}
-			ffWrapper.getWindowID();
-			ffWrapper.activateWindowID();
-			ffWrapper.setFocusWindow();
-			ffWrapper.setFullScreen();
+
+			setTimeout( ()=> { 
+
+				ffWrapper.getWindowID();
+				ffWrapper.activateWindowID();
+				ffWrapper.setFocusWindow();
+				ffWrapper.setFullScreen();
+
+			} , 5000 );
+			
 
 			setTimeout(function(){
 				ffWrapper.openNewTab("http://localhost:6969"); // testing
-			} , 30000 );			
+			} , 20000 );			
 		} , 8000 );
 
 	},
 
 	init: function() {
-		console.log("[FIREFOX] --> initializing ffWrapper");
+		console.log("[FIREFOX_MAN] --> initializing ffWrapper");
 		ffWrapper.terminateFF();
-		ffWrapper.launchFF();
-		ffWrapper.getWindowID();
-		ffWrapper.activateWindowID();
-		ffWrapper.setFocusWindow();
-		ffWrapper.setFullScreen();
+		setTimeout( ()=> {
+			ffWrapper.launchFF();
+
+			setTimeout( ()=> { 
+
+				ffWrapper.getWindowID();
+				ffWrapper.activateWindowID();
+				ffWrapper.setFocusWindow();
+				ffWrapper.setFullScreen();
+
+			} , 5000 );
+
+		} , 4000 );
+		
 	},
 
 	checkIfFFIsOpen: function() {
@@ -51,16 +67,16 @@ var ffWrapper = {
 			var wT = isFFOpen[i].split(" ");
 			if ( wT[wT.length-1] === ffBinaryLocation1 ) {
 				ffWrapper.instancePID = wT[1].toString();
-				console.log("[FIREFOX] --> is OPEN");
+				console.log("[FIREFOX_MAN] --> is OPEN");
 				return true;
 			}
 			else if ( ( wT[wT.length-3] + " " + wT[wT.length-2] + " " + wT[wT.length-1] ) === ffBinaryLocation2 ){
 				ffWrapper.instancePID = wT[1].toString();
-				console.log("[FIREFOX] --> is OPEN");
+				console.log("[FIREFOX_MAN] --> is OPEN");
 				return true;
 			}
 		}
-		console.log("[FIREFOX] --> is CLOSED");
+		console.log("[FIREFOX_MAN] --> is CLOSED");
 		return false;
 		
 	},
@@ -71,7 +87,7 @@ var ffWrapper = {
 		var launchFFPath = path.join( __dirname , "ffLauncher.js"  );
 		var lauchFFString = "node " + launchFFPath; 
 		if (!isFFOpen) {
-			console.log("[FIREFOX] --> Launching Firefox");
+			console.log("[FIREFOX_MAN] --> Launching Firefox");
 			exec( lauchFFString , {silent:true , async: false }).stdout;
 			setTimeout( ()=>{ ffWrapper.checkIfFFIsOpen(); } , 2000 );
 		}
@@ -86,16 +102,23 @@ var ffWrapper = {
 
 	getWindowID: function() {
 		
-		var findFirefox = 'xdotool search --title "Mozilla Firefox"';
-		var activeFFWindowID = exec( findFirefox , {silent:true , async: false }).stdout;
-		ffWrapper.windowID = activeFFWindowID.trim();
-		console.log(ffWrapper.windowID);
+		var findFirefox = 'xdotool search --name "Mozilla Firefox"';
+		var activeFFWindowID = exec( findFirefox , {silent:true , async: false });
+		if ( activeFFWindowID.stderr.length > 1 ) { ffWrapper.windowID = null; console.log( "[FIREFOX_MAN] --> ERROR --> Could not Wrap FF Window" ); }
+		ffWrapper.windowID = activeFFWindowID.stdout.trim();
+		console.log( "[FIREFOX_MAN] --> WindowID = " + ffWrapper.windowID );
+
 
 	},
 
 	resetFocus: function() {
 		ffWrapper.activateWindowID();
 		ffWrapper.setFocusWindow();
+	},
+
+	windowRaise: function() {
+		var windowRaiseTopCMD = "xdotool windowraise " + ffWrapper.windowID;
+		exec( windowRaiseTopCMD , {silent:true ,  async: false});
 	},
 
 	restoreFullScreen: function() {
@@ -130,7 +153,9 @@ var ffWrapper = {
 
 	openNewTab: function(w_URL) {
 		var openNewTab = 'firefox -new-tab ' + w_URL;
-		exec( openNewTab , {silent:true , async: false }).stdout;	
+		var wResult = exec( openNewTab , {silent:true , async: false });
+		if ( wResult.stderr != null && wResult.stderr.length > 1 ) { console.log( wResult.stderr ); }
+		else { console.log( wResult.stdout ); }
 	},
 
 	closeCurrentTab: function() {
@@ -139,8 +164,9 @@ var ffWrapper = {
 	},
 	
 	moveMouseToCenterOfWindow: function() {
-		var centerOfWindow2Screen = "xdotool mousemove --window %0 2537 510"
-		exec( centerOfWindow2Screen , {silent:true , async: false }).stdout;
+		//var centerOfWindow2Screen = "xdotool mousemove --window %0 2537 510"
+		var centerOfWindow13Inch = "xdotool mousemove --window %0 687 282"
+		exec( centerOfWindow13Inch , {silent:true , async: false }).stdout;
 	},
 
 	mouseLeftClick: function() {
@@ -154,7 +180,8 @@ var ffWrapper = {
 	},
 
 	glitchFullScreen: function() {
-		ffWrapper.resetFocus();
+		ffWrapper.windowRaise();
+		ffWrapper.restoreFullScreen();f
 		ffWrapper.moveMouseToCenterOfWindow();
 		ffWrapper.mouseLeftClick();
 		setTimeout(function() {
@@ -167,13 +194,14 @@ var ffWrapper = {
 	},
 
 	toggleFKeyPress: function() {
-		ffWrapper.resetFocus();
+		ffWrapper.windowRaise();
+		ffWrapper.restoreFullScreen();
 		ffWrapper.moveMouseToCenterOfWindow();
 		ffWrapper.mouseLeftClick();		
 		setTimeout(function() {
 			var fKeyPress = 'xdotool key f';
 			exec( fKeyPress , {silent:true , async: false}).stdout;
-			console.log( "[FIREFOX] --> " + fKeyPress );
+			console.log( "[FIREFOX_MAN] --> " + fKeyPress );
 			//ffWrapper.pressSpaceKey();
 		} , 1000 ); 
 		
@@ -189,7 +217,7 @@ module.exports.init = function() {
 	ffWrapper.init();
 	setTimeout(function(){
 		ffWrapper.openNewTab("http://localhost:6969"); // testing
-	} , 3000 ); 
+	} , 10000 ); 
 };
 
 module.exports.minimizeWindow = function() {

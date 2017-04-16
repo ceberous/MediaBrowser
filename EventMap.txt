@@ -16,7 +16,7 @@
 
 									Button Guide
 	--------------------------------------------------------------------------
-	|1.) Mopidy-Random Classic			| 7.) Play Standard Youtube /Twitch  |
+	|1.) Mopidy-Random Classic			| 7.) Play Standard Youtube / Twitch |
 	|2.) Mopidy-Random EDM				| 8.) Previous Media 				 |
 	|3.) Mopidy-Random Misc				| 9.) Next Media 					 |
 	|4.) Skype Cameron					| 10.) Play Archived Movie		  	 |

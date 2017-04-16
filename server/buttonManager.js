@@ -11,8 +11,11 @@ function getUSBDeviceEventPath() {
 
 	var usbDeviceID = "usb-DragonRise_Inc._Generic_USB_Joystick-event-joystick";
 	var findEventPath = 'ls -la /dev/input/by-id';
-	var findEventPathCMD = exec( findEventPath , {silent:true}).stdout;
-	findEventPathCMD = findEventPathCMD.split("\n");
+	var findEventPathCMD = exec( findEventPath , {silent:true});
+	
+	if ( findEventPathCMD.stderr.length > 1 ) { console.log( "Button-MAN --> ERROR --> " + findEventPathCMD.stderr  ); }
+
+	findEventPathCMD = findEventPathCMD.stdout.split("\n");
 
 	for (var i = 0; i < findEventPathCMD.length; ++i) {
 		
@@ -31,7 +34,7 @@ function getUSBDeviceEventPath() {
 
 }
 
-if ( !getUSBDeviceEventPath() ) { throw new Error( "Cannot Find USB-Buttton Controller" ); }
+if ( !getUSBDeviceEventPath() ) { throw new Error( "[Button-MAN] --> Cannot Find USB-Buttton Controller" ); }
 
 var buttonScript = path.join( __dirname , "py_scripts" , "buttonWatcher.py" );
 var ButtonManager = spawn( 'python' , [buttonScript] );
@@ -97,4 +100,14 @@ ButtonManager.stdout.on( "data" , function(data) {
 		var message = decoder.write(data);
 		message = message.trim();
 		handleButtonInput(message);
+});
+
+
+ButtonManager.stderr.on( "data" , function(data) {
+		var message = decoder.write(data);
+		message = message.trim();
+		console.log( "[buttonWatcher.py] --> ERROR -->"  );
+		console.log(message);
+		wEmitter.emit( "properShutdown" );
+		setTimeout( ()=> { process.exit(1); } , 2000 );
 });

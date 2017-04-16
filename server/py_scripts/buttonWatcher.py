@@ -2,6 +2,7 @@ import sys
 from evdev import InputDevice, categorize, ecodes, KeyEvent
 
 from usbDevicePath import eventPath
+
 gamepad = InputDevice(eventPath)
 
 for event in gamepad.read_loop():

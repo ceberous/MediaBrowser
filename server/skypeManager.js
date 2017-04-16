@@ -95,6 +95,7 @@ var childWrapper = {
 
 			case "trying to add video":
 				windowWrapper.init();
+				wEmitter.emit("skypeCallStarted");
 				break;
 
 			case "Call status: Finished":
