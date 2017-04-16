@@ -191,7 +191,7 @@ var wCM =  {
 	});
 
 	wEmitter.on( 'button6Press' , function() { 
-		console.log("\"[CLIENT_MAN] --> Emergency\" Stop Everything");
+		console.log("[CLIENT_MAN] --> \"Emergency\" Stop Everything");
 		wCM.stopEverything();
 	});	
 

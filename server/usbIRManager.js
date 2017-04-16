@@ -36,23 +36,37 @@ var USBIRManager = {
 			USBIRManager.setTransmitters();
 		}
 		else {
-			
-			console.log( "couldn't start LIRC because: \"" + USBIRManager.LIRC_OPEN_ERROR + "\"" );
-			if ( USBIRManager.LIRC_OPEN_ERROR === "Driver `iguanaIR' not supported." ) {
-				
-				console.log("trying to reinstall dev package");
+			USBIRManager.tryReinstallIguanaIR();
+		}
+
+	},
+
+	tryReinstallIguanaIR: function() {
+
+		console.log( "[USB_IR] --> couldn't start LIRC because: \"" + USBIRManager.LIRC_OPEN_ERROR + "\"" );
+		var wReasons = [
+			"Driver `iguanaIR' not supported.",
+			"do_connect: could not connect to socket",
+			"connect: Connection refused",
+			"Cannot open socket /run/lirc/lircd: Connection refused"
+		];
+
+		for ( var i = 0; i < wReasons.length; ++i ) {
+			if ( USBIRManager.LIRC_OPEN_ERROR === wReasons[i] ) {
+
+				console.log("[USB_IR] --> trying to reinstall dev package");
 				var reinstallCMD = "sudo dpkg -i /home/haley/WORKSPACE/lirc_0.9.0-0ubuntu6_amd64.deb";
 				var runCMD2 = exec( reinstallCMD , { silent:true  , async: false } ).stdout;
-
+				
 				setTimeout( ()=> {
-					console.log("rebooting");
+					console.log("[USB_IR] --> rebooting");
 					var restartCMD = "sudo reboot";
-					var runCMD3 = exec( restartCMD , { silent:true ,  async: false } ).stdout;
+					exec( restartCMD , { silent:true ,  async: false } );
 				} , 10000 );
 
 			}
-			
 		}
+
 
 	},
 

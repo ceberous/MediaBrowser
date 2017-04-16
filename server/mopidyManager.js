@@ -265,8 +265,10 @@ var MM = {
 
 		    	console.log( "[MOPIDY] --> PlaylistGenre = " + MM.tracklistManager.nowPlayingList.genre );
 		    	console.log( "[MOPIDY] --> Playlist = " + MM.tracklistManager.nowPlayingList.name );
+		    	console.log( "[MOPIDY] --> TrackArtist = " + MM.tracklistManager.nowPlayingList.tracks[index].artists[0].name );
 		    	setTimeout(function(){
-					console.log( "[MOPIDY] --> Track = " + MM.tracklistManager.nowPlayingList.tracks[index].name + "\n[" + ( index + 1 ) + "] of " + MM.tracklistManager.nowPlayingList.length.toString() + " || SHUFFLE = " + MM.tracklistManager.randomMode.toString() );
+					console.log( "[MOPIDY] --> Track = " + MM.tracklistManager.nowPlayingList.tracks[index].name );
+					console.log( "[MOPIDY] --> [" + ( index + 1 ) + "] of " + MM.tracklistManager.nowPlayingList.length.toString() + " || SHUFFLE = " + MM.tracklistManager.randomMode.toString() );
 		    	} , 500 );
 
 		    });
