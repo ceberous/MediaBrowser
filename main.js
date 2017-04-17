@@ -53,7 +53,15 @@ io.sockets.on( 'connection' , function (socket) {
 	socket.on( 'firefox-f-key' , function( data ){
 		// Client-Player is supposedly Ready by this point
 		clientManager.firefoxFKey();
-	});	
+	});
+
+	socket.on( 'ytLivePlaying' , function( data ){
+		clientManager.ytLive(true);
+	});
+
+	socket.on( 'ytStandardPlaying' , function( data ){
+		clientManager.ytStandard(true);
+	});					
 
 	wEmitter.on( 'socketSendTask' , function( wTask , wOptions ) {
 		console.log( "[MAIN] --> socketEmit--> " + wTask );

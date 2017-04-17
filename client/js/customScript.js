@@ -33,14 +33,20 @@ $(document).ready( function() {
 	// Child-View Management
 	// -------------------------------------------------------
 		socket.on( 'playBackgroundYTLive', function(data) {
-			addChildView( viewFiles.fullScreenYTLive );
-			setTimeout(function() {
-				$(document).trigger( "randomYTLiveBG" );
-			} , 5000 );
+			closeChildView();
+			setTimeout(function(){
+				addChildView( viewFiles.fullScreenYTLive );
+				setTimeout(function() {
+					$(document).trigger( "randomYTLiveBG" );
+				} , 5000 );
+			} , 2000 );
 		});
 
 		socket.on( 'playYTStandard', function(data) {
-			addChildView( viewFiles.fullScreenYT );
+			closeChildView();
+			setTimeout(function(){
+				addChildView( viewFiles.fullScreenYT );
+			} , 2000 );
 		});
 
 		socket.on( 'playFullScreenTwitch', function(data) {
@@ -99,6 +105,9 @@ $(document).on( "toggle-f-keypress" , function( event , einfo ) { socket.emit( '
 $(document).on( "closefirefoxtab" , function( event , einfo ) { closeChildView(); });
 $(document).on( "yt-player-destoyed" , function( event , einfo ) { socket.emit( 'yt-player-destoyed' ); });
 
+$(document).on( "ytLivePlaying" , function( event , einfo ) { socket.emit( 'ytLivePlaying' ); });
+$(document).on( "ytStandardPlaying" , function( event , einfo ) { socket.emit( 'ytStandardPlaying' ); });
+
 function wInit() {
 
 	$("#wPlaceHolder").hide();
@@ -123,6 +132,7 @@ function addChildView(viewName) {
 function closeChildView() {
 	
 	if ( viewFiles.active ) {
+		$(document).trigger( "tearDownPlayer" );
 		$("#wChildView").remove();
 		viewFiles.active = false;
 		$("#wPlaceHolder").show();

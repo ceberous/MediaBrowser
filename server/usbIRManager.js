@@ -183,10 +183,8 @@ var USBIRManager = {
 
 		if ( wRun.stderr.length > 5 ) { 
 			var check = wRun.stderr.split("\n");
-			if ( check[0] === "Driver `iguanaIR' not supported." ) {
-				USBIRManager.LIRC_OPEN = false;
-				USBIRManager.LIRC_OPEN_ERROR = check[0];
-			}
+			USBIRManager.LIRC_OPEN = false;
+			USBIRManager.LIRC_OPEN_ERROR = check[0];
 		}
 		else {
 			USBIRManager.isLircOpen();

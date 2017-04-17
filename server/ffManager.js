@@ -247,3 +247,7 @@ module.exports.toggleFKeyPress = function() {
 module.exports.glitchFullScreen = function() {
     ffWrapper.glitchFullScreen();
 };
+
+module.exports.isFFOpen = function() {
+    return ffWrapper.checkIfFFIsOpen();
+};

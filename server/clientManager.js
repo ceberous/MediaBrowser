@@ -62,11 +62,20 @@ var wCM =  {
 		console.log( "[CLIENT_MAN] --> LastAction = " + wCM.state.lastAction );
 		console.log( "[CLIENT_MAN] --> CurrentAction = " + wCM.state.currentAction );
 
+		var isFFOpen = wFM.isFFOpen();
+
 		if ( wAction != "skype" ) {
-			if ( wCM.state.lastAction != wCM.state.currentAction ) { 
+			if ( !isFFOpen ) { 
 				wFM.init();
 				wCM.state.firefoxClientTaskNeedQued = true;
-			}				
+			}
+			else if ( wCM.state.currentAction != wCM.state.lastAction ){
+				wFM.init();
+				wCM.state.firefoxClientTaskNeedQued = true;
+			}
+			else if ( !wCM.state.firefoxOpen ) { // this bool needs to be re-named to wCM.state.firefoxClientReady or something
+				wCM.state.firefoxClientTaskNeedQued = true;	
+			}			
 		}
 		
 		switch (wAction) {
@@ -82,12 +91,18 @@ var wCM =  {
 
 				console.log("[CLIENT_MAN] --> preparing mopidy with YTLive Background Video");
 				//wCM.state.mopidy.playing = true;
+
+				wCM.state.yt.standard = false;
+
 				wMM.randomPlaylist( wCM.state.mopidy.playStyleToQue );
 				
 				wCM.state.firefoxClientTask.name = 'playBackgroundYTLive';
-					
-				wEmitter.emit( 'queClientTaskOnReady' , wCM.state.firefoxClientTask.name );
-				if ( !wCM.state.yt.background ) {
+				
+				if ( wCM.state.firefoxClientTaskNeedQued ) {
+					wEmitter.emit( 'queClientTaskOnReady' , wCM.state.firefoxClientTask.name );
+					wCM.state.firefoxClientTaskNeedQued = false;
+				}
+				else if ( !wCM.state.yt.background ) {
 					wEmitter.emit( 'socketSendTask' , wCM.state.firefoxClientTask.name );
 				}
 
@@ -105,9 +120,11 @@ var wCM =  {
 
 				wCM.state.firefoxClientTask.name = 'playYTStandard';
 
-				wEmitter.emit( 'queClientTaskOnReady' , wCM.state.firefoxClientTask.name );
-				
-				if ( !wCM.state.yt.standard ) {
+				if ( wCM.state.firefoxClientTaskNeedQued ) {
+					wEmitter.emit( 'queClientTaskOnReady' , wCM.state.firefoxClientTask.name );
+					wCM.state.firefoxClientTaskNeedQued = false;
+				}
+				else if ( !wCM.state.yt.standard ) {
 					wEmitter.emit( 'socketSendTask' , wCM.state.firefoxClientTask.name );
 				}
 
@@ -142,7 +159,7 @@ var wCM =  {
 
 		if ( wCM.state.yt.background ) { wTM.stopYTShuffleTask(); wCM.state.yt.background = false; }
 		if ( wCM.state.firefoxOpen ) { wFM.quit(); }
-		if ( wCM.state.mopidy.playing ) { wMM.closeMopidy(); }
+		if ( wCM.state.mopidy.playing ) { wMM.stopMedia(); }
 		if ( wCM.state.skype.activeCall ) { wSM.stopCall(); }
 		//if ( wCM.state.vlcVideo.playing ) { wVV.stop(); wCM.state.vlcVideo.playing = false;  }
 
@@ -327,8 +344,6 @@ var wCM =  {
 	module.exports.firefoxFKey = function() {
 		wFM.toggleFKeyPress();
 		wCM.state.firefoxClientTask.online = true;
-		wCM.state.yt.background = true;
-		if ( wCM.state.yt.background ) { setTimeout( ()=> { wTM.startYTShuffleTask(); } , 3000 ); }
 	};
 
 	module.exports.firefoxCloseTab = function() {
@@ -339,6 +354,15 @@ var wCM =  {
 		wFM.quit();
 	};
 // --------------------------------------------------
+
+module.exports.ytLive = function(wBool) {
+	wCM.state.yt.background = wBool;
+	if ( wCM.state.yt.background ) { setTimeout( ()=> { wTM.startYTShuffleTask(); } , 3000 ); }
+};
+
+module.exports.ytStandard = function(wBool) {
+	wCM.state.yt.standard = wBool;
+};
 
 module.exports.prepare = function(wAction) {
 	wCM.prepare(wAction);

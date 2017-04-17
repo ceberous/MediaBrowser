@@ -10,6 +10,8 @@
 		"playlist" : null,
 		"usingPlaylist": false,
 		"muted": false,
+		"nowPlaying": { id: null , time: 0 },
+		"lastPlayed": { id: null , time: 0 },
 
 		tearDown: function() {
 			YTIFrameManager.wPlayer.destroy();
@@ -47,21 +49,38 @@
 		},
 
 		onPlayerStateChange: function(event) {
+
+			var nowPlayingURL = YTIFrameManager.wPlayer.getVideoUrl();
+			var wT = nowPlayingURL.split("t=");
+			var wID = null;
+			if ( wT.length > 1 ) { wT = wT[1]; wT = wT.split("&v="); wID = wT[1]; wT = wT[0]; }
+			else { wT = 0; wID = nowPlayingURL.split("v=")[1]; }
+			
+			if ( YTIFrameManager.nowPlaying.id != wID ) {
+
+				YTIFrameManager.lastPlayed.id = YTIFrameManager.nowPlaying.id;	
+				YTIFrameManager.lastPlayed.time = YTIFrameManager.nowPlaying.time;
+
+				YTIFrameManager.nowPlaying.id = wID;
+				YTIFrameManager.nowPlaying.time = wT;
+
+			}
+
 			switch ( event.data ) {
 				case -1:
 					console.log(" video is unstarted ");
 					break;
 				case 0:
 					console.log(" video is over ");
-					if ( YTIFrameManager.usingPlaylist ) {
-						console.log( YTIFrameManager.wPlayer.getPlaylistIndex() );
-					}
-					else {
+					if ( !YTIFrameManager.usingPlaylist ) {
 						YTIFrameManager.tearDown();
 					}
+					console.log( YTIFrameManager.lastPlayed );
+					console.log( YTIFrameManager.nowPlaying );
 					break;
 				case 1:
 					console.log(" video is now playing ");
+					$(document).trigger( "ytStandardPlaying" );
 					break;
 				case 2:
 					console.log(" video is paused ");
@@ -77,7 +96,7 @@
 
 		onPlayerReady: function(event) {
 			console.log("player is supposedly ready");
-			console.log(YTIFrameManager.wPlayer);
+			//console.log(YTIFrameManager.wPlayer);
 			if ( YTIFrameManager.usingPlaylist ) { 
 				YTIFrameManager.wPlayer.cuePlaylist( wPlaylist );
 				YTIFrameManager.wPlayer.setShuffle( true );
@@ -108,14 +127,16 @@
 
 
 	console.log("gathering stored ID's into playlist array");
-	for ( var iprop in standardList.ytStandard ) {
-		for ( var jprop in standardList.ytStandard[iprop] ) {
-			wPlaylist.push( jprop );
+	if ( standardList.ytStandard != null ) {
+		console.log(standardList.ytStandard);
+		for ( var iprop in standardList.ytStandard ) {
+			for ( var jprop in standardList.ytStandard[iprop] ) {
+				wPlaylist.push( jprop );
+			}
 		}
 	}
 
 	if ( wPlaylist.length > 1 ) { YTIFrameManager.usingPlaylist = true; }
-	YTIFrameManager.playlist = wPlaylist;
 
 	YTIFrameManager.muted = false;
 	YTIFrameManager.playlist = wPlaylist;
