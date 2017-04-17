@@ -31,7 +31,8 @@ var ffWrapper = {
 
 			setTimeout(function(){
 				ffWrapper.openNewTab("http://localhost:6969"); // testing
-			} , 20000 );			
+			} , 20000 );
+
 		} , 8000 );
 
 	},
@@ -40,6 +41,7 @@ var ffWrapper = {
 		console.log("[FIREFOX_MAN] --> initializing ffWrapper");
 		ffWrapper.terminateFF();
 		setTimeout( ()=> {
+			
 			ffWrapper.launchFF();
 
 			setTimeout( ()=> { 
@@ -83,20 +85,16 @@ var ffWrapper = {
 
 	launchFF: function() {
 
-		var isFFOpen = ffWrapper.checkIfFFIsOpen();
 		var launchFFPath = path.join( __dirname , "ffLauncher.js"  );
 		var lauchFFString = "node " + launchFFPath; 
-		if (!isFFOpen) {
-			console.log("[FIREFOX_MAN] --> Launching Firefox");
-			exec( lauchFFString , {silent:true , async: false }).stdout;
-			setTimeout( ()=>{ ffWrapper.checkIfFFIsOpen(); } , 2000 );
-		}
+		console.log("[FIREFOX_MAN] --> Launching Firefox");
+		exec( lauchFFString , {silent:true , async: false });
 
 	},
 
 	terminateFF: function() {
 		exec( "pkill -9 firefox" , {silent:true ,  async: false }).stdout;
-		console.log("[FIREFOX] --> Killed Firefox");
+		console.log("[FIREFOX_MAN] --> Killed Firefox");
 		wEmitter.emit("firefoxClosed");
 	},
 

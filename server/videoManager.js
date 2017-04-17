@@ -308,3 +308,39 @@ module.exports.updateStandardList = function() {
 module.exports.nextMedia = function() {
 	wEmitter.emit( 'socketSendTask' , "nextMedia" );	
 };
+
+module.exports.updateYTStandardInfo = function(wOBJ) {
+
+	var lID = wOBJ.last.id;
+	var lT 	= parseInt( wOBJ.last.time ); 
+	var lDuration = wOBJ.last.duration;
+	var cID = wOBJ.now.id;
+	var cT 	= parseInt( wOBJ.now.time );
+	var cDuration = wOBJ.now.duration;
+
+	console.log( "Updating ytStandardList.json with: " );
+
+	for ( var iprop in YTFeedManager.computedUnWatchedList ) {
+		for ( var jprop in YTFeedManager.computedUnWatchedList[iprop] ) {
+			if ( jprop === lID ) {
+				if ( lT >= lDuration - 5 ) { YTFeedManager.computedUnWatchedList[iprop][jprop].completed = true; }
+				else { YTFeedManager.computedUnWatchedList[iprop][jprop].resumeTime = lT }
+				YTFeedManager.computedUnWatchedList[iprop][jprop].watched = true;
+				console.log("Last = ");
+				console.log( wOBJ.last );
+				console.log( YTFeedManager.computedUnWatchedList[iprop][jprop] );
+			}
+			else if ( jprop === cID ) {
+				if ( cT >= cDuration - 5 ) { YTFeedManager.computedUnWatchedList[iprop][jprop].completed = true; }
+				else { YTFeedManager.computedUnWatchedList[iprop][jprop].resumeTime = cT }
+				YTFeedManager.computedUnWatchedList[iprop][jprop].watched = true;					
+				console.log("Current = ");
+				console.log( wOBJ.now );
+				console.log( YTFeedManager.computedUnWatchedList[iprop][jprop] );
+			}
+		}
+	}
+
+	jsonfile.writeFileSync( bSPath + "/ytStandardList.json" , YTFeedManager.computedUnWatchedList );
+
+};	

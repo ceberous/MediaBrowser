@@ -26,7 +26,7 @@ var MM = {
 		mopidy.close();
 		mopidy.off();
 		mopidy = null;
-		console.log("[MOPIDY] --> CLOSED");
+		console.log("[MOPIDY_MAN] --> CLOSED");
 		wEmitter.emit( "mopidyNotPlaying" );
 		wEmitter.emit("mopidyOffline");
 	},
@@ -53,7 +53,7 @@ var MM = {
 
 			var timeNow = new Date().getTime();
 			var wDiff = timeNow - MM.playlistManager.cachedPlaylists.lastUpdatedTime;
-			if ( wDiff < oneHour ) { console.log( "[MOPIDY] --> already updated playlist cache this hour" ); wEmitter.emit( 'playlistCacheUpdated' ); return; }
+			if ( wDiff < oneHour ) { console.log( "[MOPIDY_MAN] --> already updated playlist cache this hour" ); wEmitter.emit( 'playlistCacheUpdated' ); return; }
 			
 			mopidy.playlists.getPlaylists().then(function(playlists){
 
@@ -81,7 +81,7 @@ var MM = {
 					
 					jsonfile.writeFileSync( MM.playlistManager.genreMapFilePath , MM.playlistManager.genreMap );
 					jsonfile.writeFileSync( MM.playlistManager.cachedFilePath , MM.playlistManager.cachedPlaylists );
-					console.log("[MOPIDY] --> playlist Cache Updated");
+					console.log("[MOPIDY_MAN] --> playlist Cache Updated");
 					wEmitter.emit( 'playlistCacheUpdated' );
 
 			});
@@ -124,7 +124,7 @@ var MM = {
 		getState: function() {
 
 		    mopidy.playback.getState().then(function (state) {
-		        console.log( "[MOPIDY] --> STATE = " + state );
+		        console.log( "[MOPIDY_MAN] --> STATE = " + state );
 		        MM.playbackManager.currentState = state;
 		    });
 
@@ -273,12 +273,12 @@ var MM = {
 		    	if ( index === null ) { index = 0; console.log("null index was returned"); } 
 		    	MM.tracklistManager.nowPlayingList.index = index;
 
-		    	console.log( "[MOPIDY] --> PlaylistGenre = " + MM.tracklistManager.nowPlayingList.genre );
-		    	console.log( "[MOPIDY] --> Playlist = " + MM.tracklistManager.nowPlayingList.name );
-		    	console.log( "[MOPIDY] --> TrackArtist = " + MM.tracklistManager.nowPlayingList.tracks[index].artists[0].name );
+		    	console.log( "[MOPIDY_MAN] --> PlaylistGenre = " + MM.tracklistManager.nowPlayingList.genre );
+		    	console.log( "[MOPIDY_MAN] --> Playlist = " + MM.tracklistManager.nowPlayingList.name );
+		    	console.log( "[MOPIDY_MAN] --> TrackArtist = " + MM.tracklistManager.nowPlayingList.tracks[index].artists[0].name );
 		    	setTimeout(function(){
-					console.log( "[MOPIDY] --> Track = " + MM.tracklistManager.nowPlayingList.tracks[index].name );
-					console.log( "[MOPIDY] --> [" + ( index + 1 ) + "] of " + MM.tracklistManager.nowPlayingList.length.toString() + " || SHUFFLE = " + MM.tracklistManager.randomMode.toString() );
+					console.log( "[MOPIDY_MAN] --> Track = " + MM.tracklistManager.nowPlayingList.tracks[index].name );
+					console.log( "[MOPIDY_MAN] --> [" + ( index + 1 ) + "] of " + MM.tracklistManager.nowPlayingList.length.toString() + " || SHUFFLE = " + MM.tracklistManager.randomMode.toString() );
 		    	} , 500 );
 
 		    });
@@ -333,7 +333,7 @@ wEmitter.on( 'playlistCacheUpdated' , function() {
 
 	if ( !MM.firstLaunchReady ) { MM.firstLaunchReady = true; MM.playlistManager.getRandomList();  } 
 	else {
-		console.log("[MOPIDY] --> ONLINE"); 
+		console.log("[MOPIDY_MAN] --> ONLINE"); 
 		wEmitter.emit("mopidyOnline"); 
 	}
 

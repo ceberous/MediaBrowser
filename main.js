@@ -61,7 +61,11 @@ io.sockets.on( 'connection' , function (socket) {
 
 	socket.on( 'ytStandardPlaying' , function( data ){
 		clientManager.ytStandard(true);
-	});					
+	});
+
+	socket.on( 'updateYTStandardInfo' , function( data ) {
+		clientManager.updateYTStandardInfo(data);
+	});				
 
 	wEmitter.on( 'socketSendTask' , function( wTask , wOptions ) {
 		console.log( "[MAIN] --> socketEmit--> " + wTask );

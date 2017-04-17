@@ -13,7 +13,7 @@ function getUSBDeviceEventPath() {
 	var findEventPath = 'ls -la /dev/input/by-id';
 	var findEventPathCMD = exec( findEventPath , {silent:true});
 	
-	if ( findEventPathCMD.stderr.length > 1 ) { console.log( "[Button_MAN] --> ERROR --> " + findEventPathCMD.stderr  ); }
+	if ( findEventPathCMD.stderr.length > 1 ) { console.log( "[BUTTON_MAN] --> ERROR --> " + findEventPathCMD.stderr  ); }
 
 	findEventPathCMD = findEventPathCMD.stdout.split("\n");
 
@@ -23,7 +23,7 @@ function getUSBDeviceEventPath() {
 		if ( wT[wT.length-3] === usbDeviceID ) {
 			var wEvent = wT[wT.length-1].split("../");
 			var wEventPath = 'eventPath = "/dev/input/' + wEvent[1] + '"';
-			console.log( "[Button_MAN] --> " + wEventPath);
+			console.log( "[BUTTON_MAN] --> " + wEventPath);
 			fs.writeFileSync( path.join( __dirname , "py_scripts" , "usbDevicePath.py" ) , wEventPath );
 			return true;
 		}
@@ -34,7 +34,7 @@ function getUSBDeviceEventPath() {
 
 }
 
-if ( !getUSBDeviceEventPath() ) { throw new Error( "[Button_MAN] --> Cannot Find USB-Buttton Controller" ); }
+if ( !getUSBDeviceEventPath() ) { throw new Error( "[BUTTON_MAN] --> Cannot Find USB-Buttton Controller" ); }
 
 var buttonScript = path.join( __dirname , "py_scripts" , "buttonWatcher.py" );
 var ButtonManager = spawn( 'python' , [buttonScript] );

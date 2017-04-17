@@ -51,20 +51,26 @@
 		onPlayerStateChange: function(event) {
 
 			var nowPlayingURL = YTIFrameManager.wPlayer.getVideoUrl();
+			YTIFrameManager.nowPlaying.duration = YTIFrameManager.wPlayer.getDuration();
 			var wT = nowPlayingURL.split("t=");
 			var wID = null;
-			if ( wT.length > 1 ) { wT = wT[1]; wT = wT.split("&v="); wID = wT[1]; wT = wT[0]; }
+			if ( wT.length > 1 ) { wT = wT[1]; wT = wT.split("&v="); wID = wT[1]; wT = wT[0]; wT = wT.split("&v=")[0]; }
 			else { wT = 0; wID = nowPlayingURL.split("v=")[1]; }
 			
+			wT = parseInt(wT)
+
 			if ( YTIFrameManager.nowPlaying.id != wID ) {
 
 				YTIFrameManager.lastPlayed.id = YTIFrameManager.nowPlaying.id;	
 				YTIFrameManager.lastPlayed.time = YTIFrameManager.nowPlaying.time;
-
-				YTIFrameManager.nowPlaying.id = wID;
-				YTIFrameManager.nowPlaying.time = wT;
+				YTIFrameManager.lastPlayed.duration = YTIFrameManager.nowPlaying.duration;
 
 			}
+
+			YTIFrameManager.nowPlaying.id = wID;
+			YTIFrameManager.nowPlaying.time = wT;
+
+			videoUpateOBJ = { last: YTIFrameManager.lastPlayed , now: YTIFrameManager.nowPlaying };
 
 			switch ( event.data ) {
 				case -1:
@@ -75,8 +81,7 @@
 					if ( !YTIFrameManager.usingPlaylist ) {
 						YTIFrameManager.tearDown();
 					}
-					console.log( YTIFrameManager.lastPlayed );
-					console.log( YTIFrameManager.nowPlaying );
+					$(document).trigger( "updateYTStandardInfo" );
 					break;
 				case 1:
 					console.log(" video is now playing ");
@@ -84,6 +89,7 @@
 					break;
 				case 2:
 					console.log(" video is paused ");
+					$(document).trigger( "updateYTStandardInfo" );
 					break;
 				case 3:
 					console.log(" video is buffering ");
@@ -131,7 +137,9 @@
 		console.log(standardList.ytStandard);
 		for ( var iprop in standardList.ytStandard ) {
 			for ( var jprop in standardList.ytStandard[iprop] ) {
-				wPlaylist.push( jprop );
+				if ( !standardList.ytStandard[iprop][jprop].completed ) {
+					wPlaylist.push( jprop );
+				}
 			}
 		}
 	}

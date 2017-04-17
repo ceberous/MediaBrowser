@@ -1,6 +1,7 @@
 var socket = null;
 
 var ytLiveList , twitchLiveList , standardList = null;
+var videoUpateOBJ = null;
 var ytLiveSwapDuration = null;
 
 var viewFiles = {
@@ -107,6 +108,8 @@ $(document).on( "yt-player-destoyed" , function( event , einfo ) { socket.emit( 
 
 $(document).on( "ytLivePlaying" , function( event , einfo ) { socket.emit( 'ytLivePlaying' ); });
 $(document).on( "ytStandardPlaying" , function( event , einfo ) { socket.emit( 'ytStandardPlaying' ); });
+
+$(document).on( "updateYTStandardInfo" , function( event , efinfo ) { socket.emit( 'updateYTStandardInfo' , videoUpateOBJ ); });
 
 function wInit() {
 

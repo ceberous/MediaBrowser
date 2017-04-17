@@ -102,7 +102,7 @@ var wCM =  {
 					wEmitter.emit( 'queClientTaskOnReady' , wCM.state.firefoxClientTask.name );
 					wCM.state.firefoxClientTaskNeedQued = false;
 				}
-				else if ( !wCM.state.yt.background ) {
+				else if ( !wCM.state.firefoxClientTaskNeedQued && !wCM.state.yt.background ) {
 					wEmitter.emit( 'socketSendTask' , wCM.state.firefoxClientTask.name );
 				}
 
@@ -124,7 +124,7 @@ var wCM =  {
 					wEmitter.emit( 'queClientTaskOnReady' , wCM.state.firefoxClientTask.name );
 					wCM.state.firefoxClientTaskNeedQued = false;
 				}
-				else if ( !wCM.state.yt.standard ) {
+				else if ( !wCM.state.firefoxClientTaskNeedQued && !wCM.state.yt.standard ) {
 					wEmitter.emit( 'socketSendTask' , wCM.state.firefoxClientTask.name );
 				}
 
@@ -363,6 +363,14 @@ module.exports.ytLive = function(wBool) {
 module.exports.ytStandard = function(wBool) {
 	wCM.state.yt.standard = wBool;
 };
+
+module.exports.updateYTStandardInfo = function(wOBJ) { 
+	wVM.updateYTStandardInfo(wOBJ)
+};	
+
+
+
+
 
 module.exports.prepare = function(wAction) {
 	wCM.prepare(wAction);
