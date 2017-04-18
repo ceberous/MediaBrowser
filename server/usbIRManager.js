@@ -206,7 +206,7 @@ var USBIRManager = {
 
 		var pressButtonCmd = "sudo irsend -d /run/lirc/lircd send_once samsung1 " + wButton;
 		var runPressButton = exec( pressButtonCmd , { silent: true , async: false } );
-		if ( runPressButton.stderr.length > 1 ) { console.log( "[USB_IR] --> " + runPressButton.stderr.toString() ); }
+		if ( runPressButton.stderr.length > 1 ) { USBIRManager.LIRC_OPEN_ERROR = runPressButton.stderr; USBIRManager.tryReinstallIguanaIR(); }
 		else { 
 			console.log( "[USB_IR] --> Pressed-Button: " + wButton );
 		}

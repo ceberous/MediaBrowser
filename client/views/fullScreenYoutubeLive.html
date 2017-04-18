@@ -80,7 +80,7 @@
 			console.log("player is supposedly ready");
 			//console.log(YTIFrameManager.wPlayer);
 			if ( YTIFrameManager.usingPlaylist ) { 
-				YTIFrameManager.wPlayer.cuePlaylist( wPlaylist );
+				YTIFrameManager.wPlayer.cuePlaylist( YTIFrameManager.playlist );
 				YTIFrameManager.wPlayer.setShuffle( true );
 				setTimeout( function() {
 					YTIFrameManager.wPlayer.setLoop(true);
@@ -120,6 +120,7 @@
 		YTIFrameManager.playlist = wPlaylist;
 		YTIFrameManager.usingPlaylist = true;
 		YTIFrameManager.showVideo();
+		wPlaylist = null;
 		
 	}
 

@@ -90,9 +90,12 @@ $(document).ready( function() {
 		});
 
 		socket.on( 'nextMedia' , function (data) {
-			console.log(data.message);
 			$(document).trigger( "nextMedia" );
 		});
+
+		socket.on( 'previousMedia' , function (data) {
+			$(document).trigger( "previousMedia" );
+		});		
 
 	// -----------------------------------------------------
 

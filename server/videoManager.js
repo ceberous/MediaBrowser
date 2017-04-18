@@ -309,6 +309,10 @@ module.exports.nextMedia = function() {
 	wEmitter.emit( 'socketSendTask' , "nextMedia" );	
 };
 
+module.exports.previousMedia = function() {
+	wEmitter.emit( 'socketSendTask' , "previousMedia" );	
+};
+
 module.exports.updateYTStandardInfo = function(wOBJ) {
 
 	var lID = wOBJ.last.id;
