@@ -295,7 +295,7 @@ var wCM =  {
 	wEmitter.on( 'skypeCallStarted' , function() { wCM.state.skype.activeCall = true; } );
 
 	wEmitter.on( 'skypeCallOver' , function() {
-		console.log("skype call is over");
+		console.log("[CLIENT_MAN] --> skype call is over");
 		wCM.state.skype.activeCall = false;
 		if ( wCM.state.lastAction != "skype" ) {
 			console.log( "[CLIENT_MAN] --> restoring previous action --> " + wCM.state.lastAction );

@@ -21,11 +21,13 @@ def OnCall(call, status):
     wText = CallStatusText(status)
     print 'Call status: ' + wText
     sys.stdout.flush()
+    '''
     if wText == "Call in Progress":
         print("trying to add video")
         sys.stdout.flush()
-        callobj1.StartVideoSend()
+        #callobj1.StartVideoSend()
         #callobj1.StartVideoRecieve()
+    '''
 
 def OnAttach(status): 
     print 'API attachment status: ' + AttachmentStatusText(status)

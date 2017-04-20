@@ -11,10 +11,11 @@ var windowWrapper = {
 
 	init: function() {
 
-		console.log("wrapping skype window");
+		console.log("[SKYPE_MAN] --> wrapping skype window");
 		windowWrapper.getWindowID();
 		windowWrapper.activateWindowID();
 		windowWrapper.setFocusWindow();
+		windowWrapper.windowRaise();
 		windowWrapper.setFullScreen();
 
 	},
@@ -22,8 +23,9 @@ var windowWrapper = {
 	getWindowID: function() {
 	
 		var findCallWindow = 'xdotool search --name "Call with"';
-		var activeWindowID = exec( findCallWindow , {silent:true}).stdout;
+		var activeWindowID = exec( findCallWindow , {silent:true , async: false}).stdout;
 		windowWrapper.windowID = activeWindowID.trim();
+		console.log("[SKYPE_MAN] --> callWindowID = " + windowWrapper.windowID );
 
 	},
 
@@ -34,34 +36,40 @@ var windowWrapper = {
 
 	activateWindowID: function() {
 		var activateWindow = 'xdotool windowactivate ' + windowWrapper.windowID;
-		exec( activateWindow , {silent:true}).stdout;
+		exec( activateWindow , {silent:true , async: false}).stdout;
 	},
 
 	setFocusWindow: function() {
 
 		var setAsFocus = 'xdotool windowfocus ' + windowWrapper.windowID;
-		exec( setAsFocus , {silent:true}).stdout;
+		exec( setAsFocus , {silent:true , async: false}).stdout;
 
 	},
 
+	windowRaise: function() {
+		var windowRaiseTopCMD = "xdotool windowraise " + windowWrapper.windowID;
+		exec( windowRaiseTopCMD , {silent:true , async: false});
+	},	
+
 	setFullScreen: function() {
 		
-		//var setToMaximumWindowDualScreen = 'xdotool windowsize %0' + windowWrapper.windowID + ' 100% 100%';
+		//var setToMaximumWindowDualScreen = 'xdotool windowsize %1' + windowWrapper.windowID + ' 100% 100%';
 		var setToMaximumWindowSingleScreen = 'xdotool windowsize ' + windowWrapper.windowID + ' 100% 100%';
-		exec( setToMaximumWindowSingleScreen , {silent:true}).stdout;
+		exec( setToMaximumWindowSingleScreen , {silent:true ,  async: false}).stdout;
+		wEmitter.emit("skypeCallStarted");
 		
 	},
 
 	closeWindow: function() {
 
 		var closeWindowCMD = 'xdotool windowkill ' + windowWrapper.windowID;
-		exec( closeWindowCMD , {silent:true}).stdout;
+		exec( closeWindowCMD , {silent:true , async: false}).stdout;
 
 	},
 
 	minimizeWindow: function() {
 		var minimizeWindowCMD = 'xdotool windowminimize ' + windowWrapper.windowID;
-		exec( minimizeWindowCMD , {silent:true}).stdout;
+		exec( minimizeWindowCMD , {silent:true , async: false}).stdout;
 	},
 
 };
@@ -72,7 +80,7 @@ var childWrapper = {
 
 	start: function() {
 		childPROC = spawn( 'python' , [callScript] );
-		console.log("callFriend.py spawned");
+		console.log("[SKYPE_MAN] --> callFriend.py spawned");
 		childPROC.stdout.on( "data" , function(data) {
 			var message = decoder.write(data);
 			message = message.trim();
@@ -82,8 +90,13 @@ var childWrapper = {
 
 	handleOutput: function(wMesssage) {
 
-		console.log(wMesssage);
+		console.log( "[SKYPE_MAN] --> " + wMesssage );
 		switch( wMesssage ) {
+
+			case "Call status: Never placed":
+				childWrapper.regularCleanup();
+				setTimeout( ()=> { childWrapper.start(); } , 2000 );
+				break;
 
 			case "API attachment status: Refused":
 				childWrapper.regularCleanup();
@@ -93,9 +106,8 @@ var childWrapper = {
 				childWrapper.regularCleanup();
 				break;
 
-			case "trying to add video":
+			case "Call status: Call in Progress":
 				windowWrapper.init();
-				wEmitter.emit("skypeCallStarted");
 				break;
 
 			case "Call status: Finished":
@@ -128,17 +140,18 @@ var childWrapper = {
 	},
 
 	voicemailCleanUp: function() {
-		console.log("waiting 10 seconds to record voicemail");
+		console.log("[SKYPE_MAN] --> waiting 5 seconds to record voicemail");
 		setTimeout( function() {
 			//windowWrapper.closeWindow();
 			windowWrapper.minimizeWindow();
 			childPROC.kill();
 			wEmitter.emit("skypeCallOver");
-		} , 10000 );
+		} , 5000 );
 	}
 
 
 };
+
 
 module.exports.startCall = function() {  
 	childWrapper.start();
@@ -151,3 +164,4 @@ module.exports.stopCall = function() {
 module.exports.stopMedia = function() {  
 	childWrapper.regularCleanup();
 };
+
