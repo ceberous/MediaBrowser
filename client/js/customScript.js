@@ -1,6 +1,8 @@
 var socket = null;
 
 var ytLiveList , twitchLiveList , standardList = null;
+var usingPlaylist = true;
+var wPlaylist = [];
 var videoUpateOBJ = null;
 var ytLiveSwapDuration = null;
 
@@ -40,6 +42,15 @@ $(document).ready( function() {
 				setTimeout(function() {
 					$(document).trigger( "randomYTLiveBG" );
 				} , 5000 );
+			} , 2000 );
+		});
+
+		socket.on( 'playYTSingleVideo' , function(data) {
+			usingPlaylist = false;
+			wPlaylist = data.playlist;
+			closeChildView();
+			setTimeout(function(){
+				addChildView( viewFiles.fullScreenYT );
 			} , 2000 );
 		});
 

@@ -6,7 +6,7 @@ var colors = require("colors");
 var ytLiveList 		= "*/5 * * * *"; // every 5 minutes 
 var twitchLiveList 	= "*/59 * * * *"; // every 1 hour 
 //var standardList 	= "*/59 * * * *"; // every 1 hour
-var standardList 	= "*/5 * * * *"; // every 1 hour
+var standardList 	= "*/59 * * * *"; // every 1 hour
 
 var ytShuffle 		= "*/5 * * * *"; // every 5 Minutes
 

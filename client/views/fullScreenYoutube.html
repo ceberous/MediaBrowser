@@ -2,8 +2,6 @@
 
 <script type="text/javascript">
 
-	var wPlaylist = [];
-
 	var YTIFrameManager = {
 
 		"wPlayer" : null,
@@ -18,22 +16,19 @@
 			setTimeout(function(){
 				YTIFrameManager.wPlayer = null,
 				$(document).trigger( "yt-player-destoyed" );
-				$("#waitingMessage").show();
+				$("#wPlaceHolder").show();
 			} , 1000 );
 		},
 
-		showVideo: function(wVideo) {
+		showVideo: function() {
 
 			$("#waitingMessage").hide();
 
-			if ( !wVideo ){ var wVideo = { id: "o2Qmc8Sb6Ws" }; } 
-
 			var wThis = $(window);
-			var wOptions = { version: 3 , height: wThis.height() , width: wThis.width() , videoId: wVideo.id };
-			if ( YTIFrameManager.usingPlaylist ) {
-				wOptions.videoId = YTIFrameManager.playlist[0];
-				wOptions.loop = 1;
-			}
+			var wOptions = { version: 3 , height: wThis.height() , width: wThis.width() , videoId: YTIFrameManager.playlist[0] };
+			
+			if ( YTIFrameManager.usingPlaylist ) { wOptions.loop = 1; }
+			
 			wOptions.events = {
 				'onReady': YTIFrameManager.onPlayerReady,
 			    'onStateChange': YTIFrameManager.onPlayerStateChange,
@@ -131,24 +126,28 @@
 
 	};
 
-
-	console.log("gathering stored ID's into playlist array");
-	if ( standardList.ytStandard != null ) {
-		console.log(standardList.ytStandard);
-		for ( var iprop in standardList.ytStandard ) {
-			for ( var jprop in standardList.ytStandard[iprop] ) {
-				if ( !standardList.ytStandard[iprop][jprop].completed ) {
-					wPlaylist.push( jprop );
+	if ( usingPlaylist ) {
+		console.log("gathering stored ID's into playlist array");
+		if ( standardList.ytStandard != null ) {
+			console.log(standardList.ytStandard);
+			for ( var iprop in standardList.ytStandard ) {
+				for ( var jprop in standardList.ytStandard[iprop] ) {
+					if ( !standardList.ytStandard[iprop][jprop].completed ) {
+						wPlaylist.push( jprop );
+					}
 				}
 			}
 		}
+		if ( wPlaylist.length > 1 ) { YTIFrameManager.usingPlaylist = true; }
 	}
-
-	if ( wPlaylist.length > 1 ) { YTIFrameManager.usingPlaylist = true; }
-
+	else {
+		YTIFrameManager.usingPlaylist = false;
+		console.log("playing single video");
+		console.log( wPlaylist );
+	}
+	
 	YTIFrameManager.muted = false;
 	YTIFrameManager.playlist = wPlaylist;
-	YTIFrameManager.usingPlaylist = true;
 	YTIFrameManager.showVideo();
 	wPlaylist = null;
 

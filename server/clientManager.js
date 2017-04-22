@@ -35,13 +35,15 @@ var wCM =  {
 		firefoxClientYTPlayerReady: false,
 	},
 
+	singleYTVideoID: null,
+
 	managerMap: {
 		"skype": wSM,
 		"mopidy": wMM,
 		"mopidyBGYT": wMM,
 		"youtubeFG": wVM,
 		//"twitchFG": wVM,
-		//"savedVideo": wVV,
+		//"singleYT": wVV,
 		//"podcast": wVV,
 		//"audioBook": wVV,
 	},
@@ -59,10 +61,11 @@ var wCM =  {
 		else { wCM.state.lastAction = wCM.state.currentAction }
 		wCM.state.currentAction = wAction;
 
-
 		console.log( colors.magenta( "[CLIENT_MAN] --> LastAction = " + wCM.state.lastAction ) );
 		console.log( colors.magenta( "[CLIENT_MAN] --> CurrentAction = " + wCM.state.currentAction ) );
 
+		if ( wCM.state.lastAction === wCM.state.currentAction ) { wCM.state.actionSkipped = true; }
+				
 		var isFFOpen = wFM.isFFOpen();
 
 		if ( wAction != "skype" ) {
@@ -91,14 +94,17 @@ var wCM =  {
 			case "mopidyBGYT":
 
 				console.log("[CLIENT_MAN] --> preparing mopidy with YTLive Background Video".magenta);
-				//wCM.state.mopidy.playing = true;
 
 				wCM.state.yt.standard = false;
 
+				// Update "Skip Count"  if necessary
+				if ( wCM.state.actionSkipped) { wMM.updateSkipCount(); }	
+
+				// Start Mopidy Playlist
 				wMM.randomPlaylist( wCM.state.mopidy.playStyleToQue );
 				
+				// Load Client with View
 				wCM.state.firefoxClientTask.name = 'playBackgroundYTLive';
-				
 				if ( wCM.state.firefoxClientTaskNeedQued ) {
 					wEmitter.emit( 'queClientTaskOnReady' , wCM.state.firefoxClientTask.name );
 					wCM.state.firefoxClientTaskNeedQued = false;
@@ -135,8 +141,16 @@ var wCM =  {
 
 				break;
 
-			case "savedVideo":
-
+			case "singleYT":
+				
+				if ( wCM.state.firefoxClientTaskNeedQued ) {
+					wEmitter.emit( 'queClientTaskOnReady' , "playYTSingleVideo" , { playlist: [wCM.singleYTVideoID] } );
+					wCM.state.firefoxClientTaskNeedQued = false;
+				}
+				else if ( !wCM.state.firefoxClientTaskNeedQued && !wCM.state.yt.standard ) {
+					wEmitter.emit( 'socketSendTask' , "playYTSingleVideo" , { playlist: [wCM.singleYTVideoID] } );
+				}
+				
 				break;
 
 			case "podcast":
@@ -195,7 +209,11 @@ var wCM =  {
 	wEmitter.on( 'button1Press' , function() { 
 		console.log("[CLIENT_MAN] --> now-playing--> random-classic".magenta);
 		wCM.state.mopidy.playStyleToQue = "classic";
-		wCM.prepare( "mopidyBGYT" );
+		
+		//wCM.prepare( "mopidyBGYT" );
+
+		wCM.prepare( "singleYT" );
+		wCM.singleYTVideoID = "ybSNXGKM304";
 	});
 
 	wEmitter.on( 'button2Press' , function() { 

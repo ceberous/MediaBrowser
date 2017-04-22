@@ -1,20 +1,27 @@
 
-1.) Update Playlist Skip and Play Counts
-
-2.) Add "watched" to video if YT-Standard or Twitch-Standard
-3.) Add "watched" comparison on parsing YouTube XML feed
+1.) Update Playlist Play Counts
 
 // Waiting on API Credential Approval from Twitch
-4.) Implement TwitchAPI
+2.) Implement TwitchAPI
 		--> http://livestreamer.tanuki.se/en/develop/twitch_oauth.html#access_token=nkzwh4xppmh404w6qgdw3oj915vdm6&scope=user_read+user_subscriptions
 		--> livestreamer --twitch-oauth-token nkzwh4xppmh404w6qgdw3oj915vdm6 <url> <quality>
 
-5.) Implement Sending Standard-Video Play Cues to Web-Client 
-6.) Implement Sending Single StandardVideo to Web-Client
+// Semi-Started , need to slim down jqeury / bootstrap theme
+3.) Add Public Web-Control Interface
 
-7.) Add Public Web-Control Interface
+4.) Add "Cloud" Web-Control ( for various "admin" tasks , like editing YTLive Blacklist )
 
-8.) x11vnc Server setup @ http://askubuntu.com/a/304720
+5.) Finish MPlayer-Manager Support
+
+6.) Ensure Pulse Audio is Setup Right.
+	--> Appropriate Volume
+	--> Output Device
+
+
+
+
+
+
 
 
 https://github.com/ceberous/MediaBrowser

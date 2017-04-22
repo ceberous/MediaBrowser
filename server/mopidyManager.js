@@ -106,6 +106,18 @@ var MM = {
 
 		},
 
+		updateSkipCount: function() {
+			MM.playlistManager.cachedPlaylists.playlists[MM.playlistManager.randomList.genre][MM.playlistManager.randomList.key].skipCount += 1;
+			jsonfile.writeFileSync( MM.playlistManager.cachedFilePath , MM.playlistManager.cachedPlaylists );
+			console.log("[MOPIDY_MAN] --> playlist Cache Updated with new: SkipCount".yellow);
+		},
+
+		updatePlayCount: function() {
+			MM.playlistManager.cachedPlaylists.playlists[MM.playlistManager.randomList.genre][MM.playlistManager.randomList.key].playCount += 1;
+			jsonfile.writeFileSync( MM.playlistManager.cachedFilePath , MM.playlistManager.cachedPlaylists );
+			console.log("[MOPIDY_MAN] --> playlist Cache Updated with new: PlayCount".yellow);
+		},		
+
 	},
 
 	playbackManager: {
@@ -212,11 +224,11 @@ var MM = {
 
 		startRandomPlaylist: function(wGenre) {
 
+			// If were in a new random genre
 			if ( MM.playlistManager.randomList.genre != wGenre ) {
 
 				MM.playlistManager.getRandomList( wGenre );
 				setTimeout( ()=> { 
-
 					mopidy.tracklist.clear().then( function( result ){
 						mopidy.tracklist.add( MM.playlistManager.randomList.playlistModel.tracks ).then(function(result){
 							MM.tracklistManager.nowPlayingList.name 			= MM.playlistManager.randomList.name;
@@ -232,12 +244,10 @@ var MM = {
 							} , 1500 );
 						});
 					});
-
 				} , 2000 );
 
 			}
 			else {
-
 				mopidy.tracklist.clear().then( function( result ){
 					mopidy.tracklist.add( MM.playlistManager.randomList.playlistModel.tracks ).then(function(result){
 						MM.tracklistManager.nowPlayingList.name 			= MM.playlistManager.randomList.name;
@@ -301,7 +311,7 @@ var MM = {
 			mopidy.tracklist.setRandom(wBool).then( function( result ){
 				MM.tracklistManager.randomMode = result;
 			});
-		},		
+		},
 
 
 	}
@@ -339,6 +349,16 @@ wEmitter.on( 'playlistCacheUpdated' , function() {
 	}
 
 });
+
+
+
+module.exports.updateSkipCount = function() {
+	MM.playlistManager.updateSkipCount();
+};
+
+module.exports.updatePlayCount = function() {
+	MM.playlistManager.updatePlayCount();
+};
 
 module.exports.randomPlaylist = function(wGenre) {
 	MM.tracklistManager.startRandomPlaylist(wGenre);
