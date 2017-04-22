@@ -1,5 +1,7 @@
 var wEmitter = require('../main.js').wEmitter;
 
+var colors = require("colors");
+
 var FeedParser = require('feedparser');
 var request = require("request");
 var cheerio = require('cheerio');
@@ -127,7 +129,7 @@ var YTLiveManager = {
 
 				if ( wStoring ) {
 
-					console.log( "[VIDEO_MAN] --> Storing --> YTLiveID: " + YTLiveManager.newResults[wProp][i]["id"] );
+					console.log( colors.cyan( "[VIDEO_MAN] --> Storing --> YTLiveID: " + YTLiveManager.newResults[wProp][i]["id"] ) );
 					YTLiveManager.computedUnWatchedList[wProp][YTLiveManager.newResults[wProp][i]["id"]] = {
 						
 						title: YTLiveManager.newResults[wProp][i].title,
@@ -151,7 +153,12 @@ var YTFeedManager = {
 
 	feeds: followers.ytStandard,
 	newFeedResults: {},
-	computedUnWatchedList: ytStandardList,
+	cachedResults: ytStandardList,
+	computedUnWatchedList: null,
+
+	init: function() {
+		YTFeedManager.updateComputedUnWatchedList();
+	},
 
 	enumerateFollowers: function() {
 
@@ -231,46 +238,66 @@ var YTFeedManager = {
 
 		}
 
-		YTFeedManager.updateComputedUnWatchedList( followerUserName );
+		YTFeedManager.updateCachedResults( followerUserName );
 
 	},
 
-	updateComputedUnWatchedList: function( followerUserName ) {
+	updateCachedResults: function( followerUserName ) {
 
 		for ( var i = 0; i < YTFeedManager.newFeedResults[followerUserName].length; ++i ) {
 
 			// If UserName Does not Exist Already
-			if ( !YTFeedManager.computedUnWatchedList[followerUserName] ) {
-				YTFeedManager.computedUnWatchedList[followerUserName] = {};
+			if ( !YTFeedManager.cachedResults[followerUserName] ) {
+				YTFeedManager.cachedResults[followerUserName] = {};
 			}
 
 			// If ID is not in UserName
-			if ( !YTFeedManager.computedUnWatchedList[followerUserName][YTFeedManager.newFeedResults[followerUserName][i]["id"]] ) {
+			if ( !YTFeedManager.cachedResults[followerUserName][YTFeedManager.newFeedResults[followerUserName][i]["id"]] ) {
 				
-				console.log( "[VIDEO_MAN] --> STORING --> ytStandardID " + YTFeedManager.newFeedResults[followerUserName][i]["id"] + " for " + followerUserName );
-				YTFeedManager.computedUnWatchedList[followerUserName][YTFeedManager.newFeedResults[followerUserName][i]["id"]] = {
+				console.log( colors.cyan( "[VIDEO_MAN] --> STORING --> ytStandardID( " + followerUserName + " , " + YTFeedManager.newFeedResults[followerUserName][i]["id"] + " )" ) );
+				YTFeedManager.cachedResults[followerUserName][YTFeedManager.newFeedResults[followerUserName][i]["id"]] = {
 					
 					title: YTFeedManager.newFeedResults[followerUserName][i].title,
 					pubdate: YTFeedManager.newFeedResults[followerUserName][i].pubdate,
-					watched: false,
+					//watched: false,
 					completed: false,
 					resumeTime: null
 
 				};
 
 			}
-			
+
 		}
 
-		jsonfile.writeFileSync( bSPath + "/ytStandardList.json" , YTFeedManager.computedUnWatchedList );
+		jsonfile.writeFileSync( bSPath + "/ytStandardList.json" , YTFeedManager.cachedResults );
 		YTFeedManager.newFeedResults = {};
+
+		YTFeedManager.updateComputedUnWatchedList();
+
+	},
+
+	updateComputedUnWatchedList: function() {
+
+		YTFeedManager.computedUnWatchedList = YTFeedManager.cachedResults;
+
+		for ( var iprop in YTFeedManager.computedUnWatchedList ) {
+
+			for ( var jprop in YTFeedManager.computedUnWatchedList[iprop] ) {
+
+				if ( YTFeedManager.computedUnWatchedList[iprop][jprop].completed ) {
+					delete YTFeedManager.computedUnWatchedList[iprop][jprop];
+				}
+
+			}
+
+		}
 
 	}
 
 };
 
 
-
+YTFeedManager.init();
 
 module.exports.returnAllSources = function() {
 	return {
@@ -322,29 +349,29 @@ module.exports.updateYTStandardInfo = function(wOBJ) {
 	var cT 	= parseInt( wOBJ.now.time );
 	var cDuration = wOBJ.now.duration;
 
-	console.log( "Updating ytStandardList.json with: " );
+	//console.log( "Updating ytStandardList.json with: " );
 
-	for ( var iprop in YTFeedManager.computedUnWatchedList ) {
-		for ( var jprop in YTFeedManager.computedUnWatchedList[iprop] ) {
+	for ( var iprop in YTFeedManager.cachedResults ) {
+		for ( var jprop in YTFeedManager.cachedResults[iprop] ) {
 			if ( jprop === lID ) {
-				if ( lT >= lDuration - 5 ) { YTFeedManager.computedUnWatchedList[iprop][jprop].completed = true; }
-				else { YTFeedManager.computedUnWatchedList[iprop][jprop].resumeTime = lT }
-				YTFeedManager.computedUnWatchedList[iprop][jprop].watched = true;
-				console.log("Last = ");
-				console.log( wOBJ.last );
-				console.log( YTFeedManager.computedUnWatchedList[iprop][jprop] );
+				if ( lT >= lDuration - 5 ) { YTFeedManager.cachedResults[iprop][jprop].completed = true; }
+				else { YTFeedManager.cachedResults[iprop][jprop].resumeTime = lT }
+				YTFeedManager.cachedResults[iprop][jprop].completed = true;
+				//console.log("Last = ");
+				//console.log( wOBJ.last );
+				//console.log( YTFeedManager.cachedResults[iprop][jprop] );
 			}
 			else if ( jprop === cID ) {
-				if ( cT >= cDuration - 5 ) { YTFeedManager.computedUnWatchedList[iprop][jprop].completed = true; }
-				else { YTFeedManager.computedUnWatchedList[iprop][jprop].resumeTime = cT }
-				YTFeedManager.computedUnWatchedList[iprop][jprop].watched = true;					
-				console.log("Current = ");
-				console.log( wOBJ.now );
-				console.log( YTFeedManager.computedUnWatchedList[iprop][jprop] );
+				if ( cT >= cDuration - 5 ) { YTFeedManager.cachedResults[iprop][jprop].completed = true; }
+				else { YTFeedManager.cachedResults[iprop][jprop].resumeTime = cT }
+				YTFeedManager.cachedResults[iprop][jprop].completed = true;					
+				//console.log("Current = ");
+				//console.log( wOBJ.now );
+				//console.log( YTFeedManager.cachedResults[iprop][jprop] );
 			}
 		}
 	}
 
-	jsonfile.writeFileSync( bSPath + "/ytStandardList.json" , YTFeedManager.computedUnWatchedList );
+	jsonfile.writeFileSync( bSPath + "/ytStandardList.json" , YTFeedManager.cachedResults );
 
 };	

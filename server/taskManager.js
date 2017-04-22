@@ -1,27 +1,30 @@
 var schedule = require('node-schedule');
 var wEmitter = require('../main.js').wEmitter;
 
+var colors = require("colors");
+
 var ytLiveList 		= "*/5 * * * *"; // every 5 minutes 
 var twitchLiveList 	= "*/59 * * * *"; // every 1 hour 
-var standardList 	= "*/59 * * * *"; // every 1 hour
+//var standardList 	= "*/59 * * * *"; // every 1 hour
+var standardList 	= "*/5 * * * *"; // every 1 hour
 
 var ytShuffle 		= "*/5 * * * *"; // every 5 Minutes
 
 
 var updateYouTubeLiveList = schedule.scheduleJob( ytLiveList , function() {
-	console.log("[TASK_MAN] --> SCHEDULED --> updateYTLiveList");	
+	console.log( "[TASK_MAN] --> SCHEDULED --> updateYTLiveList".black.bgWhite );	
 	wEmitter.emit('updateYTLiveList');
 });
 
 
 var updateTwitchLiveList = schedule.scheduleJob( twitchLiveList , function() {
-	console.log("[TASK_MAN] --> SCHEDULED --> updateTwitchLiveList");
+	console.log("[TASK_MAN] --> SCHEDULED --> updateTwitchLiveList".black.bgWhite );
 	wEmitter.emit('updateTwitchLiveList');
 });
 
 
 var updateStandardList = schedule.scheduleJob( standardList , function() {
-	console.log("[TASK_MAN] --> SCHEDULED --> updateStandardList");	
+	console.log("[TASK_MAN] --> SCHEDULED --> updateStandardList".black.bgWhite );	
 	wEmitter.emit('updateStandardList');
 });
 
@@ -29,7 +32,7 @@ var updateStandardList = schedule.scheduleJob( standardList , function() {
 var gotoNextYTLiveVideo = null;
 module.exports.startYTShuffleTask = function() {
 	gotoNextYTLiveVideo = schedule.scheduleJob( ytShuffle , function() { 
-		console.log("[TASK_MAN] --> SCHEDULED--> nextYTLiveVideo");
+		console.log("[TASK_MAN] --> SCHEDULED--> nextYTLiveVideo".black.bgWhite );
 		wEmitter.emit( 'socketSendTask' , 'nextYTLiveVideo', { 
 			message: 'goto nextYTLiveVideo',
 		});

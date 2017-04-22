@@ -1,5 +1,6 @@
 var fs = require('fs');
 var path = require("path");
+var colors = require("colors");
 
 var wEmitter = require('../main.js').wEmitter;
 
@@ -9,7 +10,7 @@ var wVM = require("./videoManager.js"); 	// Video-Manager
 var wMM = require("./mopidyManager.js"); 	// Mopidy-Manager
 var wSM = require("./skypeManager.js"); 	// Skype-Manager
 var wBM = require("./buttonManager.js"); 	// Button-Manager
-var wIM = require("./usbIRManager.js"); 	// USB_IR-Manager
+//var wIM = require("./usbIRManager.js"); 	// USB_IR-Manager
 //var wVV = require("./vlcManager.js")		// VLC-Manager
 
 
@@ -50,7 +51,7 @@ var wCM =  {
 		if ( wCM.state.skype.activeCall ) { return; }
 
 		if ( !wCM.state.tvON ) {
-			wIM.togglePower();
+			//wIM.togglePower();
 			wCM.state.tvON = true;
 		}
 
@@ -59,8 +60,8 @@ var wCM =  {
 		wCM.state.currentAction = wAction;
 
 
-		console.log( "[CLIENT_MAN] --> LastAction = " + wCM.state.lastAction );
-		console.log( "[CLIENT_MAN] --> CurrentAction = " + wCM.state.currentAction );
+		console.log( colors.magenta( "[CLIENT_MAN] --> LastAction = " + wCM.state.lastAction ) );
+		console.log( colors.magenta( "[CLIENT_MAN] --> CurrentAction = " + wCM.state.currentAction ) );
 
 		var isFFOpen = wFM.isFFOpen();
 
@@ -81,7 +82,7 @@ var wCM =  {
 		switch (wAction) {
 
 			case "skype":
-				console.log("[CLIENT_MAN] --> preparing skype call");
+				console.log("[CLIENT_MAN] --> preparing skype call".magenta);
 				if ( wCM.state.firefoxOpen ) { wFM.quit(); }
 				wCM.pauseMedia( wCM.state.lastAction );
 				wSM.startCall();
@@ -89,7 +90,7 @@ var wCM =  {
 
 			case "mopidyBGYT":
 
-				console.log("[CLIENT_MAN] --> preparing mopidy with YTLive Background Video");
+				console.log("[CLIENT_MAN] --> preparing mopidy with YTLive Background Video".magenta);
 				//wCM.state.mopidy.playing = true;
 
 				wCM.state.yt.standard = false;
@@ -153,7 +154,7 @@ var wCM =  {
 	stopEverything: function() {
 
 		if ( wCM.state.tvON ) {
-			wIM.togglePower();
+			//wIM.togglePower();
 			wCM.state.tvON = false;
 		}
 
@@ -192,57 +193,57 @@ var wCM =  {
 // 				Button-Event Handling
 // --------------------------------------------------------------------
 	wEmitter.on( 'button1Press' , function() { 
-		console.log("[CLIENT_MAN] --> now-playing--> random-classic");
+		console.log("[CLIENT_MAN] --> now-playing--> random-classic".magenta);
 		wCM.state.mopidy.playStyleToQue = "classic";
 		wCM.prepare( "mopidyBGYT" );
 	});
 
 	wEmitter.on( 'button2Press' , function() { 
-		console.log("[CLIENT_MAN] --> now-playing--> random-edm");
+		console.log("[CLIENT_MAN] --> now-playing--> random-edm".magenta);
 		wCM.state.mopidy.playStyleToQue = "edm";
 		wCM.prepare( "mopidyBGYT" );
 	});
 
 	wEmitter.on( 'button3Press' , function() { 
-		console.log("[CLIENT_MAN] --> now-playing --> random-misc");
+		console.log("[CLIENT_MAN] --> now-playing --> random-misc".magenta);
 		wCM.state.mopidy.playStyleToQue = "misc";
 		wCM.prepare( "mopidyBGYT" );
 	});
 
 	wEmitter.on( 'button4Press' , function() { 
-		console.log("[CLIENT_MAN] --> skype call cameron");
+		console.log("[CLIENT_MAN] --> skype call cameron".magenta);
 		fs.writeFileSync( path.join( __dirname , "py_scripts" , "wUserName.py" ) , "callingName = 'live:ccerb96'" );
 		wCM.prepare( "skype" );
 	});
 
 	wEmitter.on( 'button5Press' , function() { 
-		console.log("skype call collin");
+		console.log("skype call collin".magenta);
 		fs.writeFileSync( path.join( __dirname , "py_scripts" , "wUserName.py" ) , "callingName = 'collin.cerbus'" );
 		wCM.prepare( "skype" );
 	});
 
 	wEmitter.on( 'button6Press' , function() { 
-		console.log("[CLIENT_MAN] --> \"Emergency\" Stop Everything");
+		console.log("[CLIENT_MAN] --> \"Emergency\" Stop Everything".magenta);
 		wCM.stopEverything();
 	});	
 
 	wEmitter.on( 'button7Press' , function() { 
-		console.log("[CLIENT_MAN] --> now-playing --> YTStandardList");
+		console.log("[CLIENT_MAN] --> now-playing --> YTStandardList".magenta);
 		wCM.prepare( "youtubeFG" );
 	});	
 
 	wEmitter.on( 'button8Press' , function() { 
-		console.log("[CLIENT_MAN] --> play Previous-Media");
+		console.log("[CLIENT_MAN] --> play Previous-Media".magenta);
 		wCM.previousMedia();
 	});
 
 	wEmitter.on( 'button9Press' , function() { 
-		console.log("[CLIENT_MAN] --> play Next-Media");
+		console.log("[CLIENT_MAN] --> play Next-Media".magenta);
 		wCM.nextMedia();
 	});
 
 	wEmitter.on( 'button10Press' , function() { 
-		console.log("[CLIENT_MAN] --> stop all client tasks and play local-movie");
+		console.log("[CLIENT_MAN] --> stop all client tasks and play local-movie".magenta);
 		// wEmitter.emit("")
 		wEmitter.emit( 'socketSendTask' , 'stopBackgroundYTLive' );
 	});				
@@ -289,16 +290,16 @@ var wCM =  {
 
 //					State Management
 // ---------------------------------------------------------------------------------
-	wEmitter.on( 'firefoxOpen' , function() { console.log("[CLIENT_MAN] --> FireFox Open and Ready on localhost:6969"); wCM.state.firefoxOpen = true; });
+	wEmitter.on( 'firefoxOpen' , function() { console.log("[CLIENT_MAN] --> FireFox Open and Ready on localhost:6969".magenta); wCM.state.firefoxOpen = true; });
 	wEmitter.on( 'firefoxClosed' , function() { wCM.state.firefoxOpen = false; wCM.state.firefoxClientYTPlayerReady = true; });
 
 	wEmitter.on( 'skypeCallStarted' , function() { wCM.state.skype.activeCall = true; } );
 
 	wEmitter.on( 'skypeCallOver' , function() {
-		console.log("[CLIENT_MAN] --> skype call is over");
+		console.log("[CLIENT_MAN] --> skype call is over".magenta);
 		wCM.state.skype.activeCall = false;
 		if ( wCM.state.lastAction != "skype" ) {
-			console.log( "[CLIENT_MAN] --> restoring previous action --> " + wCM.state.lastAction );
+			console.log( colors.magenta( "[CLIENT_MAN] --> restoring previous action --> " + wCM.state.lastAction ) );
 			wCM.prepare( wCM.state.lastAction );
 		}
 	});
@@ -324,12 +325,12 @@ var wCM =  {
 // 					Testing / MISC
 // --------------------------------------------------------------
 	wEmitter.on( 'closeChildView' , function() {
-		console.log("[CLIENT_MAN] --> closing all client views");
+		console.log("[CLIENT_MAN] --> closing all client views".magenta);
 		wEmitter.emit( 'socketSendTask' , 'closeChildView', { });
 	});
 
 	wEmitter.on( 'properShutdown' , function() {
-		console.log("[CLIENT_MAN] --> Proper Shutdown");
+		console.log("[CLIENT_MAN] --> Proper Shutdown".magenta);
 		wCM.stopEverything();
 	});
 

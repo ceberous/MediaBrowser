@@ -1,6 +1,7 @@
 var wEmitter = require('../main.js').wEmitter;
 require('shelljs/global');
 var path = require("path");
+var colors = require("colors");
 
 var ffWrapper = {
 
@@ -8,7 +9,7 @@ var ffWrapper = {
 	windowID: null,
 
 	firstInit: function() {
-		console.log("[FIREFOX_MAN] --> BOOT-initializing ffWrapper");
+		console.log("[FIREFOX_MAN] --> BOOT-initializing ffWrapper".red);
 
 		var ensureBlankScreenIsOff = "xset s off && xset -dpms";
 		exec( ensureBlankScreenIsOff , { silent:true , async: false });
@@ -38,7 +39,7 @@ var ffWrapper = {
 	},
 
 	init: function() {
-		console.log("[FIREFOX_MAN] --> initializing ffWrapper");
+		console.log("[FIREFOX_MAN] --> initializing ffWrapper".red);
 		ffWrapper.terminateFF();
 		setTimeout( ()=> {
 			
@@ -69,16 +70,16 @@ var ffWrapper = {
 			var wT = isFFOpen[i].split(" ");
 			if ( wT[wT.length-1] === ffBinaryLocation1 ) {
 				ffWrapper.instancePID = wT[1].toString();
-				console.log("[FIREFOX_MAN] --> is OPEN");
+				console.log("[FIREFOX_MAN] --> is OPEN".red);
 				return true;
 			}
 			else if ( ( wT[wT.length-3] + " " + wT[wT.length-2] + " " + wT[wT.length-1] ) === ffBinaryLocation2 ){
 				ffWrapper.instancePID = wT[1].toString();
-				console.log("[FIREFOX_MAN] --> is OPEN");
+				console.log("[FIREFOX_MAN] --> is OPEN".red);
 				return true;
 			}
 		}
-		console.log("[FIREFOX_MAN] --> is CLOSED");
+		console.log("[FIREFOX_MAN] --> is CLOSED".red);
 		return false;
 		
 	},
@@ -87,14 +88,14 @@ var ffWrapper = {
 
 		var launchFFPath = path.join( __dirname , "ffLauncher.js"  );
 		var lauchFFString = "node " + launchFFPath; 
-		console.log("[FIREFOX_MAN] --> Launching Firefox");
+		console.log("[FIREFOX_MAN] --> Launching Firefox".red);
 		exec( lauchFFString , {silent:true , async: false });
 
 	},
 
 	terminateFF: function() {
 		exec( "pkill -9 firefox" , {silent:true ,  async: false }).stdout;
-		console.log("[FIREFOX_MAN] --> Killed Firefox");
+		console.log("[FIREFOX_MAN] --> Killed Firefox".red);
 		wEmitter.emit("firefoxClosed");
 	},
 
@@ -104,7 +105,7 @@ var ffWrapper = {
 		var activeFFWindowID = exec( findFirefox , {silent:true , async: false });
 		if ( activeFFWindowID.stderr.length > 1 ) { ffWrapper.windowID = null; console.log( "[FIREFOX_MAN] --> ERROR --> Could not Wrap FF Window" ); }
 		ffWrapper.windowID = activeFFWindowID.stdout.trim();
-		console.log( "[FIREFOX_MAN] --> WindowID = " + ffWrapper.windowID );
+		console.log( colors.red( "[FIREFOX_MAN] --> WindowID = " + ffWrapper.windowID ) );
 
 
 	},
@@ -163,8 +164,9 @@ var ffWrapper = {
 	
 	moveMouseToCenterOfWindow: function() {
 		//var centerOfWindow2Screen = "xdotool mousemove --window %0 2537 510"
-		var centerOfWindow13Inch = "xdotool mousemove --window %0 687 282"
-		exec( centerOfWindow13Inch , {silent:true , async: false }).stdout;
+		//var centerOfWindow13Inch = "xdotool mousemove --window %0 687 282";
+		var centerOfWindow2ndMonitor = "xdotool mousemove 687 282";
+		exec( centerOfWindow2ndMonitor , {silent:true , async: false }).stdout;
 	},
 
 	mouseLeftClick: function() {
@@ -199,7 +201,7 @@ var ffWrapper = {
 		setTimeout(function() {
 			var fKeyPress = 'xdotool key f';
 			exec( fKeyPress , {silent:true , async: false}).stdout;
-			console.log( "[FIREFOX_MAN] --> " + fKeyPress );
+			console.log( colors.red( "[FIREFOX_MAN] --> " + fKeyPress ) );
 			//ffWrapper.pressSpaceKey();
 		} , 1000 ); 
 		

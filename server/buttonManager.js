@@ -1,4 +1,5 @@
 var wEmitter = require('../main.js').wEmitter;
+var colors = require("colors");
 var fs = require("fs");
 var path = require("path");
 var StringDecoder = require('string_decoder').StringDecoder;
@@ -13,7 +14,7 @@ function getUSBDeviceEventPath() {
 	var findEventPath = 'ls -la /dev/input/by-id';
 	var findEventPathCMD = exec( findEventPath , {silent:true});
 	
-	if ( findEventPathCMD.stderr.length > 1 ) { console.log( "[BUTTON_MAN] --> ERROR --> " + findEventPathCMD.stderr  ); }
+	if ( findEventPathCMD.stderr.length > 1 ) { console.log( colors.green( "[BUTTON_MAN] --> ERROR --> " + findEventPathCMD.stderr  ) ); }
 
 	findEventPathCMD = findEventPathCMD.stdout.split("\n");
 
@@ -23,7 +24,7 @@ function getUSBDeviceEventPath() {
 		if ( wT[wT.length-3] === usbDeviceID ) {
 			var wEvent = wT[wT.length-1].split("../");
 			var wEventPath = 'eventPath = "/dev/input/' + wEvent[1] + '"';
-			console.log( "[BUTTON_MAN] --> " + wEventPath);
+			console.log( colors.green( "[BUTTON_MAN] --> " + wEventPath ) );
 			fs.writeFileSync( path.join( __dirname , "py_scripts" , "usbDevicePath.py" ) , wEventPath );
 			return true;
 		}
@@ -106,7 +107,7 @@ ButtonManager.stdout.on( "data" , function(data) {
 ButtonManager.stderr.on( "data" , function(data) {
 		var message = decoder.write(data);
 		message = message.trim();
-		console.log( "[buttonWatcher.py] --> ERROR -->"  );
+		console.log( "[buttonWatcher.py] --> ERROR -->".green  );
 		console.log(message);
 		wEmitter.emit( "properShutdown" );
 		setTimeout( ()=> { process.exit(1); } , 2000 );

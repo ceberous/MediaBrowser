@@ -1,5 +1,6 @@
 var wEmitter = require('../main.js').wEmitter;
 
+var colors = require("colors");
 var path = require("path");
 var jsonfile = require("jsonfile");
 
@@ -26,7 +27,7 @@ var MM = {
 		mopidy.close();
 		mopidy.off();
 		mopidy = null;
-		console.log("[MOPIDY_MAN] --> CLOSED");
+		console.log("[MOPIDY_MAN] --> CLOSED".yellow);
 		wEmitter.emit( "mopidyNotPlaying" );
 		wEmitter.emit("mopidyOffline");
 	},
@@ -53,7 +54,7 @@ var MM = {
 
 			var timeNow = new Date().getTime();
 			var wDiff = timeNow - MM.playlistManager.cachedPlaylists.lastUpdatedTime;
-			if ( wDiff < oneHour ) { console.log( "[MOPIDY_MAN] --> already updated playlist cache this hour" ); wEmitter.emit( 'playlistCacheUpdated' ); return; }
+			if ( wDiff < oneHour ) { console.log( "[MOPIDY_MAN] --> already updated playlist cache this hour".yellow ); wEmitter.emit( 'playlistCacheUpdated' ); return; }
 			
 			mopidy.playlists.getPlaylists().then(function(playlists){
 
@@ -81,7 +82,7 @@ var MM = {
 					
 					jsonfile.writeFileSync( MM.playlistManager.genreMapFilePath , MM.playlistManager.genreMap );
 					jsonfile.writeFileSync( MM.playlistManager.cachedFilePath , MM.playlistManager.cachedPlaylists );
-					console.log("[MOPIDY_MAN] --> playlist Cache Updated");
+					console.log("[MOPIDY_MAN] --> playlist Cache Updated".yellow);
 					wEmitter.emit( 'playlistCacheUpdated' );
 
 			});
@@ -124,7 +125,7 @@ var MM = {
 		getState: function() {
 
 		    mopidy.playback.getState().then(function (state) {
-		        console.log( "[MOPIDY_MAN] --> STATE = " + state );
+		        console.log( colors.yellow( "[MOPIDY_MAN] --> STATE = " + state ) );
 		        MM.playbackManager.currentState = state;
 		    });
 
@@ -270,15 +271,15 @@ var MM = {
 		getCurrentPosition: function() {
 		    mopidy.tracklist.index().then( function(index) {
 
-		    	if ( index === null ) { index = 0; console.log("null index was returned"); } 
+		    	if ( index === null ) { index = 0; console.log("[MOPIDY_MAN] --> getCurrentPosition()--> null index was returned".yellow); } 
 		    	MM.tracklistManager.nowPlayingList.index = index;
 
-		    	console.log( "[MOPIDY_MAN] --> PlaylistGenre = " + MM.tracklistManager.nowPlayingList.genre );
-		    	console.log( "[MOPIDY_MAN] --> Playlist = " + MM.tracklistManager.nowPlayingList.name );
-		    	console.log( "[MOPIDY_MAN] --> TrackArtist = " + MM.tracklistManager.nowPlayingList.tracks[index].artists[0].name );
+		    	console.log( colors.yellow( "[MOPIDY_MAN] --> PlaylistGenre = " + MM.tracklistManager.nowPlayingList.genre ) );
+		    	console.log( colors.yellow( "[MOPIDY_MAN] --> Playlist = " + MM.tracklistManager.nowPlayingList.name ) );
+		    	console.log( colors.yellow( "[MOPIDY_MAN] --> TrackArtist = " + MM.tracklistManager.nowPlayingList.tracks[index].artists[0].name ) );
 		    	setTimeout(function(){
-					console.log( "[MOPIDY_MAN] --> Track = " + MM.tracklistManager.nowPlayingList.tracks[index].name );
-					console.log( "[MOPIDY_MAN] --> [" + ( index + 1 ) + "] of " + MM.tracklistManager.nowPlayingList.length.toString() + " || SHUFFLE = " + MM.tracklistManager.randomMode.toString() );
+					console.log( colors.yellow( "[MOPIDY_MAN] --> Track = " + MM.tracklistManager.nowPlayingList.tracks[index].name ) );
+					console.log( colors.yellow( "[MOPIDY_MAN] --> [" + ( index + 1 ) + "] of " + MM.tracklistManager.nowPlayingList.length.toString() + " || SHUFFLE = " + MM.tracklistManager.randomMode.toString() ) );
 		    	} , 500 );
 
 		    });
@@ -333,7 +334,7 @@ wEmitter.on( 'playlistCacheUpdated' , function() {
 
 	if ( !MM.firstLaunchReady ) { MM.firstLaunchReady = true; MM.playlistManager.getRandomList();  } 
 	else {
-		console.log("[MOPIDY_MAN] --> ONLINE"); 
+		console.log( "[MOPIDY_MAN] --> ONLINE".yellow ); 
 		wEmitter.emit("mopidyOnline"); 
 	}
 
@@ -366,6 +367,6 @@ module.exports.closeMopidy = function() {
 
 
 process.on('SIGINT', function () {
-	console.log("\n[MOPIDY] --> Shutting Down\n");
+	console.log( "\n[MOPIDY] --> Shutting Down\n".yellow );
 	MM.shutdown();
 });

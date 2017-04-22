@@ -34,7 +34,9 @@ app.get( "/" , function( req , res , next ) {
 	res.render( 'index.html' );
 });
 
-
+app.get( "/control" , function( req , res , next ) {
+	res.render( 'control.html' );
+});
 
 
 
