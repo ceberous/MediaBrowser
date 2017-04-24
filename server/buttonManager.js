@@ -12,7 +12,7 @@ function getUSBDeviceEventPath() {
 
 	var usbDeviceID = "usb-DragonRise_Inc._Generic_USB_Joystick-event-joystick";
 	var findEventPath = 'ls -la /dev/input/by-id';
-	var findEventPathCMD = exec( findEventPath , {silent:true});
+	var findEventPathCMD = exec( findEventPath , { silent:true , async: false });
 	
 	if ( findEventPathCMD.stderr.length > 1 ) { console.log( colors.green( "[BUTTON_MAN] --> ERROR --> " + findEventPathCMD.stderr  ) ); }
 
