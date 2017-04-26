@@ -340,7 +340,6 @@ var wPM = {
 
 	startPlayer: function() {
 
-		console.log( colors.green( "[LOCAL_VM] --> NowPlaying = " + wPM.nowPlaying ) );
 		mediaFiles.watchedList.globalLastWatched = wPM.nowPlaying;
 		jsonfile.writeFileSync( mediaFiles.hardDrive.watchedListFP , mediaFiles.watchedList );
 		
@@ -351,6 +350,7 @@ var wPM = {
 		var defaultArgs = [ wPM.nowPlaying.path , '-msglevel', 'global=0', '-msglevel', 'cplayer=4', '-idle', '-slave', '-fs', '-noborder'];
 		wPM.wPlayer = spawn( "mplayer" , defaultArgs , wOptions );
 		console.log( colors.green( "[LOCAL_VM] -->  MPlayer PID = " + wPM.wPlayer.pid.toString() ) );
+		wPM.active = true;
 		wEmitter.emit("mPlayerPlaying");
 
 		var ignoreMessages = [
@@ -447,9 +447,11 @@ var wPM = {
 	stop: function() {
 		wPM.sendCMD( "stop" );
 		wPM.state.playing = false;
-		wPM.wPlayer.kill();
-		wPM.wPlayer = null;
 		wPM.active = false;
+		setTimeout(function(){
+			wPM.wPlayer.kill();
+			wPM.wPlayer = null;
+		} , 1400 );
 		wEmitter.emit("mPlayerStopped");
 	},
 
@@ -475,17 +477,31 @@ wEmitter.on( "mPlayerPlaying" , function(data) {
 
 });
 
+
+
 module.exports.playMedia = function( wRandom , wGenre ) {
 	if ( wPM.active ) {
 		wPM.stop();
-	}
-	if ( wRandom ) {
-		wPM.playRandom( wGenre );
+		setTimeout( function() {
+			if ( wRandom ) {
+				wPM.playRandom( wGenre );
+			}
+			else {
+				console.log( mediaFiles.watchedList.globalLastWatched );
+				wPM.playNextInTVShow();
+			}
+		} , 3000 );
 	}
 	else {
-		console.log( mediaFiles.watchedList.globalLastWatched );
-		wPM.playNextInTVShow();
+		if ( wRandom ) {
+			wPM.playRandom( wGenre );
+		}
+		else {
+			console.log( mediaFiles.watchedList.globalLastWatched );
+			wPM.playNextInTVShow();
+		}
 	}
+	
 };
 
 module.exports.pauseMedia = function() {

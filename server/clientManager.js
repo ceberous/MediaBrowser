@@ -49,7 +49,23 @@ var wCM =  {
 		"tvShow": wLVM,
 	},
 
+	configureFirefox: function() {
+		if ( !wFM.isFFOpen() ) { 
+			wFM.init();
+			wCM.state.firefoxClientTaskNeedQued = true;
+		}
+		else if ( wCM.state.currentAction != wCM.state.lastAction ){
+			wFM.init();
+			wCM.state.firefoxClientTaskNeedQued = true;
+		}
+		else if ( !wCM.state.firefoxOpen ) { // this bool needs to be re-named to wCM.state.firefoxClientReady or something
+			wCM.state.firefoxClientTaskNeedQued = true;	
+		}
+	},
+
 	prepare: function(wAction) {
+
+		console.log(wAction);
 
 		if ( wCM.state.skype.activeCall ) { return; }
 
@@ -66,22 +82,6 @@ var wCM =  {
 		console.log( colors.magenta( "[CLIENT_MAN] --> CurrentAction = " + wCM.state.currentAction ) );
 
 		if ( wCM.state.lastAction === wCM.state.currentAction ) { wCM.state.actionSkipped = true; }
-				
-		var isFFOpen = wFM.isFFOpen();
-
-		if ( wAction != "skype" || wAction != "tvShow" ) {
-			if ( !isFFOpen ) { 
-				wFM.init();
-				wCM.state.firefoxClientTaskNeedQued = true;
-			}
-			else if ( wCM.state.currentAction != wCM.state.lastAction ){
-				wFM.init();
-				wCM.state.firefoxClientTaskNeedQued = true;
-			}
-			else if ( !wCM.state.firefoxOpen ) { // this bool needs to be re-named to wCM.state.firefoxClientReady or something
-				wCM.state.firefoxClientTaskNeedQued = true;	
-			}			
-		}
 		
 		switch (wAction) {
 
@@ -94,6 +94,7 @@ var wCM =  {
 
 			case "mopidyBGYT":
 
+				wCM.configureFirefox();
 				console.log("[CLIENT_MAN] --> preparing mopidy with YTLive Background Video".magenta);
 
 				wCM.state.yt.standard = false;
@@ -118,11 +119,12 @@ var wCM =  {
 				
 
 			case "mopidy":
-
+				wCM.configureFirefox();
 				break;
 
 			case "youtubeFG":
 
+				wCM.configureFirefox();
 				if ( wCM.state.mopidy.playing ) { wMM.stopMedia(); }
 				if ( wCM.state.yt.background ) { wTM.stopYTShuffleTask(); wCM.state.yt.background = false; }
 
@@ -139,11 +141,11 @@ var wCM =  {
 				break;
 
 			case "twitchFG":
-
+				wCM.configureFirefox();
 				break;
 
 			case "singleYT":
-				
+				wCM.configureFirefox();
 				if ( wCM.state.firefoxClientTaskNeedQued ) {
 					wEmitter.emit( 'queClientTaskOnReady' , "playYTSingleVideo" , { playlist: [wCM.singleYTVideoID] } );
 					wCM.state.firefoxClientTaskNeedQued = false;
@@ -163,8 +165,8 @@ var wCM =  {
 				break;
 
 			case "tvShow":
-				
-				if ( isFFOpen ) { wFM.quit(); }
+
+				if ( wFM.isFFOpen() ) { wFM.quit(); }
 				if ( wCM.state.mopidy.playing ) { wMM.stopMedia(); }
 				if ( wCM.state.yt.background ) { wTM.stopYTShuffleTask(); wCM.state.yt.background = false; }
 
