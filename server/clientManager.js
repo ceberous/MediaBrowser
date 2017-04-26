@@ -210,10 +210,11 @@ var wCM =  {
 		console.log("[CLIENT_MAN] --> now-playing--> random-classic".magenta);
 		wCM.state.mopidy.playStyleToQue = "classic";
 		
-		//wCM.prepare( "mopidyBGYT" );
+		wCM.prepare( "mopidyBGYT" );
 
-		wCM.prepare( "singleYT" );
-		wCM.singleYTVideoID = "ybSNXGKM304";
+		// Adhoc Testing
+		//wCM.prepare( "singleYT" );
+		//wCM.singleYTVideoID = "ybSNXGKM304";
 	});
 
 	wEmitter.on( 'button2Press' , function() { 

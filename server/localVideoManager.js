@@ -29,9 +29,9 @@ var mediaFiles = {
 		mediaFiles.hardDrive.watchedListFP = path.join( __dirname , "save_files" , "hdWatchedList.json" );
 		mediaFiles.structure = jsonfile.readFileSync( mediaFiles.hardDrive.structureCacheFP );
 		mediaFiles.watchedList = jsonfile.readFileSync( mediaFiles.hardDrive.watchedListFP );
-		
-		//mediaFiles.updateStructureCache();
-		//mediaFiles.updateWatchList();
+
+		mediaFiles.updateStructureCache();
+		mediaFiles.updateWatchList();
 	
 	},
 
@@ -49,10 +49,16 @@ var mediaFiles = {
 					if ( wOUT1.stderr !== undefined && wOUT1.stderr.length > 1 ) { console.log("error finding USB Hard Drive"); process.exit(1); }
 					else{
 						mediaFiles.hardDrive.UUID = wT[4].split("UUID=\"")[1].slice(0,-1);
-						mediaFiles.hardDrive.baseDIR = wOUT1.stdout.trim().replace( /\\x20/g , " " );
+
+						// Need Better Matching because Ubuntu Mounts this using different schemes
+						mediaFiles.hardDrive.baseDIR = wOUT1.stdout.trim().replace( /\\x5c/g , "" ).replace( /\\x20/g , "\ \\" );
+
 						console.log( colors.green( "[LOCAL_VM] --> UUID = " + mediaFiles.hardDrive.UUID + " || " + mediaFiles.hardDrive.baseDIR ) );
 						if ( mediaFiles.hardDrive.baseDIR === '' ) {
-							exec( "sudo mkdir /media/haley/Seagate\ Expansion\ Drive" , { silent: true , async: false } );
+							var wPath = path.join( "/" , "media" , "haley" , "Seagate" , "Expansion" , "Drive" );
+							var wPath = "sudo mkdir " + wPath;
+							console.log(wPath);
+							exec( wPath , { silent: true , async: false } );
 							exec( "sudo mount -U " + mediaFiles.hardDrive.UUID , { silent: true , async: false } );
 							mediaFiles.findUSBHardDrive();
 						}
@@ -64,6 +70,7 @@ var mediaFiles = {
 	},
 
 	updateStructureCache: function() {
+		console.log( mediaFiles.hardDrive.baseDIR );
 		mediaFiles.structure = dirTree( mediaFiles.hardDrive.baseDIR );
 		jsonfile.writeFileSync( mediaFiles.hardDrive.structureCacheFP , mediaFiles.structure );
 		mediaFiles.updateWatchList();
@@ -114,12 +121,17 @@ var mediaFiles = {
 			finalResults[iprop] = { lastWached: {} , totalItems: wList[iprop].length };
 			for ( var j = 0; j < wList[iprop].length; ++j ) {
 
+				var wShowName = mediaFiles.structure.children[wIndex].children[j].name;
 				wList[iprop][j] = wList[iprop][j].filter(String);
-				finalResults[iprop][mediaFiles.structure.children[wIndex].children[j].name] = { index: j , items:[] , lastWached:[] };
+				finalResults[iprop][wShowName] = { index: j , items:[] , lastWached:[] };
+				
+				if ( mediaFiles.watchedList[iprop][wShowName].lastWached.length > 1 ){
+					finalResults[iprop][wShowName].lastWached = mediaFiles.watchedList[iprop][wShowName].lastWached;
+				}
 
-					for ( var k = 0; k < wList[iprop][j].length; ++k ) {
-						finalResults[iprop][mediaFiles.structure.children[wIndex].children[j].name].items.push(wList[iprop][j][k].length);
-					}
+				for ( var k = 0; k < wList[iprop][j].length; ++k ) {
+					finalResults[iprop][mediaFiles.structure.children[wIndex].children[j].name].items.push(wList[iprop][j][k].length);
+				}
 	
 			}
 			wIndex += 1;
@@ -189,25 +201,27 @@ var wPM = {
 		var randomShowFolderIndex = wPM.getRandomVal( 0 , wFolderMax );
 		var wEpisodeMax = mediaFiles.watchedList[wPM.genre][randomShowName].items[randomShowFolderIndex] - 1;
 		var randomEpisodeIndex = wPM.getRandomVal( 0 , wEpisodeMax );
-
-		//console.log( "Genre Index = " + wPM.genreIndex.toString() );
-		//console.log( "Show Index = " + randomShowIndex.toString() );
-		//console.log( "Folder Max = " + wFolderMax.toString() );
-		//console.log( "ShowSubFolder Index = " + randomShowFolderIndex.toString() );
-		//console.log( "Episode Max = " + wEpisodeMax.toString() );
-		//console.log( "ShowItem Index = " + randomEpisodeIndex.toString() );
 		
 		var wEpisode , newTableMapEntry;
 
 		// More Rediculousness 
 		switch( wPM.genre ) {
 			case "TV Shows":
-				wEpisode = wPM.tableLookUp( wPM.genreIndex , randomShowIndex , randomShowFolderIndex , randomEpisodeIndex  );
+				wEpisode = wPM.structureLookup({
+					items: [
+						wPM.genreIndex , randomShowIndex , randomShowFolderIndex , randomEpisodeIndex
+					],
+				});
 				newTableMapEntry = [ wPM.genreIndex , randomShowIndex , randomShowFolderIndex , randomEpisodeIndex ];
 				break;
 
 			case "Movies":
-				wEpisode = wPM.tableLookUp( wPM.genreIndex , randomShowIndex  );
+				wEpisode = wPM.structureLookup({
+					items: [
+						wPM.genreIndex , randomShowIndex 
+					],
+				});
+				//wEpisode = wPM.tableLookUp( wPM.genreIndex , randomShowIndex  );
 				newTableMapEntry = [ wPM.genreIndex , randomShowIndex ];
 				break;
 
@@ -220,7 +234,12 @@ var wPM = {
 				break;
 
 			case "Music":
-				wEpisode = wPM.tableLookUp( wPM.genreIndex , randomShowIndex , randomEpisodeIndex  );
+				wEpisode = wPM.structureLookup({
+					items: [
+						wPM.genreIndex , randomShowIndex , randomEpisodeIndex
+					],
+				});
+				//wEpisode = wPM.tableLookUp( wPM.genreIndex , randomShowIndex , randomEpisodeIndex  );
 				newTableMapEntry = [ wPM.genreIndex , randomShowIndex , randomEpisodeIndex ];
 				break;
 
@@ -239,11 +258,10 @@ var wPM = {
 		var wGenreIndex = mediaFiles.watchedList.rootMap["TV Shows"];
 		var wShowIndex = mediaFiles.watchedList["TV Shows"][wShowName].index;
 		var wFolderMax = mediaFiles.watchedList["TV Shows"][wShowName].items.length - 1;
-		var wEpisodeMax;
+		var wEpisodeMax = mediaFiles.watchedList["TV Shows"][wShowName].items[0];
 		var wFolderIndex = 0; 
 		var wEpisodeIndex = 0;
-		
-		console.log(mediaFiles.watchedList["TV Shows"][wShowName]);
+				
 		if ( mediaFiles.watchedList["TV Shows"][wShowName]["lastWached"].length > 1 ) {
 			wFolderIndex = mediaFiles.watchedList["TV Shows"][wShowName].lastWached[0];
 			wEpisodeIndex = mediaFiles.watchedList["TV Shows"][wShowName].lastWached[1] + 1;
@@ -252,19 +270,18 @@ var wPM = {
 		
 		if ( wEpisodeIndex > wEpisodeMax ) { wEpisodeIndex = 0; wFolderIndex += 1; }
 		if ( wFolderIndex > wFolderMax ) { wFolderIndex = 0; }
-		
-		//console.log( "GenreIndex = " + wGenreIndex.toString() );
-		//console.log( "ShowIndex = " + wShowIndex.toString() );
-		//console.log( "FolderIndex = " + wFolderIndex.toString() );
-		//console.log( "EpisodeIndex = " + wEpisodeIndex.toString() );
-
-		var wEpisode = wPM.tableLookUp( wGenreIndex , wShowIndex , wFolderIndex , wEpisodeIndex );
+	
+		var wEpisode = wPM.structureLookup({
+			items: [
+				wGenreIndex , wShowIndex , wFolderIndex , wEpisodeIndex 
+			],
+		});
 
 		mediaFiles.watchedList["TV Shows"][wShowName]["lastWached"][0] = wFolderIndex;
 		mediaFiles.watchedList["TV Shows"][wShowName]["lastWached"][1] = wEpisodeIndex;
 
 		wPM.tableMap.previous = wPM.tableMap.now;
-		wPM.tableMap.now = [ "TV Shows" , wShowIndex , wFolderIndex , wEpisodeIndex ];
+		wPM.tableMap.now = [ wGenreIndex , wShowIndex , wFolderIndex , wEpisodeIndex ];
 		
 		wPM.nowPlaying.name = wEpisode.name;
 		wPM.nowPlaying.path = wEpisode.path;
@@ -282,40 +299,38 @@ var wPM = {
 		return Math.floor( Math.random() * ( max - min + 1 ) ) + min;
 	},
 
-	// my other autistic moment
-	tableLookUp: function( genreIndex , showIndex , showSubFolderIndex , itemIndex ) {
+	structureLookup: function(wOBJ) {
 
-		if ( !itemIndex ) {
-			if ( itemIndex === 0 ) {
+		var wDepth = wOBJ.items.length;
+		var wResult;
+		switch ( wDepth ) {
+			case 1:
+				console.log("we were passed a 1 deep item");
+				wResult = mediaFiles.structure.children[ wOBJ.items[0] ];
+				break;
+			case 2:
+				console.log("we were passed a 2 deep item");
+				wResult = mediaFiles.structure.children[ wOBJ.items[0] ].children[  wOBJ.items[1] ];
+				break;
+			case 3: 
 				console.log("we were passed a 3 deep item");
-				return mediaFiles.structure.children[ genreIndex ].children[ showIndex ].children[ showSubFolderIndex ].children[ itemIndex ];
-			}
-			else if ( !showSubFolderIndex ) {
-				if ( showSubFolderIndex === 0 ) {
-					console.log("was passed a 2 deep item");
-					return mediaFiles.structure.children[ genreIndex ].children[ showIndex ].children[ showSubFolderIndex ];
-				}
-				else {
-					console.log("passed a 1 deep item");
-					return mediaFiles.structure.children[ genreIndex ].children[ showIndex ];
-				}
-			}
-			else {
-				console.log("was passed a 2 deep item");
-				return mediaFiles.structure.children[ genreIndex ].children[ showIndex ].children[ showSubFolderIndex ];		
-			}
+				wResult = mediaFiles.structure.children[ wOBJ.items[0] ].children[  wOBJ.items[1] ].children[  wOBJ.items[2] ];
+				break;
+			case 4:
+				console.log("we were passed a 4 deep item");
+				wResult = mediaFiles.structure.children[ wOBJ.items[0] ].children[  wOBJ.items[1] ].children[  wOBJ.items[2] ].children[  wOBJ.items[3] ];
+				break;
+			default:
+				break;
 		}
-		else {
-			console.log("we were passed a 3 deep item");
-			return mediaFiles.structure.children[ genreIndex ].children[ showIndex ].children[ showSubFolderIndex ].children[ itemIndex ];
-		}
-	
+
+		return wResult;
+
 	},
 
 	startPlayer: function() {
 
 		console.log(wPM.nowPlaying);
-
 		mediaFiles.watchedList.globalLastWatched = wPM.nowPlaying;
 		jsonfile.writeFileSync( mediaFiles.hardDrive.watchedListFP , mediaFiles.watchedList );
 		
@@ -325,6 +340,7 @@ var wPM = {
 		
 		var defaultArgs = [ wPM.nowPlaying.path , '-msglevel', 'global=0', '-msglevel', 'cplayer=4', '-idle', '-slave', '-fs', '-noborder'];
 		wPM.wPlayer = spawn( "mplayer" , defaultArgs , wOptions );
+		console.log( colors.green( "[LOCAL_VM] -->  MPlayer PID = " + wPM.wPlayer.pid.toString() ) );
 		wEmitter.emit("mPlayerPlaying");
 
 		var ignoreMessages = [
@@ -443,7 +459,7 @@ var wPM = {
 
 mediaFiles.init();
 //wPM.playRandom( "TV Shows" );
-wPM.playNextInTVShow( "Gilmore Girls" );
+wPM.playNextInTVShow( "Brady Bunch" );
 
 
 wEmitter.on( "mPlayerPlaying" , function(data) {

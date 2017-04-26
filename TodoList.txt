@@ -47,5 +47,3 @@ https://cloud.google.com/appengine/docs/standard/python/download
 
 https://code.google.com/archive/p/google-plus-hangout-samples/downloads
 
-TESTING 124
-
