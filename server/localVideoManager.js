@@ -1,6 +1,6 @@
 var colors = require("colors");
-//var wEmitter = require('../main.js').wEmitter;
-var wEmitter = new (require('events').EventEmitter);
+var wEmitter = require('../main.js').wEmitter;
+//var wEmitter = new (require('events').EventEmitter);
 
 var fs = require('fs');
 var path = require("path");
@@ -30,8 +30,8 @@ var mediaFiles = {
 		mediaFiles.structure = jsonfile.readFileSync( mediaFiles.hardDrive.structureCacheFP );
 		mediaFiles.watchedList = jsonfile.readFileSync( mediaFiles.hardDrive.watchedListFP );
 
-		mediaFiles.updateStructureCache();
-		mediaFiles.updateWatchList();
+		//mediaFiles.updateStructureCache();
+		//mediaFiles.updateWatchList();
 	
 	},
 
@@ -118,10 +118,11 @@ var mediaFiles = {
 		var finalResults = {globalLastWatched: {}};
 		var wIndex = 0;
 		for ( var iprop in wList ) {
-			finalResults[iprop] = { lastWached: {} , totalItems: wList[iprop].length };
+			finalResults[iprop] = { lastWached: 0 , totalItems: wList[iprop].length , showNames: [] };
 			for ( var j = 0; j < wList[iprop].length; ++j ) {
 
 				var wShowName = mediaFiles.structure.children[wIndex].children[j].name;
+				finalResults[iprop].showNames.push(wShowName);
 				wList[iprop][j] = wList[iprop][j].filter(String);
 				finalResults[iprop][wShowName] = { index: j , items:[] , lastWached:[] };
 				
@@ -158,6 +159,7 @@ var mediaFiles = {
 
 var wPM = {
 
+	active: false,
 	randomMode: false,
 	genre: null,
 	genreIndex: null,
@@ -255,6 +257,13 @@ var wPM = {
 
 	playNextInTVShow: function( wShowName ) {
 
+		var wIndex = mediaFiles.watchedList["TV Shows"].lastWached + 1; 
+		if ( wIndex > ( mediaFiles.watchedList["TV Shows"].totalItems - 1 ) ) {
+			var wIndex = 0;
+		}
+
+		if ( !wShowName ) { var wShowName = mediaFiles.watchedList["TV Shows"].showNames[ wIndex ]; }
+
 		var wGenreIndex = mediaFiles.watchedList.rootMap["TV Shows"];
 		var wShowIndex = mediaFiles.watchedList["TV Shows"][wShowName].index;
 		var wFolderMax = mediaFiles.watchedList["TV Shows"][wShowName].items.length - 1;
@@ -277,6 +286,7 @@ var wPM = {
 			],
 		});
 
+		mediaFiles.watchedList["TV Shows"].lastWached = wShowIndex;
 		mediaFiles.watchedList["TV Shows"][wShowName]["lastWached"][0] = wFolderIndex;
 		mediaFiles.watchedList["TV Shows"][wShowName]["lastWached"][1] = wEpisodeIndex;
 
@@ -305,19 +315,19 @@ var wPM = {
 		var wResult;
 		switch ( wDepth ) {
 			case 1:
-				console.log("we were passed a 1 deep item");
+				//console.log("we were passed a 1 deep item");
 				wResult = mediaFiles.structure.children[ wOBJ.items[0] ];
 				break;
 			case 2:
-				console.log("we were passed a 2 deep item");
+				//console.log("we were passed a 2 deep item");
 				wResult = mediaFiles.structure.children[ wOBJ.items[0] ].children[  wOBJ.items[1] ];
 				break;
 			case 3: 
-				console.log("we were passed a 3 deep item");
+				//console.log("we were passed a 3 deep item");
 				wResult = mediaFiles.structure.children[ wOBJ.items[0] ].children[  wOBJ.items[1] ].children[  wOBJ.items[2] ];
 				break;
 			case 4:
-				console.log("we were passed a 4 deep item");
+				//console.log("we were passed a 4 deep item");
 				wResult = mediaFiles.structure.children[ wOBJ.items[0] ].children[  wOBJ.items[1] ].children[  wOBJ.items[2] ].children[  wOBJ.items[3] ];
 				break;
 			default:
@@ -330,7 +340,7 @@ var wPM = {
 
 	startPlayer: function() {
 
-		console.log(wPM.nowPlaying);
+		console.log( colors.green( "[LOCAL_VM] --> NowPlaying = " + wPM.nowPlaying ) );
 		mediaFiles.watchedList.globalLastWatched = wPM.nowPlaying;
 		jsonfile.writeFileSync( mediaFiles.hardDrive.watchedListFP , mediaFiles.watchedList );
 		
@@ -439,6 +449,7 @@ var wPM = {
 		wPM.state.playing = false;
 		wPM.wPlayer.kill();
 		wPM.wPlayer = null;
+		wPM.active = false;
 		wEmitter.emit("mPlayerStopped");
 	},
 
@@ -458,17 +469,23 @@ var wPM = {
 
 
 mediaFiles.init();
-//wPM.playRandom( "TV Shows" );
-wPM.playNextInTVShow( "Brady Bunch" );
 
 
 wEmitter.on( "mPlayerPlaying" , function(data) {
-	console.log( "now Playing" );
-	console.log( data );
+
 });
 
 module.exports.playMedia = function( wRandom , wGenre ) {
-	wPM.prepare( wRandom , wGenre );
+	if ( wPM.active ) {
+		wPM.stop();
+	}
+	if ( wRandom ) {
+		wPM.playRandom( wGenre );
+	}
+	else {
+		console.log( mediaFiles.watchedList.globalLastWatched );
+		wPM.playNextInTVShow();
+	}
 };
 
 module.exports.pauseMedia = function() {

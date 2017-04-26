@@ -20,8 +20,8 @@
 	|2.) Mopidy-Random EDM				| 8.) Previous Media 				 |
 	|3.) Mopidy-Random Misc				| 9.) Next Media 					 |
 	|4.) Skype Cameron					| 10.) Play Archived Movie		  	 |
-	|5.) Skype Collin					| 11.) Play Podcast  	 		 	 |
-	|6.) "Emergency" Stop Everything	| 12.) Play Audiobook				 |
+	|5.) Skype Collin					| 11.) Play Podcast / AudioBook  	 |
+	|6.) "Emergency" Stop Everything	| 12.) Play Archived TV Show		 |
 	--------------------------------------------------------------------------
 
 

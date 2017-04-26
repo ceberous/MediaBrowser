@@ -4,14 +4,14 @@ var colors = require("colors");
 
 var wEmitter = require('../main.js').wEmitter;
 
-var wTM = require("./taskManager.js"); 		// Task-Manager
-var wFM = require("./ffManager.js");		// Firefox-Manager
-var wVM = require("./videoManager.js"); 	// Video-Manager
-var wMM = require("./mopidyManager.js"); 	// Mopidy-Manager
-var wSM = require("./skypeManager.js"); 	// Skype-Manager
-var wBM = require("./buttonManager.js"); 	// Button-Manager
-//var wIM = require("./usbIRManager.js"); 	// USB_IR-Manager
-//var wVV = require("./vlcManager.js")		// VLC-Manager
+var wTM 	= require("./taskManager.js"); 		// Task-Manager
+var wFM 	= require("./ffManager.js");		// Firefox-Manager
+var wVM 	= require("./videoManager.js"); 	// Video-Manager
+var wMM 	= require("./mopidyManager.js"); 	// Mopidy-Manager
+var wSM 	= require("./skypeManager.js"); 	// Skype-Manager
+var wBM 	= require("./buttonManager.js"); 	// Button-Manager
+//var wIM 	= require("./usbIRManager.js"); 	// USB_IR-Manager
+var wLVM 	= require("./localVideoManager.js");// VLC-Manager
 
 
 wVM.updateYTLiveList();
@@ -46,6 +46,7 @@ var wCM =  {
 		//"singleYT": wVV,
 		//"podcast": wVV,
 		//"audioBook": wVV,
+		"tvShow": wLVM,
 	},
 
 	prepare: function(wAction) {
@@ -68,7 +69,7 @@ var wCM =  {
 				
 		var isFFOpen = wFM.isFFOpen();
 
-		if ( wAction != "skype" ) {
+		if ( wAction != "skype" || wAction != "tvShow" ) {
 			if ( !isFFOpen ) { 
 				wFM.init();
 				wCM.state.firefoxClientTaskNeedQued = true;
@@ -159,7 +160,17 @@ var wCM =  {
 
 			case "audioBook":
 
-				break;	
+				break;
+
+			case "tvShow":
+				
+				if ( isFFOpen ) { wFM.quit(); }
+				if ( wCM.state.mopidy.playing ) { wMM.stopMedia(); }
+				if ( wCM.state.yt.background ) { wTM.stopYTShuffleTask(); wCM.state.yt.background = false; }
+
+				wLVM.playMedia( false , "TV Shows" );
+
+				break;
 
 		}
 
@@ -265,7 +276,12 @@ var wCM =  {
 		console.log("[CLIENT_MAN] --> stop all client tasks and play local-movie".magenta);
 		// wEmitter.emit("")
 		wEmitter.emit( 'socketSendTask' , 'stopBackgroundYTLive' );
-	});				
+	});
+
+	wEmitter.on( 'button12Press' , function() { 
+		console.log("[CLIENT_MAN] --> stop all client tasks and play local-TV Show".magenta);
+		wCM.prepare( "tvShow" );
+	});						
 
 // --------------------------------------------------------------------
 
