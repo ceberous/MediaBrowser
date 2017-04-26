@@ -1,6 +1,5 @@
 var colors = require("colors");
 var wEmitter = require('../main.js').wEmitter;
-//var wEmitter = new (require('events').EventEmitter);
 
 var fs = require('fs');
 var path = require("path");
@@ -423,13 +422,14 @@ var wPM = {
 				}
 
 				if ( !ignore ) {
-					console.log(message);	
+					//console.log(message);
+					wEmitter.emit( "mPlayerError" , message );
 				} 
 
 		});
 
 		wPM.wPlayer.on( "close" , function(code) {
-			console.log( "Exit Code = " + code.toString() );
+			wEmitter.emit( "mPlayerClosed" , code );
 		});
 
 	},
@@ -487,7 +487,6 @@ module.exports.playMedia = function( wRandom , wGenre ) {
 				wPM.playRandom( wGenre );
 			}
 			else {
-				console.log( mediaFiles.watchedList.globalLastWatched );
 				wPM.playNextInTVShow();
 			}
 		} , 3000 );
@@ -497,11 +496,9 @@ module.exports.playMedia = function( wRandom , wGenre ) {
 			wPM.playRandom( wGenre );
 		}
 		else {
-			console.log( mediaFiles.watchedList.globalLastWatched );
 			wPM.playNextInTVShow();
 		}
 	}
-	
 };
 
 module.exports.pauseMedia = function() {
@@ -519,19 +516,3 @@ module.exports.previousMedia = function() {
 module.exports.stopMedia = function() {
 	wMPWrapper.stop();
 };
-
-
-/*
-// Testing Example
-var wGenre = "TV Shows";
-var wShowName = "Parks and Recreation";
-var wGenreIndex = mediaFiles.watchedList.rootMap[wGenre];
-var wShowIndex = mediaFiles.watchedList[wGenre][wShowName].index;
-// Last Season Example
-var wSeasonIndex = mediaFiles.watchedList[wGenre][wShowName].items.length - 1 
-// Final Episode Example
-var wEpisodeIndex = mediaFiles.watchedList[wGenre][wShowName].items[ mediaFiles.watchedList[wGenre][wShowName].items.length - 1 ];
-var nowPlaying = mediaFiles.structure.children[wGenreIndex].children[wShowIndex].children[wSeasonIndex].children[ wEpisodeIndex - 1 ] 
-console.log( nowPlaying );
-wMPWrapper.watch(nowPlaying.path);
-*/

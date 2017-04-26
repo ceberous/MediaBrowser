@@ -23,6 +23,7 @@ var wCM =  {
 		twitch: { live: false , standard: false , paused: false },
 		vlcVideo: { playing: false , paused: false },
 		mopidy: { playing: false , paused: false , playStyleToQue: null },
+		mPlayer: { error: {} , active: false , playing: false , paused: false , activeGenre: null , activeShow: null },
 		podcast: { playing: false , paused: false },
 		audioBook: { playing: false , paused: false },
 		skype: { activeCall: false },
@@ -64,8 +65,6 @@ var wCM =  {
 	},
 
 	prepare: function(wAction) {
-
-		console.log(wAction);
 
 		if ( wCM.state.skype.activeCall ) { return; }
 
@@ -127,6 +126,7 @@ var wCM =  {
 				wCM.configureFirefox();
 				if ( wCM.state.mopidy.playing ) { wMM.stopMedia(); }
 				if ( wCM.state.yt.background ) { wTM.stopYTShuffleTask(); wCM.state.yt.background = false; }
+
 
 				wCM.state.firefoxClientTask.name = 'playYTStandard';
 
@@ -356,6 +356,18 @@ var wCM =  {
 	wEmitter.on( "mopidyNotPlaying"  , function() { wCM.state.mopidy.playing = false; });
 
 	wEmitter.on( 'firefoxClientYTPlayerReady' , function() { wCM.state.firefoxClientYTPlayerReady = true; } );
+
+	wEmitter.on( "mPlayerError" , function(wMSG) { 
+		wCM.state.mPlayer.active = false; 
+		wCM.state.mPlayer.error["active"] = true; 
+		wCM.state.mPlayer.error["message"] = wMSG; 
+		console.log(wCM.state.mPlayer.error); 
+	});
+	wEmitter.on( "mPlayerPlaying" , function() { wCM.state.mPlayer.active = true; wCM.state.mPlayer.playing = true; });
+	wEmitter.on( "mPlayerPaused" , function() { wCM.state.mPlayer.paused = true; wCM.state.mPlayer.playing = false; });
+	wEmitter.on( "mPlayerStopped" , function() { wCM.state.mPlayer.playing = false; });
+	wEmitter.on( "mPlayerClosed" , function(wCode) { wCM.state.mPlayer.active = false; console.log( "mPlayer Exit Code = " + wCode.toString() ); });
+
 // ---------------------------------------------------------------------------------
 
 
