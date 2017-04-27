@@ -431,6 +431,9 @@ var wPM = {
 		});
 
 		wPM.wPlayer.on( "close" , function(code) {
+			wPM.active = false;
+			wPM.state.playing = false;
+			wPM.wPlayer = null;
 			wEmitter.emit( "mPlayerClosed" , code );
 		});
 
