@@ -251,3 +251,5 @@ module.exports.glitchFullScreen = function() {
 module.exports.isFFOpen = function() {
     return ffWrapper.checkIfFFIsOpen();
 };
+
+wEmitter.on( "killFirefox" , function(){ ffWrapper.terminateFF(); })

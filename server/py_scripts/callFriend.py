@@ -1,5 +1,6 @@
 import sys
 import Skype4Py
+import time
 
 from wUserName import callingName
 
@@ -28,6 +29,14 @@ def OnCall(call, status):
         #callobj1.StartVideoSend()
         #callobj1.StartVideoRecieve()
     '''
+    if ( wText == "Recording" ):
+        time.sleep(5)
+        callobj1.Finish()
+        
+
+    if ( wText == "Never placed" ):
+        callobj1.Finish()
+
 
 def OnAttach(status): 
     print 'API attachment status: ' + AttachmentStatusText(status)

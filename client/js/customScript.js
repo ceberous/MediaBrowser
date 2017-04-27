@@ -100,6 +100,10 @@ $(document).ready( function() {
 			$(document).trigger( "nextYTLiveVideo" );
 		});
 
+		socket.on( 'stopMedia' , function (data) {
+			closeChildView();
+		});		
+
 		socket.on( 'nextMedia' , function (data) {
 			$(document).trigger( "nextMedia" );
 		});

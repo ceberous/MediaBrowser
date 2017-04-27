@@ -76,11 +76,13 @@ var windowWrapper = {
 
 var callScript = path.join( __dirname , "py_scripts" , "callFriend.py" );
 var childPROC = null;
+var childPROC_PID = null;
 var childWrapper = {
 
 	start: function() {
-		childPROC = spawn( 'python' , [callScript] );
+		childPROC = spawn( 'python' , [callScript] , {detatched: true} );
 		console.log("[SKYPE_MAN] --> callFriend.py spawned");
+		childPROC_PID = childPROC.pid;
 		childPROC.stdout.on( "data" , function(data) {
 			var message = decoder.write(data);
 			message = message.trim();
@@ -134,8 +136,10 @@ var childWrapper = {
 		// skype freaks out if you close the window ubruptly with xdotool so... we have to just minimize it
 		// and wait for it to close on it's own.
 		//windowWrapper.closeWindow();
-		windowWrapper.minimizeWindow();
+		//windowWrapper.minimizeWindow();
 		childPROC.kill();
+		exec( "sudo kill -9 " + childPROC_PID.toString() , {silent:true ,  async: false} );
+		//process.kill(childPROC_PID);
 		wEmitter.emit("skypeCallOver");
 	},
 
@@ -143,8 +147,10 @@ var childWrapper = {
 		console.log("[SKYPE_MAN] --> waiting 5 seconds to record voicemail");
 		setTimeout( function() {
 			//windowWrapper.closeWindow();
-			windowWrapper.minimizeWindow();
+			//windowWrapper.minimizeWindow();
 			childPROC.kill();
+			//process.kill(childPROC_PID);
+			exec( "sudo kill -9 " + childPROC_PID.toString() , {silent:true ,  async: false} );
 			wEmitter.emit("skypeCallOver");
 		} , 5000 );
 	}

@@ -37,7 +37,8 @@ var mediaFiles = {
 	findUSBHardDrive: function() {
 		var usbHardDriveLabel = "LABEL=\"Seagate"; 
 		var findEventPathCMD = exec( "sudo blkid" , { silent: true , async: false } );
-		if ( findEventPathCMD.stderr !== undefined && findEventPathCMD.stderr.length > 1 ) { console.log("error finding USB Hard Drive"); process.exit(1); }
+		//console.log( findEventPathCMD );
+		if ( findEventPathCMD.stderr ) { console.log("error finding USB Hard Drive"); process.exit(1); }
 		else{ 
 			var wOUT = findEventPathCMD.stdout.split("\n");
 			for ( var i = 0; i < wOUT.length; ++i ) {
@@ -45,7 +46,8 @@ var mediaFiles = {
 				var wT = wOUT[i].split(" ");
 				if ( wT[ 1 ] === usbHardDriveLabel ) {
 					var wOUT1 = exec( "findmnt -rn -S " + wT[4] + " -o TARGET" , { silent:true , async: false } );
-					if ( wOUT1.stderr !== undefined && wOUT1.stderr.length > 1 ) { console.log("error finding USB Hard Drive"); process.exit(1); }
+					//console.log(wOUT1);
+					if ( wOUT1.stderr ) { console.log("error finding USB Hard Drive"); process.exit(1); }
 					else{
 						mediaFiles.hardDrive.UUID = wT[4].split("UUID=\"")[1].slice(0,-1);
 
@@ -506,7 +508,7 @@ module.exports.pauseMedia = function() {
 };
 
 module.exports.nextMedia = function() {
-	wPM.next();
+	wPM.playNextInTVShow();
 };
 
 module.exports.previousMedia = function() {
@@ -514,5 +516,5 @@ module.exports.previousMedia = function() {
 };
 
 module.exports.stopMedia = function() {
-	wMPWrapper.stop();
+	wPM.stop();
 };

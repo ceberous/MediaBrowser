@@ -14,8 +14,6 @@ var wBM 	= require("./buttonManager.js"); 	// Button-Manager
 var wLVM 	= require("./localVideoManager.js");// VLC-Manager
 
 
-wVM.updateYTLiveList();
-
 var wCM =  {
 
 	state: {
@@ -73,21 +71,27 @@ var wCM =  {
 			wCM.state.tvON = true;
 		}
 
-		if ( wCM.state.lastAction === null ) { wCM.state.lastAction = wAction; }
-		else { wCM.state.lastAction = wCM.state.currentAction }
-		wCM.state.currentAction = wAction;
-
+		// Shift Actions
+		if ( wCM.state.lastAction === null ) { wCM.state.lastAction = wAction; wCM.state.currentAction = wAction; }
+		else {
+			wCM.state.lastAction = wCM.state.currentAction
+			wCM.state.currentAction = wAction; 
+			if ( wCM.state.lastAction != wCM.state.currentAction ) {
+				wCM.stopMedia( wCM.state.lastAction );
+			}
+			else {
+				wCM.state.actionSkipped = true;
+			}
+		}		
 		console.log( colors.magenta( "[CLIENT_MAN] --> LastAction = " + wCM.state.lastAction ) );
 		console.log( colors.magenta( "[CLIENT_MAN] --> CurrentAction = " + wCM.state.currentAction ) );
-
-		if ( wCM.state.lastAction === wCM.state.currentAction ) { wCM.state.actionSkipped = true; }
 		
 		switch (wAction) {
 
 			case "skype":
 				console.log("[CLIENT_MAN] --> preparing skype call".magenta);
 				if ( wCM.state.firefoxOpen ) { wFM.quit(); }
-				wCM.pauseMedia( wCM.state.lastAction );
+				//wCM.pauseMedia( wCM.state.lastAction );
 				wSM.startCall();
 				break;
 
@@ -192,6 +196,10 @@ var wCM =  {
 		//if ( wCM.state.vlcVideo.playing ) { wVV.stop(); wCM.state.vlcVideo.playing = false;  }
 
 	},
+
+	stopMedia: function( wAction ) {
+		wCM.managerMap[wAction].stopMedia();
+	},	
 
 	pauseMedia: function( wAction ) {
 		if ( wCM.state.currentAction != "skype" ) {

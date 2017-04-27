@@ -10,7 +10,7 @@ for event in gamepad.read_loop():
         
         keyevent = categorize(event)
         
-        if keyevent.keystate == KeyEvent.key_up:
+        if keyevent.keystate == KeyEvent.key_up: 
             
             if keyevent.keycode[0] == 'BTN_JOYSTICK':
                 print "6"

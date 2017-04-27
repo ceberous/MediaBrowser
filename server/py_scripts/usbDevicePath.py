@@ -1,1 +1,1 @@
-eventPath = "/dev/input/event7"
+eventPath = "/dev/input/event12"

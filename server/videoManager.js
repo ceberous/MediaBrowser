@@ -79,6 +79,10 @@ var YTLiveManager = {
 	newResults: {},
 	computedUnWatchedList: ytLiveList,
 
+	init: function() {
+		YTLiveManager.enumerateFollowers();
+	},
+
 	enumerateFollowers: function() {
 
 		for( var i = 0; i < YTLiveManager.followers.length; ++i ) {
@@ -297,6 +301,7 @@ var YTFeedManager = {
 };
 
 
+YTLiveManager.init();
 YTFeedManager.init();
 
 module.exports.returnAllSources = function() {
@@ -330,6 +335,13 @@ module.exports.updateTwitchLiveList = function() {
 module.exports.updateStandardList = function() {
 	YTFeedManager.enumerateFollowers();
 	//TwitchFeedManager.enumerateFollowers();
+};
+
+module.exports.stopMedia = function() {
+	wEmitter.emit( 'socketSendTask' , "stopMedia" );
+	setTimeout(function(){
+		wEmitter.emit("killFirefox");
+	});
 };
 
 module.exports.nextMedia = function() {
