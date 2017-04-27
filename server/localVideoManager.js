@@ -162,6 +162,7 @@ var wPM = {
 
 	active: false,
 	randomMode: false,
+	continuousWatching: false,
 	genre: null,
 	genreIndex: null,
 	genreFolders: [],
@@ -341,11 +342,18 @@ var wPM = {
 
 	startPlayer: function() {
 
+		if ( wPM.active ) {
+			wPM.sendCMD( "stop" );
+			wPM.state.playing = false;
+			wPM.active = false;
+			wPM.wPlayer = null;
+		}
+
 		mediaFiles.watchedList.globalLastWatched = wPM.nowPlaying;
 		jsonfile.writeFileSync( mediaFiles.hardDrive.watchedListFP , mediaFiles.watchedList );
 		
 		var wOptions = {
-		
+			
 		};
 		
 		var defaultArgs = [ wPM.nowPlaying.path , '-msglevel', 'global=0', '-msglevel', 'cplayer=4', '-idle', '-slave', '-fs', '-noborder'];
@@ -396,37 +404,60 @@ var wPM = {
 		];
 		var ignoreErrorMessagesLength = ignoreErrorMessages.length;
 
+		var headerDamagedExample = "{ active: true, message: '[mpeg4 @ 0x7fb189c08560]header damaged\nError while decoding frame!' }";
+
 		var ignore = false;
-		wPM.wPlayer.stdout.on( "data" , function(data) {
-				
-				var message = decoder.write(data);
+		var message;
+		var timeStart, timeEnd, time;
+
+		wPM.wPlayer.stdout.on( "data" , function(data) {	
+
+			if ( data.indexOf('A:') != 0 )  {
+				message = decoder.write(data);
 				message = message.trim();
-				if ( data.indexOf('A:') != 0 )  {
-					for ( var i = 0; i < ignoreMessagesLength; ++i ) {
-						if ( message === ignoreMessages[i] ) {
-							ignore = true;
-						}
+				for ( var i = 0; i < ignoreMessagesLength; ++i ) {
+					if ( message === ignoreMessages[i] ) {
+						ignore = true;
 					}
-					if ( !ignore ) {
-						console.log(message);	
-					} 
 				}
+				if ( !ignore ) {
+					console.log(message);	
+				} 
+			}
+
+			if ( data.indexOf( 'A:' ) === 0 ) {
+
+				data = data.toString("binary");
+
+	            if(data.indexOf(' V:') !== -1) {
+	                timeStart = data.indexOf(' V:') + 3;
+	                timeEnd = data.indexOf(' A-V:');
+	            } else {
+	                timeStart = data.indexOf('A:') + 2;
+	                timeEnd = data.indexOf(' (');
+	               	console.log(data);
+	            }
+
+				time = data.substring(timeStart, timeEnd).trim();
+	            console.log(time);
+
+			}
 				
 		});
 
 		wPM.wPlayer.stderr.on( "data" , function(data) {
-				var message = decoder.write(data);
-				message = message.trim();
-				for ( var i = 0; i < ignoreErrorMessagesLength; ++i ) {
-					if ( message === ignoreErrorMessages[i] ) {
-						ignore = true;
-					}
+			var message = decoder.write(data);
+			message = message.trim();
+			for ( var i = 0; i < ignoreErrorMessagesLength; ++i ) {
+				if ( message === ignoreErrorMessages[i] ) {
+					ignore = true;
 				}
+			}
 
-				if ( !ignore ) {
-					//console.log(message);
-					wEmitter.emit( "mPlayerError" , message );
-				} 
+			if ( !ignore ) {
+				//console.log(message);
+				wEmitter.emit( "mPlayerError" , message );
+			} 
 
 		});
 
@@ -434,7 +465,17 @@ var wPM = {
 			wPM.active = false;
 			wPM.state.playing = false;
 			wPM.wPlayer = null;
-			wEmitter.emit( "mPlayerClosed" , code );
+			if ( wPM.continuousWatching ) {
+				if (wPM.randomMode) {
+					wPM.playRandom( wPM.genre );
+				}
+				else{
+					wPM.playNextInTVShow();
+				}
+			}
+			else {
+				wEmitter.emit( "mPlayerClosed" , code );
+			}
 		});
 
 	},
@@ -453,15 +494,8 @@ var wPM = {
 		wPM.sendCMD( "stop" );
 		wPM.state.playing = false;
 		wPM.active = false;
-
-		setTimeout(function(){
-			if ( wPM.wPlayer != null ) {
-				wPM.wPlayer.kill();
-				wPM.wPlayer = null;
-			}
-			wEmitter.emit("mPlayerStopped");
-		} , 1400 );
-		
+		wPM.wPlayer = null;
+		wEmitter.emit("mPlayerStopped");	
 	},
 
 	seek: function(seconds) {
@@ -469,12 +503,6 @@ var wPM = {
     },
 
 };
-
-
-
-
-
-
 
 
 
@@ -489,6 +517,9 @@ wEmitter.on( "mPlayerPlaying" , function(data) {
 
 
 module.exports.playMedia = function( wRandom , wGenre ) {
+
+	wPM.continuousWatching = true;
+
 	if ( wPM.active ) {
 		wPM.stop();
 		setTimeout( function() {
@@ -525,3 +556,5 @@ module.exports.previousMedia = function() {
 module.exports.stopMedia = function() {
 	wPM.stop();
 };
+
+

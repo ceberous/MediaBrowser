@@ -1,5 +1,5 @@
 
-1.) Update Playlist Play Counts
+1.) Update Mopidy-Playlist Play Counts
 
 // Waiting on API Credential Approval from Twitch
 2.) Implement TwitchAPI
@@ -11,11 +11,12 @@
 
 4.) Add "Cloud" Web-Control ( for various "admin" tasks , like editing YTLive Blacklist )
 
+
 5.) Add Resume Times to MPlayer 
 6.) Add Resume-Video-ID to YTStandard and couch.. twitch
 
 
-6.) Ensure Pulse Audio is Setup Right.
+7.) Ensure Pulse Audio is Setup Right.
 	--> Appropriate Volume
 	--> Output Device
 
