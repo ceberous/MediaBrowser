@@ -12,8 +12,6 @@ var jsonfile = require("jsonfile");
 var Filehound = require("filehound");
 var mime = require('mime');
 
-
-
 var mediaFiles = {
 	
 	hardDrive: { UUID: null , baseDIR: null , structureCacheSaveFP: null , watchedListFP: null  },
@@ -23,7 +21,7 @@ var mediaFiles = {
 	init: function( ) {
 
 		mediaFiles.findUSBHardDrive();
-
+		
 		mediaFiles.hardDrive.structureCacheFP = path.join( __dirname , "save_files" , "hdFolderStructure.json" );
 		mediaFiles.hardDrive.watchedListFP = path.join( __dirname , "save_files" , "hdWatchedList.json" );
 		mediaFiles.structure = jsonfile.readFileSync( mediaFiles.hardDrive.structureCacheFP );
@@ -31,11 +29,12 @@ var mediaFiles = {
 
 		//mediaFiles.updateStructureCache();
 		//mediaFiles.updateWatchList();
+		
 	
 	},
 
 	findUSBHardDrive: function() {
-		var usbHardDriveLabel = "LABEL=\"Seagate"; 
+		var usbHardDriveLabel = "LABEL=\"Seagate\""; 
 		var findEventPathCMD = exec( "sudo blkid" , { silent: true , async: false } );
 		//console.log( findEventPathCMD );
 		if ( findEventPathCMD.stderr ) { console.log("error finding USB Hard Drive"); process.exit(1); }
@@ -45,8 +44,8 @@ var mediaFiles = {
 
 				var wT = wOUT[i].split(" ");
 				if ( wT[ 1 ] === usbHardDriveLabel ) {
-					var wOUT1 = exec( "findmnt -rn -S " + wT[4] + " -o TARGET" , { silent:true , async: false } );
-					//console.log(wOUT1);
+					var wCMD6 = "findmnt -rn -S " + wT[4] + " -o TARGET";
+					var wOUT1 = exec( wCMD6 , { silent:true , async: false } );
 					if ( wOUT1.stderr ) { console.log("error finding USB Hard Drive"); process.exit(1); }
 					else{
 						mediaFiles.hardDrive.UUID = wT[4].split("UUID=\"")[1].slice(0,-1);
@@ -56,11 +55,11 @@ var mediaFiles = {
 
 						console.log( colors.green( "[LOCAL_VM] --> UUID = " + mediaFiles.hardDrive.UUID + " || " + mediaFiles.hardDrive.baseDIR ) );
 						if ( mediaFiles.hardDrive.baseDIR === '' ) {
-							var wPath = path.join( "/" , "media" , "haley" , "Seagate" , "Expansion" , "Drive" );
+							var wPath = path.join( "/" , "media" , "haley" , "Seagate"  );
 							var wPath = "sudo mkdir " + wPath;
 							console.log(wPath);
 							exec( wPath , { silent: true , async: false } );
-							exec( "sudo mount -U " + mediaFiles.hardDrive.UUID , { silent: true , async: false } );
+							exec( "sudo mount -U " + mediaFiles.hardDrive.UUID + " --target " + wPath , { silent: true , async: false } );
 							mediaFiles.findUSBHardDrive();
 						}
 					}
@@ -152,8 +151,11 @@ var mediaFiles = {
 	fixPathSpace: function(wFP) {
 		var fixSpace = new RegExp( " " , "g" );
 		wFP = wFP.replace( fixSpace , String.fromCharCode(92) + " " );
+		wFP = wFP.replace( ")" , String.fromCharCode(92) + ")" );
+		wFP = wFP.replace( "'" , String.fromCharCode(92) + "'" );
 		return wFP;
 	}
+		
 
 };
 
@@ -349,6 +351,12 @@ var wPM = {
 			wPM.wPlayer = null;
 		}
 
+		var wCMD5 = "mediainfo --Inform=\"Video;%Duration%\" " + mediaFiles.fixPathSpace( wPM.nowPlaying.path );
+		//var wCMD5 = "mediainfo --Inform=\"Video;%Duration%\" " + wPM.nowPlaying.path;
+		console.log(wCMD5);
+		var wDuration = exec( wCMD5 , { silent: true , async: false } );
+		wDuration = wDuration.stdout.trim();
+
 		mediaFiles.watchedList.globalLastWatched = wPM.nowPlaying;
 		jsonfile.writeFileSync( mediaFiles.hardDrive.watchedListFP , mediaFiles.watchedList );
 		
@@ -439,7 +447,8 @@ var wPM = {
 	            }
 
 				time = data.substring(timeStart, timeEnd).trim();
-	            console.log(time);
+				time = ( time * 1000 ).toFixed();
+	            //console.log( time.toString() + " / " + wDuration.toString() );
 
 			}
 				

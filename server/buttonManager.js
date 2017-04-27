@@ -40,7 +40,13 @@ if ( !getUSBDeviceEventPath() ) { throw new Error( "[BUTTON_MAN] --> Cannot Find
 var buttonScript = path.join( __dirname , "py_scripts" , "buttonWatcher.py" );
 var ButtonManager = spawn( 'python' , [buttonScript] );
 
+var lastPressed = new Date().getTime();
+var timeNow;
 var handleButtonInput = function(wInput) {
+
+	timeNow = new Date().getTime();
+	if ( ( timeNow - lastPressed ) < 3000 ) { console.log("pressed too soon"); return; }
+	lastPressed = timeNow;
 
 	switch(wInput) {
 
