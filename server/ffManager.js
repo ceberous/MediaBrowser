@@ -211,7 +211,7 @@ var ffWrapper = {
 
 
 // On Module-Import
-//ffWrapper.firstInit();
+ffWrapper.firstInit();
 
 module.exports.init = function() {
 	ffWrapper.init();

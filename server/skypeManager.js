@@ -80,7 +80,7 @@ var childPROC_PID = null;
 var childWrapper = {
 
 	start: function() {
-		childPROC = spawn( 'python' , [callScript] , {detatched: true} );
+		childPROC = spawn( 'python' , [callScript] , {detatched: false} );
 		console.log("[SKYPE_MAN] --> callFriend.py spawned");
 		childPROC_PID = childPROC.pid;
 		childPROC.stdout.on( "data" , function(data) {
@@ -92,7 +92,7 @@ var childWrapper = {
 
 	handleOutput: function(wMesssage) {
 
-		console.log( "[SKYPE_MAN] --> " + wMesssage );
+		//console.log( "[SKYPE_MAN] --> " + wMesssage );
 		switch( wMesssage ) {
 
 			case "Call status: Never placed":

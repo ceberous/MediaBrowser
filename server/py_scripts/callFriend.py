@@ -20,23 +20,20 @@ def OnCall(call, status):
     global callobj1
     CallStatus = status
     wText = CallStatusText(status)
-    print 'Call status: ' + wText
-    sys.stdout.flush()
-    '''
-    if wText == "Call in Progress":
-        print("trying to add video")
-        sys.stdout.flush()
-        #callobj1.StartVideoSend()
-        #callobj1.StartVideoRecieve()
-    '''
+
     if ( wText == "Recording" ):
         time.sleep(5)
         callobj1.Finish()
+        print("ended call")
+        sys.stdout.flush()
         
-
-    if ( wText == "Never placed" ):
+    elif ( wText == "Never placed" ):
         callobj1.Finish()
+        sys.stdout.flush()
 
+    else:
+        print 'Call status: ' + wText
+        sys.stdout.flush()
 
 def OnAttach(status): 
     print 'API attachment status: ' + AttachmentStatusText(status)

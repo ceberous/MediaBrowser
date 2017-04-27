@@ -193,7 +193,7 @@ var wCM =  {
 		if ( wCM.state.firefoxOpen ) { wFM.quit(); }
 		if ( wCM.state.mopidy.playing ) { wMM.stopMedia(); }
 		if ( wCM.state.skype.activeCall ) { wSM.stopCall(); }
-		//if ( wCM.state.vlcVideo.playing ) { wVV.stop(); wCM.state.vlcVideo.playing = false;  }
+		if ( wCM.state.mPlayer.playing || wCM.state.mPlayer.active ) { wLVM.stopMedia(); wCM.state.vlcVideo.playing = false;  }
 
 	},
 

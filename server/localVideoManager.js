@@ -450,11 +450,15 @@ var wPM = {
 		wPM.sendCMD( "stop" );
 		wPM.state.playing = false;
 		wPM.active = false;
+
 		setTimeout(function(){
-			wPM.wPlayer.kill();
-			wPM.wPlayer = null;
+			if ( wPM.wPlayer != null ) {
+				wPM.wPlayer.kill();
+				wPM.wPlayer = null;
+			}
+			wEmitter.emit("mPlayerStopped");
 		} , 1400 );
-		wEmitter.emit("mPlayerStopped");
+		
 	},
 
 	seek: function(seconds) {
