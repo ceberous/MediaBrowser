@@ -351,6 +351,8 @@ var wPM = {
 			wPM.wPlayer = null;
 		}
 
+		console.log(wPM.nowPlaying);
+
 		var wCMD5 = "mediainfo --Inform=\"Video;%Duration%\" " + mediaFiles.fixPathSpace( wPM.nowPlaying.path );
 		//var wCMD5 = "mediainfo --Inform=\"Video;%Duration%\" " + wPM.nowPlaying.path;
 		console.log(wCMD5);
@@ -483,6 +485,7 @@ var wPM = {
 				}
 			}
 			else {
+				wPM.continuousWatching = false;
 				wEmitter.emit( "mPlayerClosed" , code );
 			}
 		});
@@ -490,7 +493,10 @@ var wPM = {
 	},
 
 	sendCMD: function( wCMD , wARGS ) {
-		wPM.wPlayer.stdin.write([wCMD].concat(wARGS).join(' ') + '\n');
+		//console.log(wCMD);
+		if ( wPM.wPlayer != null ) {
+			wPM.wPlayer.stdin.write([wCMD].concat(wARGS).join(' ') + '\n');
+		}
 	},
 
 	pause: function() {
@@ -503,6 +509,7 @@ var wPM = {
 		wPM.sendCMD( "stop" );
 		wPM.state.playing = false;
 		wPM.active = false;
+		wPM.continuousWatching = false;
 		wPM.wPlayer = null;
 		wEmitter.emit("mPlayerStopped");	
 	},

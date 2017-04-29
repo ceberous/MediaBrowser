@@ -189,7 +189,11 @@ var wCM =  {
 			wCM.state.tvON = false;
 		}
 
-		if ( wCM.state.yt.background ) { wTM.stopYTShuffleTask(); wCM.state.yt.background = false; }
+		wTM.stopYTShuffleTask();
+		wCM.state.yt.background = false;
+		wCM.state.lastAction = null;
+		wCM.state.currentAction = null;
+		//if ( wCM.state.yt.background ) { wTM.stopYTShuffleTask();  }
 		if ( wCM.state.firefoxOpen ) { wFM.quit(); }
 		if ( wCM.state.mopidy.playing ) { wMM.stopMedia(); }
 		if ( wCM.state.skype.activeCall ) { wSM.stopCall(); }

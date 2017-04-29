@@ -6,6 +6,7 @@ from wUserName import callingName
 
 CallStatus = 0
 callobj1 = 0
+retryCount = 0
 
 CallIsFinished = set ([Skype4Py.clsFailed, Skype4Py.clsFinished, Skype4Py.clsMissed, Skype4Py.clsRefused, Skype4Py.clsBusy, Skype4Py.clsCancelled]);
 
@@ -30,6 +31,12 @@ def OnCall(call, status):
     elif ( wText == "Never placed" ):
         callobj1.Finish()
         sys.stdout.flush()
+
+    elif ( wText == "Cancelled" ):
+    	if ( retryCount < 3 ):
+    		retryCount = retryCount + 1
+    		time.sleep(2)
+    		makeCall()
 
     else:
         print 'Call status: ' + wText
@@ -73,12 +80,18 @@ if not skype.Client.IsRunning:
 # Attatching to Skype..
 print 'Connecting to Skype..'
 skype.Attach()
-		
-print 'Calling ' + callingName + '..'
-callobj1 = skype.PlaceCall(callingName)
 
-		
-# Loop until CallStatus gets one of "call terminated" values in OnCall handler
-while not CallStatus in CallIsFinished:
-    pass
 
+def makeCall():
+
+	print 'Calling ' + callingName + '..'
+	callobj1 = skype.PlaceCall(callingName)
+
+			
+	# Loop until CallStatus gets one of "call terminated" values in OnCall handler
+	while not CallStatus in CallIsFinished:
+	    pass
+
+
+
+makeCall()

@@ -88,6 +88,11 @@ var childWrapper = {
 			message = message.trim();
 			childWrapper.handleOutput(message);
 		});
+		childPROC.stderr.on( "data" , function(data) {
+			var message = decoder.write(data);
+			message = message.trim();
+			console.log(message);
+		});
 	},
 
 	handleOutput: function(wMesssage) {
@@ -116,13 +121,16 @@ var childWrapper = {
 				childWrapper.regularCleanup();
 				break;
 
+			/*
 			case "Call status: Cancelled":
 				childWrapper.regularCleanup();
 				break;
 
+
 			case "Call status: Recording":
 				childWrapper.voicemailCleanUp();
 				break;
+			*/
 
 			case "Call status: Voicemail Has Been Sent":
 				childWrapper.regularCleanup();
@@ -158,7 +166,7 @@ var childWrapper = {
 
 };
 
-
+//childWrapper.start();
 module.exports.startCall = function() {  
 	childWrapper.start();
 };
