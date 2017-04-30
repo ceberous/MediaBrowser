@@ -39,6 +39,7 @@ if ( !getUSBDeviceEventPath() ) { throw new Error( "[BUTTON_MAN] --> Cannot Find
 
 var buttonScript = path.join( __dirname , "py_scripts" , "buttonWatcher.py" );
 var ButtonManager = spawn( 'python' , [buttonScript] );
+console.log( "@@PID=" + ButtonManager.pid );
 
 var lastPressed = new Date().getTime();
 var timeNow;
@@ -117,4 +118,16 @@ ButtonManager.stderr.on( "data" , function(data) {
 		console.log(message);
 		wEmitter.emit( "properShutdown" );
 		setTimeout( ()=> { process.exit(1); } , 2000 );
+});
+
+process.on('SIGINT', function () {
+	console.log("parent is dead");
+	console.log(process.pid);
+	ButtonManager.kill('SIGINT');
+});
+
+process.on('exit', function (){
+  	console.log("parent is dead");
+	console.log(process.pid);
+	ButtonManager.kill('SIGINT');
 });

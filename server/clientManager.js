@@ -194,10 +194,10 @@ var wCM =  {
 		wCM.state.lastAction = null;
 		wCM.state.currentAction = null;
 		//if ( wCM.state.yt.background ) { wTM.stopYTShuffleTask();  }
-		if ( wCM.state.firefoxOpen ) { wFM.quit(); }
-		if ( wCM.state.mopidy.playing ) { wMM.stopMedia(); }
+		wFM.quit();
+		wMM.stopMedia();
 		if ( wCM.state.skype.activeCall ) { wSM.stopCall(); }
-		if ( wCM.state.mPlayer.playing || wCM.state.mPlayer.active ) { wLVM.stopMedia(); wCM.state.vlcVideo.playing = false;  }
+		if ( wCM.state.mPlayer.playing || wCM.state.mPlayer.active ) { wLVM.stopMedia(); wCM.state.mPlayer.playing = false;  }
 
 	},
 

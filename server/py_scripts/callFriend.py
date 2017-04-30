@@ -19,17 +19,19 @@ def CallStatusText(status):
 def OnCall(call, status):
     global CallStatus
     global callobj1
+    global skype
+    global retryCount
     CallStatus = status
     wText = CallStatusText(status)
 
     if ( wText == "Recording" ):
         time.sleep(5)
-        callobj1.Finish()
+        skype.Finish()
         print("ended call")
         sys.stdout.flush()
         
     elif ( wText == "Never placed" ):
-        callobj1.Finish()
+        skype.Finish()
         sys.stdout.flush()
 
     elif ( wText == "Cancelled" ):
