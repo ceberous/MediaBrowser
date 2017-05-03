@@ -145,8 +145,9 @@ var childWrapper = {
 		// and wait for it to close on it's own.
 		//windowWrapper.closeWindow();
 		//windowWrapper.minimizeWindow();
-		childPROC.kill();
-		exec( "sudo kill -9 " + childPROC_PID.toString() , {silent:true ,  async: false} );
+		if ( childPROC_PID != null ) {
+			exec( "sudo kill -9 " + childPROC_PID.toString() , {silent:true ,  async: false} );
+		}
 		//process.kill(childPROC_PID);
 		wEmitter.emit("skypeCallOver");
 	},
@@ -156,9 +157,10 @@ var childWrapper = {
 		setTimeout( function() {
 			//windowWrapper.closeWindow();
 			//windowWrapper.minimizeWindow();
-			childPROC.kill();
 			//process.kill(childPROC_PID);
-			exec( "sudo kill -9 " + childPROC_PID.toString() , {silent:true ,  async: false} );
+			if ( childPROC_PID != null ) {
+				exec( "sudo kill -9 " + childPROC_PID.toString() , {silent:true ,  async: false} );
+			}
 			wEmitter.emit("skypeCallOver");
 		} , 5000 );
 	}

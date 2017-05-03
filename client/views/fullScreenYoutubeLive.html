@@ -126,6 +126,8 @@
 
 	$(document).on( "tearDownPlayer" , function( event , einfo ) { YTIFrameManager.tearDown(); });
 
+	$(document).on( "pauseMedia" , function( event , einfo ) { YTIFrameManager.wPlayer.pauseVideo(); });
+
 	$(document).on( "randomYTLiveBG" , function( event , einfo ) {
 
 		console.log(ytLiveList);

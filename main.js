@@ -86,3 +86,7 @@ process.on('SIGINT', function () {
 	console.log("\nShutting Everything Down\n");
 	clientManager.properShutdown();
 });
+
+setTimeout(function(){
+	process.exit(1);
+} , 8000 );

@@ -4,9 +4,10 @@ var StringDecoder = require('string_decoder').StringDecoder;
 var decoder = new StringDecoder('utf8');
 require('shelljs/global');
 
-var wChild;
+var wChild = null;
 var wKillPIDS = [];
 var superKill = false;
+var alreadyRespawning = false;
 
 function printData(wData) {
 	if ( wData === null || wData === undefined ) { return; }
@@ -14,7 +15,7 @@ function printData(wData) {
 	message = message.trim();
 	if ( message.substring( 0 , 6 ) === "@@PID=" ) {
 		console.log("new Child PID to kill");
-		var wN = message.substring( 6 , 10 );
+		var wN = message.substring( 6 , message.length );
 		wKillPIDS.push(wN);
 		console.log(wN);
 	}
@@ -25,6 +26,7 @@ function printData(wData) {
 }
 
 function loadEventListeners() {
+	
 	wChild.stdout.on( "data" , function(data) {
 		printData(data);
 	});
@@ -34,22 +36,25 @@ function loadEventListeners() {
 	});
 
 	wChild.on( "exit" , function(data) {
-		console.log("child is dead");
-		printData(data);
-		if (!superKill) {
+		if ( !alreadyRespawning && !superKill) {
+			alreadyRespawning = true;
+			console.log("child is dead");
+			printData(data);
 			console.log("Preparing to Respawn Child in 10 seconds");
+			cleanupChildren();
 			setTimeout(function(){
 				launchChild();
 			} , 10000 );
 		}
 	});
 
-
 	wChild.on( "close"  , function(data){
-		console.log("child is dead");
-		printData(data);
-		if (!superKill) {
+		if ( !alreadyRespawning && !superKill) {
+			alreadyRespawning = true;
+			console.log("child is dead");
+			printData(data);
 			console.log("Preparing to Respawn Child in 10 seconds");
+			cleanupChildren();
 			setTimeout(function(){
 				launchChild();
 			} , 10000 );
@@ -61,24 +66,26 @@ function loadEventListeners() {
 
 function launchChild() {
 	wChild = null;
+	alreadyRespawning = false;
 	wChild = spawn( "node" , ["./main"] );
 	loadEventListeners();
 }
 
 function cleanupChildren() {
-	superKill = true;
-	wChild.kill('SIGINT');
-	for ( var i = 0; i < wKillPIDS.length; ++i ) {
-		exec( "sudo kill -9 " + wKillPIDS[i].toString() , { silent:true , async: false });
-		console.log( "killed @@PID = " + wKillPIDS[i].toString() );
+	while( wKillPIDS.length > 0 ) {
+		var x1a1 = wKillPIDS.pop();
+		exec( "sudo kill -9 " + x1a1.toString() , { silent:true , async: false });
+		console.log( "killed @@PID = " + x1a1.toString() );
 	}
 }
 
 process.on( 'SIGINT' , function () {
+	superKill = true;
 	cleanupChildren();
 });
 
 process.on( 'exit' , function (){
+	superKill = true;
   	cleanupChildren();
 });
 

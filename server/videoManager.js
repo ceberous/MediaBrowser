@@ -98,7 +98,8 @@ var YTLiveManager = {
 		var wResults = [];
 
 		request( wURL , function ( err , response , body ) {
-	        if (err) throw err;
+			//console.log(wURL);
+	        if (err) {console.log(err); return;}
 	        var $ = cheerio.load(body);
 	        $('.yt-lockup-title > a').each(function () {
 	        	var wID = $(this).attr('href');
@@ -335,6 +336,10 @@ module.exports.updateTwitchLiveList = function() {
 module.exports.updateStandardList = function() {
 	YTFeedManager.enumerateFollowers();
 	//TwitchFeedManager.enumerateFollowers();
+};
+
+module.exports.pauseMedia = function() {
+	wEmitter.emit( 'socketSendTask' , "pauseMedia" );
 };
 
 module.exports.stopMedia = function() {

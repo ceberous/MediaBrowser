@@ -176,10 +176,13 @@ var MM = {
 		},
 
 		stop: function() {
-		    mopidy.playback.stop().then(function (something) {
-		        setTimeout( ()=> { MM.playbackManager.getState(); } , 1000 );
-		        wEmitter.emit( "mopidyNotPlaying" );
-		    });
+			if ( mopidy != null ) {
+				 mopidy.playback.stop().then(function (something) {
+		        	setTimeout( ()=> { MM.playbackManager.getState(); } , 1000 );
+		        	wEmitter.emit( "mopidyNotPlaying" );
+		    	});
+			}
+		   
 		},
 
 		pause: function() {
@@ -320,24 +323,18 @@ var MM = {
 
 
 mopidy.on('state:online', function () {
-    
     MM.init();
-    //setTimeout( ()=> { MM.tracklistManager.startRandomPlaylist("edm"); } , 3000 );
-    
-
 });
 
 mopidy.on( 'event:trackPlaybackEnded' , function(data) {
 	setTimeout(function() {
 		if ( MM.tracklistManager.nowPlayingList.length <= 1 ) {
-			MM.tracklistManager.startRandomPlaylist();
+			MM.tracklistManager.startRandomPlaylist( MM.tracklistManager.nowPlayingList.genre );
 		}
 		else {
 			MM.tracklistManager.getCurrentList();
 		}
-		//console.log( "Playlist Length = " + MM.tracklistManager.nowPlayingList.length.toString() );
 	} , 1000 );
-
 });
 
 wEmitter.on( 'playlistCacheUpdated' , function() {
@@ -366,11 +363,16 @@ module.exports.randomPlaylist = function(wGenre) {
 
 module.exports.stopMedia = function() {
 	MM.playbackManager.stop();
-
 };
 
 module.exports.pauseMedia = function() {
-	MM.playbackManager.pause();
+	if ( MM.playbackManager.currentState === "paused" ) {
+		MM.playbackManager.resume();
+	}
+	else {
+		MM.playbackManager.pause();
+		wEmitter.emit("mopidyPaused");
+	}
 };
 
 module.exports.nextMedia = function() {

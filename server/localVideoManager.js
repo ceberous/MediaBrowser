@@ -313,6 +313,10 @@ var wPM = {
 		return Math.floor( Math.random() * ( max - min + 1 ) ) + min;
 	},
 
+	nextInAudioBook: function() {
+
+	},
+
 	structureLookup: function(wOBJ) {
 
 		var wDepth = wOBJ.items.length;
@@ -369,6 +373,7 @@ var wPM = {
 		var defaultArgs = [ wPM.nowPlaying.path , '-msglevel', 'global=0', '-msglevel', 'cplayer=4', '-idle', '-slave', '-fs', '-noborder'];
 		wPM.wPlayer = spawn( "mplayer" , defaultArgs , wOptions );
 		console.log( colors.green( "[LOCAL_VM] -->  MPlayer PID = " + wPM.wPlayer.pid.toString() ) );
+		console.log( "@@PID=" + wPM.wPlayer.pid.toString() );
 		wPM.active = true;
 		wEmitter.emit("mPlayerPlaying");
 
@@ -421,10 +426,11 @@ var wPM = {
 		var timeStart, timeEnd, time;
 
 		wPM.wPlayer.stdout.on( "data" , function(data) {	
-
+			
 			if ( data.indexOf('A:') != 0 )  {
 				message = decoder.write(data);
 				message = message.trim();
+				//console.log(message);
 				for ( var i = 0; i < ignoreMessagesLength; ++i ) {
 					if ( message === ignoreMessages[i] ) {
 						ignore = true;
@@ -558,7 +564,7 @@ module.exports.playMedia = function( wRandom , wGenre ) {
 };
 
 module.exports.pauseMedia = function() {
-	wMPWrapper.pause();
+	wPM.pause();
 };
 
 module.exports.nextMedia = function() {

@@ -8,7 +8,7 @@ var twitchLiveList 	= "*/59 * * * *"; // every 1 hour
 //var standardList 	= "*/59 * * * *"; // every 1 hour
 var standardList 	= "*/59 * * * *"; // every 1 hour
 
-var ytShuffle 		= "*/3 * * * *"; // every 5 Minutes
+var ytShuffle 		= "*/3 * * * *"; // every 3 Minutes
 
 
 var updateYouTubeLiveList = schedule.scheduleJob( ytLiveList , function() {

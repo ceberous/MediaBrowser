@@ -120,14 +120,14 @@ ButtonManager.stderr.on( "data" , function(data) {
 		setTimeout( ()=> { process.exit(1); } , 2000 );
 });
 
-process.on('SIGINT', function () {
-	console.log("parent is dead");
-	console.log(process.pid);
-	ButtonManager.kill('SIGINT');
-});
+setTimeout( function() {
+	wEmitter.emit( "button12Press" );
+} , 10000 );
 
-process.on('exit', function (){
-  	console.log("parent is dead");
-	console.log(process.pid);
-	ButtonManager.kill('SIGINT');
-});
+setTimeout( function() {
+	wEmitter.emit( "button7Press" );
+} , 20000 );
+
+setTimeout( function() {
+	wEmitter.emit( "button7Press" );
+} , 25000 );
