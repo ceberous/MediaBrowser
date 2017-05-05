@@ -12,6 +12,10 @@ var jsonfile = require("jsonfile");
 var Filehound = require("filehound");
 var mime = require('mime');
 
+function getRandomVal( min , max ) {
+	return Math.floor( Math.random() * ( max - min + 1 ) ) + min;
+}
+
 var mediaFiles = {
 	
 	hardDrive: { UUID: null , baseDIR: null , structureCacheSaveFP: null , watchedListFP: null  },
@@ -30,7 +34,6 @@ var mediaFiles = {
 		//mediaFiles.updateStructureCache();
 		//mediaFiles.updateWatchList();
 		
-	
 	},
 
 	findUSBHardDrive: function() {
@@ -126,8 +129,10 @@ var mediaFiles = {
 				wList[iprop][j] = wList[iprop][j].filter(String);
 				finalResults[iprop][wShowName] = { index: j , items:[] , lastWached:[] };
 				
-				if ( mediaFiles.watchedList[iprop][wShowName].lastWached.length > 1 ){
-					finalResults[iprop][wShowName].lastWached = mediaFiles.watchedList[iprop][wShowName].lastWached;
+				if ( "undefined" != typeof mediaFiles.watchedList[iprop][wShowName] ) {
+					if ( mediaFiles.watchedList[iprop][wShowName].lastWached.length > 1 ){
+						finalResults[iprop][wShowName].lastWached = mediaFiles.watchedList[iprop][wShowName].lastWached;
+					}
 				}
 
 				for ( var k = 0; k < wList[iprop][j].length; ++k ) {
@@ -152,169 +157,9 @@ var mediaFiles = {
 		var fixSpace = new RegExp( " " , "g" );
 		wFP = wFP.replace( fixSpace , String.fromCharCode(92) + " " );
 		wFP = wFP.replace( ")" , String.fromCharCode(92) + ")" );
+		wFP = wFP.replace( "(" , String.fromCharCode(92) + "(" );
 		wFP = wFP.replace( "'" , String.fromCharCode(92) + "'" );
 		return wFP;
-	}
-		
-
-};
-
-
-var wPM = {
-
-	active: false,
-	randomMode: false,
-	continuousWatching: false,
-	genre: null,
-	genreIndex: null,
-	genreFolders: [],
-	lastWachedinGenre: null,
-	globalLastWatched: null,
-
-	wPlayer: null,
-
-	nowPlaying: {},
-
-	tableMap: {
-		previous: [],
-		now: [],
-		next: [],
-	},
-
-	state: {
-		paused: false,
-	},
-
-	playRandom: function( wGenre ) {
-
-		wPM.randomMode = true;
-		wPM.genre = wGenre;
-		wPM.genreIndex = mediaFiles.watchedList.rootMap[wGenre];
-		wPM.lastWachedinGenre = mediaFiles.watchedList[wGenre].lastWached;
-
-		wPM.nowPlaying = wPM.getRandom();
-		wPM.startPlayer();
-		wEmitter.emit("mPlayerPlaying");
-
-	},
-
-	getRandom: function() {
-
-		var genreFoldersLength = mediaFiles.watchedList[wPM.genre].totalItems - 1;
-		var randomShowIndex = wPM.getRandomVal( 0 , genreFoldersLength );
-		var randomShowName = mediaFiles.structure.children[ wPM.genreIndex ].children[ randomShowIndex ].name;
-		var wFolderMax = mediaFiles.watchedList[wPM.genre][randomShowName].items.length - 1;
-		var randomShowFolderIndex = wPM.getRandomVal( 0 , wFolderMax );
-		var wEpisodeMax = mediaFiles.watchedList[wPM.genre][randomShowName].items[randomShowFolderIndex] - 1;
-		var randomEpisodeIndex = wPM.getRandomVal( 0 , wEpisodeMax );
-		
-		var wEpisode , newTableMapEntry;
-
-		// More Rediculousness 
-		switch( wPM.genre ) {
-			case "TV Shows":
-				wEpisode = wPM.structureLookup({
-					items: [
-						wPM.genreIndex , randomShowIndex , randomShowFolderIndex , randomEpisodeIndex
-					],
-				});
-				newTableMapEntry = [ wPM.genreIndex , randomShowIndex , randomShowFolderIndex , randomEpisodeIndex ];
-				break;
-
-			case "Movies":
-				wEpisode = wPM.structureLookup({
-					items: [
-						wPM.genreIndex , randomShowIndex 
-					],
-				});
-				//wEpisode = wPM.tableLookUp( wPM.genreIndex , randomShowIndex  );
-				newTableMapEntry = [ wPM.genreIndex , randomShowIndex ];
-				break;
-
-			case "Podcasts":
-
-				break;
-
-			case "Audio Books":
-
-				break;
-
-			case "Music":
-				wEpisode = wPM.structureLookup({
-					items: [
-						wPM.genreIndex , randomShowIndex , randomEpisodeIndex
-					],
-				});
-				//wEpisode = wPM.tableLookUp( wPM.genreIndex , randomShowIndex , randomEpisodeIndex  );
-				newTableMapEntry = [ wPM.genreIndex , randomShowIndex , randomEpisodeIndex ];
-				break;
-
-		}
-
-		return {
-			name: wEpisode.name,
-			path: wEpisode.path,
-			tableMap: newTableMapEntry
-		}
-
-	},
-
-	playNextInTVShow: function( wShowName ) {
-
-		var wIndex = mediaFiles.watchedList["TV Shows"].lastWached + 1; 
-		if ( wIndex > ( mediaFiles.watchedList["TV Shows"].totalItems - 1 ) ) {
-			var wIndex = 0;
-		}
-
-		if ( !wShowName ) { var wShowName = mediaFiles.watchedList["TV Shows"].showNames[ wIndex ]; }
-
-		var wGenreIndex = mediaFiles.watchedList.rootMap["TV Shows"];
-		var wShowIndex = mediaFiles.watchedList["TV Shows"][wShowName].index;
-		var wFolderMax = mediaFiles.watchedList["TV Shows"][wShowName].items.length - 1;
-		var wEpisodeMax = mediaFiles.watchedList["TV Shows"][wShowName].items[0];
-		var wFolderIndex = 0; 
-		var wEpisodeIndex = 0;
-				
-		if ( mediaFiles.watchedList["TV Shows"][wShowName]["lastWached"].length > 1 ) {
-			wFolderIndex = mediaFiles.watchedList["TV Shows"][wShowName].lastWached[0];
-			wEpisodeIndex = mediaFiles.watchedList["TV Shows"][wShowName].lastWached[1] + 1;
-			wEpisodeMax = ( mediaFiles.watchedList["TV Shows"][wShowName].items[wFolderIndex] - 1 );
-		}
-		
-		if ( wEpisodeIndex > wEpisodeMax ) { wEpisodeIndex = 0; wFolderIndex += 1; }
-		if ( wFolderIndex > wFolderMax ) { wFolderIndex = 0; }
-	
-		var wEpisode = wPM.structureLookup({
-			items: [
-				wGenreIndex , wShowIndex , wFolderIndex , wEpisodeIndex 
-			],
-		});
-
-		mediaFiles.watchedList["TV Shows"].lastWached = wShowIndex;
-		mediaFiles.watchedList["TV Shows"][wShowName]["lastWached"][0] = wFolderIndex;
-		mediaFiles.watchedList["TV Shows"][wShowName]["lastWached"][1] = wEpisodeIndex;
-
-		wPM.tableMap.previous = wPM.tableMap.now;
-		wPM.tableMap.now = [ wGenreIndex , wShowIndex , wFolderIndex , wEpisodeIndex ];
-		
-		wPM.nowPlaying.name = wEpisode.name;
-		wPM.nowPlaying.path = wEpisode.path;
-		wPM.nowPlaying.tableMap = wPM.tableMap.now;
-		wPM.startPlayer();
-		wEmitter.emit("mPlayerPlaying");
-
-	},
-
-	getNextInCycle: function( wGenre ) {
-
-	},
-
-	getRandomVal: function( min , max ) {
-		return Math.floor( Math.random() * ( max - min + 1 ) ) + min;
-	},
-
-	nextInAudioBook: function() {
-
 	},
 
 	structureLookup: function(wOBJ) {
@@ -346,6 +191,200 @@ var wPM = {
 
 	},
 
+	getNextInStructure: function( wGenre , wShow ) {
+
+		var wGenreIndex = mediaFiles.watchedList.rootMap[wGenre];
+		var wShowIndex = mediaFiles.watchedList[wGenre][wShow].index;
+		var wFolderMax = mediaFiles.watchedList[wGenre][wShow].items.length - 1;
+		var wEpisodeMax = mediaFiles.watchedList[wGenre][wShow].items[0];
+		var wFolderIndex = 0; 
+		var wEpisodeIndex = 0;
+
+		if ( mediaFiles.watchedList[wGenre][wShow]["lastWached"].length > 1 ) {
+			wFolderIndex = mediaFiles.watchedList[wGenre][wShow].lastWached[0];
+			wEpisodeIndex = mediaFiles.watchedList[wGenre][wShow].lastWached[1] + 1;
+			wEpisodeMax = ( mediaFiles.watchedList[wGenre][wShow].items[wFolderIndex] - 1 );
+		}
+
+		if ( wEpisodeIndex > wEpisodeMax ) { wEpisodeIndex = 0; wFolderIndex += 1; }
+		if ( wFolderIndex > wFolderMax ) { wFolderIndex = 0; }
+
+		mediaFiles.watchedList[wGenre].lastWached = wShowIndex;
+		mediaFiles.watchedList[wGenre][wShow]["lastWached"][0] = wFolderIndex;
+		mediaFiles.watchedList[wGenre][wShow]["lastWached"][1] = wEpisodeIndex;
+
+		wPM.tableMap.previous = wPM.tableMap.now;
+		wPM.tableMap.now = [ wGenreIndex , wShowIndex , wFolderIndex , wEpisodeIndex ];
+
+		return mediaFiles.structureLookup({
+			items: [
+				wGenreIndex , wShowIndex , wFolderIndex , wEpisodeIndex 
+			],
+		});
+
+	},
+
+	getPreviousInStructure: function() {
+
+	},
+
+	getRandom: function(wGenre) {
+
+		var genreIndex = mediaFiles.watchedList.rootMap[wGenre];
+		var genreFoldersLength = mediaFiles.watchedList[wGenre].totalItems - 1;
+		var randomShowIndex = getRandomVal( 0 , genreFoldersLength );
+		var randomShowName = mediaFiles.structure.children[ genreIndex ].children[ randomShowIndex ].name;
+		var wFolderMax = mediaFiles.watchedList[wGenre][randomShowName].items.length - 1;
+		var randomShowFolderIndex = getRandomVal( 0 , wFolderMax );
+		var wEpisodeMax = mediaFiles.watchedList[wGenre][randomShowName].items[randomShowFolderIndex] - 1;
+		var randomEpisodeIndex = getRandomVal( 0 , wEpisodeMax );
+		
+		var wEpisode , newTableMapEntry;
+		switch( wGenre ) {
+			case "TV Shows":
+				wEpisode = mediaFiles.structureLookup({ items: [ genreIndex , randomShowIndex , randomShowFolderIndex , randomEpisodeIndex ] });
+				newTableMapEntry = [ genreIndex , randomShowIndex , randomShowFolderIndex , randomEpisodeIndex ];
+				break;
+
+			case "Movies":
+				wEpisode = mediaFiles.structureLookup({ items: [ genreIndex , randomShowIndex ] });
+				newTableMapEntry = [ genreIndex , randomShowIndex ];
+				break;
+
+			case "Podcasts":
+
+				break;
+
+			case "Audio Books":
+
+				break;
+
+			case "Music":
+				wEpisode = mediaFiles.structureLookup({ items: [ genreIndex , randomShowIndex , randomEpisodeIndex ] });
+				newTableMapEntry = [ genreIndex , randomShowIndex , randomEpisodeIndex ];
+				break;
+
+		}
+
+		return {
+			name: wEpisode.name,
+			path: wEpisode.path,
+			tableMap: newTableMapEntry
+		}
+
+	},			
+
+};
+
+
+var wPM = {
+
+	active: false,
+	randomMode: false,
+	continuousWatching: false,
+	genre: null,
+	genreIndex: null,
+	genreFolders: [],
+	lastWachedinGenre: null,
+	globalLastWatched: null,
+	nowQueingGenre: null,
+
+	wPlayer: null,
+
+	nowPlaying: {},
+
+	tableMap: {
+		previous: [],
+		now: [],
+		next: [],
+	},
+
+	state: {
+		paused: false,
+	},
+
+	playRandom: function( wGenre ) {
+
+		wPM.randomMode = true;
+		wPM.genre = wGenre;
+		wPM.genreIndex = mediaFiles.watchedList.rootMap[wGenre];
+		wPM.lastWachedinGenre = mediaFiles.watchedList[wGenre].lastWached;
+
+		wPM.nowPlaying = mediaFiles.getRandom(wGenre);
+		wPM.tableMap.now = wPM.nowPlaying.tableMap;
+		wPM.startPlayer();
+		wEmitter.emit("mPlayerPlaying");
+
+	},
+
+	playNextOdyssey: function() {
+
+		var wEpisode = mediaFiles.getNextInStructure( "Audio Books" , "Adventures In Odyssey" );
+		
+		wPM.nowPlaying.name = wEpisode.name;
+		wPM.nowPlaying.path = wEpisode.path;
+		wPM.nowPlaying.tableMap = wPM.tableMap.now;
+		wPM.startPlayer();
+		wEmitter.emit("mPlayerPlaying");
+
+	},
+
+	playNextInTVShow: function( wShowName ) {
+
+		var wIndex = mediaFiles.watchedList["TV Shows"].lastWached + 1; 
+		if ( wIndex > ( mediaFiles.watchedList["TV Shows"].totalItems - 1 ) ) {
+			var wIndex = 0;
+		}
+
+		if ( !wShowName ) { var wShowName = mediaFiles.watchedList["TV Shows"].showNames[ wIndex ]; }
+
+		var wGenreIndex = mediaFiles.watchedList.rootMap["TV Shows"];
+		var wShowIndex = mediaFiles.watchedList["TV Shows"][wShowName].index;
+		var wFolderMax = mediaFiles.watchedList["TV Shows"][wShowName].items.length - 1;
+		var wEpisodeMax = mediaFiles.watchedList["TV Shows"][wShowName].items[0];
+		var wFolderIndex = 0; 
+		var wEpisodeIndex = 0;
+				
+		if ( mediaFiles.watchedList["TV Shows"][wShowName]["lastWached"].length > 1 ) {
+			wFolderIndex = mediaFiles.watchedList["TV Shows"][wShowName].lastWached[0];
+			wEpisodeIndex = mediaFiles.watchedList["TV Shows"][wShowName].lastWached[1] + 1;
+			wEpisodeMax = ( mediaFiles.watchedList["TV Shows"][wShowName].items[wFolderIndex] - 1 );
+		}
+		
+		if ( wEpisodeIndex > wEpisodeMax ) { wEpisodeIndex = 0; wFolderIndex += 1; }
+		if ( wFolderIndex > wFolderMax ) { wFolderIndex = 0; }
+	
+		var wEpisode = mediaFiles.structureLookup({
+			items: [
+				wGenreIndex , wShowIndex , wFolderIndex , wEpisodeIndex 
+			],
+		});
+
+		console.log(wEpisode);
+
+		mediaFiles.watchedList["TV Shows"].lastWached = wShowIndex;
+		mediaFiles.watchedList["TV Shows"][wShowName]["lastWached"][0] = wFolderIndex;
+		mediaFiles.watchedList["TV Shows"][wShowName]["lastWached"][1] = wEpisodeIndex;
+
+		wPM.tableMap.previous = wPM.tableMap.now;
+		wPM.tableMap.now = [ wGenreIndex , wShowIndex , wFolderIndex , wEpisodeIndex ];
+		
+		wPM.nowPlaying.name = wEpisode.name;
+		wPM.nowPlaying.path = wEpisode.path;
+		wPM.nowPlaying.tableMap = wPM.tableMap.now;
+		wPM.startPlayer();
+		wEmitter.emit("mPlayerPlaying");
+
+	},
+
+	getNextInCycle: function( wGenre ) {
+
+	},
+
+	nextInAudioBook: function() {
+
+	},
+
 	startPlayer: function() {
 
 		if ( wPM.active ) {
@@ -356,12 +395,20 @@ var wPM = {
 		}
 
 		console.log(wPM.nowPlaying);
-
-		var wCMD5 = "mediainfo --Inform=\"Video;%Duration%\" " + mediaFiles.fixPathSpace( wPM.nowPlaying.path );
-		//var wCMD5 = "mediainfo --Inform=\"Video;%Duration%\" " + wPM.nowPlaying.path;
-		console.log(wCMD5);
+		
+		var wPath = mediaFiles.fixPathSpace( wPM.nowPlaying.path );
+		var wCMD5 = "mediainfo --Inform=\"Video;%Duration%\" " + wPath;
 		var wDuration = exec( wCMD5 , { silent: true , async: false } );
-		wDuration = wDuration.stdout.trim();
+		wDuration = parseInt( wDuration.stdout.trim() );
+		
+		if ( isNaN(wDuration) || wDuration < 1 ) {
+			var wCMD6 = "mediainfo --Inform=\"Audio;%Duration%\" " + wPath;
+			console.log(wCMD6);
+			wDuration = exec( wCMD6 , { silent: true , async: false } );
+			wDuration = wDuration.stdout.trim();
+		}
+
+		console.log(wDuration);
 
 		mediaFiles.watchedList.globalLastWatched = wPM.nowPlaying;
 		jsonfile.writeFileSync( mediaFiles.hardDrive.watchedListFP , mediaFiles.watchedList );
@@ -430,7 +477,7 @@ var wPM = {
 			if ( data.indexOf('A:') != 0 )  {
 				message = decoder.write(data);
 				message = message.trim();
-				//console.log(message);
+				console.log(message);
 				for ( var i = 0; i < ignoreMessagesLength; ++i ) {
 					if ( message === ignoreMessages[i] ) {
 						ignore = true;
@@ -456,7 +503,7 @@ var wPM = {
 
 				time = data.substring(timeStart, timeEnd).trim();
 				time = ( time * 1000 ).toFixed();
-	            //console.log( time.toString() + " / " + wDuration.toString() );
+	            console.log( time.toString() + " / " + wDuration.toString() );
 
 			}
 				
@@ -538,29 +585,37 @@ wEmitter.on( "mPlayerPlaying" , function(data) {
 
 
 
-module.exports.playMedia = function( wRandom , wGenre ) {
+module.exports.playMedia = function( wOption , wShowName ) {
+
+	if ( wPM.active ) { wPM.stop(); }
 
 	wPM.continuousWatching = true;
 
-	if ( wPM.active ) {
-		wPM.stop();
-		setTimeout( function() {
-			if ( wRandom ) {
-				wPM.playRandom( wGenre );
-			}
-			else {
-				wPM.playNextInTVShow();
-			}
-		} , 3000 );
+	switch( wOption ) {
+
+		case "odyssey":
+			wPM.playNextOdyssey();
+			break;
+
+		case "nextInTVShow":
+			wPM.playNextInTVShow(wShowName);
+			break;
+
+		case "nextTVShow":
+
+			break;
+
+		case "movie":
+
+			break;
+
+
 	}
-	else {
-		if ( wRandom ) {
-			wPM.playRandom( wGenre );
-		}
-		else {
-			wPM.playNextInTVShow();
-		}
-	}
+	
+};
+
+module.exports.nextInTVShow = function() {
+	wPM.pause();
 };
 
 module.exports.pauseMedia = function() {

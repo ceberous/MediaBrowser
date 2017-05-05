@@ -87,6 +87,8 @@ process.on('SIGINT', function () {
 	clientManager.properShutdown();
 });
 
+/*
 setTimeout(function(){
 	process.exit(1);
 } , 8000 );
+*/

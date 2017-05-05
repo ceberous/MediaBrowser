@@ -43,6 +43,7 @@ var wCM =  {
 		"singleYT": wVM,
 		//"podcast": wVV,
 		"audioBook": wLVM,
+		"odyssey": wLVM,
 		"tvShow": wLVM,
 	},
 
@@ -166,9 +167,37 @@ var wCM =  {
 				if ( wCM.state.mopidy.playing ) { wMM.stopMedia(); }
 				if ( wCM.state.yt.background ) { wTM.stopYTShuffleTask(); wCM.state.yt.background = false; }
 
-				wLVM.playMedia( false , "TV Shows" );
+				wLVM.playMedia( "nextTVShow" );
 
 				break;
+
+			case "odyssey":
+
+				
+				wCM.configureFirefox();
+				console.log("[CLIENT_MAN] --> preparing odyssey with YTLive Background Video".magenta);
+
+				wCM.state.yt.standard = false;
+
+				// Update "Skip Count"  if necessary
+				if ( wCM.state.actionSkipped) { wMM.updateSkipCount(); }	
+				
+				// Load Client with View
+				wCM.state.firefoxClientTask.name = 'playBackgroundYTLive';
+				if ( wCM.state.firefoxClientTaskNeedQued ) {
+					wEmitter.emit( 'queClientTaskOnReady' , wCM.state.firefoxClientTask.name );
+					wCM.state.firefoxClientTaskNeedQued = false;
+				}
+				else if ( !wCM.state.firefoxClientTaskNeedQued && !wCM.state.yt.background ) {
+					wEmitter.emit( 'socketSendTask' , wCM.state.firefoxClientTask.name );
+				}
+
+				if ( wCM.state.mopidy.playing ) { wMM.stopMedia(); }
+				if ( wCM.state.yt.background ) { wTM.stopYTShuffleTask(); wCM.state.yt.background = false; }
+
+				wLVM.playMedia( "odyssey" );
+
+				break;	
 
 		}
 
@@ -292,6 +321,11 @@ var wCM =  {
 		// wEmitter.emit("")
 		wEmitter.emit( 'socketSendTask' , 'stopBackgroundYTLive' );
 	});
+
+	wEmitter.on( 'button11Press' , function() { 
+		console.log("[CLIENT_MAN] --> stop all client tasks and play local-TV Show".magenta);
+		wCM.prepare( "odyssey" );
+	});	
 
 	wEmitter.on( 'button12Press' , function() { 
 		console.log("[CLIENT_MAN] --> stop all client tasks and play local-TV Show".magenta);
@@ -460,4 +494,5 @@ module.exports.returnStandardList = function() {
 module.exports.properShutdown = function() {
 	wCM.stopEverything();
 };
+
 

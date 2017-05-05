@@ -120,10 +120,14 @@ ButtonManager.stderr.on( "data" , function(data) {
 		setTimeout( ()=> { process.exit(1); } , 2000 );
 });
 
+
+
+
 setTimeout( function() {
-	wEmitter.emit( "button12Press" );
+	wEmitter.emit( "button11Press" );
 } , 10000 );
 
+/*
 setTimeout( function() {
 	wEmitter.emit( "button7Press" );
 } , 20000 );
@@ -131,3 +135,5 @@ setTimeout( function() {
 setTimeout( function() {
 	wEmitter.emit( "button7Press" );
 } , 25000 );
+
+*/
