@@ -70,7 +70,12 @@ $(document).ready( function() {
 			setTimeout( function() {
 				closeChildView();
 			} , 3000 );
-		});	
+		});
+
+		socket.on( 'showToast', function(data) {
+			//$(document).trigger( "tearDownPlayer" );
+			toastr.success("this is a test toast");
+		});				
 	// -------------------------------------------------------
 
 	// Sheduled-Updates

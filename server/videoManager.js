@@ -93,7 +93,13 @@ var YTLiveManager = {
 
 	searchUserName: function( wUserName ) {
 
-		var wURL = "https://www.youtube.com/user/" + wUserName + "/videos?view=2&live_view=501&flow=grid";
+		var wURL;
+		if ( typeof wUserName === 'object' ) {
+			wURL = "https://www.youtube.com/user/" + wUserName.channelID + "/videos?view=2&live_view=501&flow=grid";
+		}
+		else {
+			wURL = "https://www.youtube.com/user/" + wUserName + "/videos?view=2&live_view=501&flow=grid";
+		}
 		
 		var wResults = [];
 

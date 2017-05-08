@@ -1,13 +1,15 @@
 {
 	"ytStandard": {
-		"PowerfulJRE": "UCzQUP1qoWDoEbmsQxvdjxgQ", 
 		"kylelandry": "UCk0UErv9b4Hn5ucNNjqD1UQ", 
 		"brtvofficial" : "UCGBpxWJr9FNOcFYA5GkKrMg"
 	},
 
 	"ytLive": [
 		"ouramazingspace", 
-		"MontereyBayAquarium"
+		"MontereyBayAquarium",
+		"calacademy",
+		{ "name": "Jackson Hole Cams" , "channelID": "UCEpDjqeFIGTqHwk-uULx72Q" },
+		{ "name": "Geirangerfjord Cruise Port" , "channelID": "UCbYNIUYxdzeQTKdb9GfJl3w" }
 	],
 
 	"twitch": [

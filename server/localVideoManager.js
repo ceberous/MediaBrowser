@@ -293,6 +293,9 @@ var wPM = {
 
 	nowPlaying: {},
 
+	currentTime: null,
+	duration: null,
+
 	tableMap: {
 		previous: [],
 		now: [],
@@ -338,37 +341,8 @@ var wPM = {
 
 		if ( !wShowName ) { var wShowName = mediaFiles.watchedList["TV Shows"].showNames[ wIndex ]; }
 
-		var wGenreIndex = mediaFiles.watchedList.rootMap["TV Shows"];
-		var wShowIndex = mediaFiles.watchedList["TV Shows"][wShowName].index;
-		var wFolderMax = mediaFiles.watchedList["TV Shows"][wShowName].items.length - 1;
-		var wEpisodeMax = mediaFiles.watchedList["TV Shows"][wShowName].items[0];
-		var wFolderIndex = 0; 
-		var wEpisodeIndex = 0;
+		var wEpisode = mediaFiles.getNextInStructure( "TV Shows" , wShowName );
 				
-		if ( mediaFiles.watchedList["TV Shows"][wShowName]["lastWached"].length > 1 ) {
-			wFolderIndex = mediaFiles.watchedList["TV Shows"][wShowName].lastWached[0];
-			wEpisodeIndex = mediaFiles.watchedList["TV Shows"][wShowName].lastWached[1] + 1;
-			wEpisodeMax = ( mediaFiles.watchedList["TV Shows"][wShowName].items[wFolderIndex] - 1 );
-		}
-		
-		if ( wEpisodeIndex > wEpisodeMax ) { wEpisodeIndex = 0; wFolderIndex += 1; }
-		if ( wFolderIndex > wFolderMax ) { wFolderIndex = 0; }
-	
-		var wEpisode = mediaFiles.structureLookup({
-			items: [
-				wGenreIndex , wShowIndex , wFolderIndex , wEpisodeIndex 
-			],
-		});
-
-		console.log(wEpisode);
-
-		mediaFiles.watchedList["TV Shows"].lastWached = wShowIndex;
-		mediaFiles.watchedList["TV Shows"][wShowName]["lastWached"][0] = wFolderIndex;
-		mediaFiles.watchedList["TV Shows"][wShowName]["lastWached"][1] = wEpisodeIndex;
-
-		wPM.tableMap.previous = wPM.tableMap.now;
-		wPM.tableMap.now = [ wGenreIndex , wShowIndex , wFolderIndex , wEpisodeIndex ];
-		
 		wPM.nowPlaying.name = wEpisode.name;
 		wPM.nowPlaying.path = wEpisode.path;
 		wPM.nowPlaying.tableMap = wPM.tableMap.now;
@@ -395,7 +369,7 @@ var wPM = {
 		}
 
 		console.log(wPM.nowPlaying);
-		
+
 		var wPath = mediaFiles.fixPathSpace( wPM.nowPlaying.path );
 		var wCMD5 = "mediainfo --Inform=\"Video;%Duration%\" " + wPath;
 		var wDuration = exec( wCMD5 , { silent: true , async: false } );
@@ -409,6 +383,7 @@ var wPM = {
 		}
 
 		console.log(wDuration);
+		wPM.duration = parseInt(wDuration);
 
 		mediaFiles.watchedList.globalLastWatched = wPM.nowPlaying;
 		jsonfile.writeFileSync( mediaFiles.hardDrive.watchedListFP , mediaFiles.watchedList );
@@ -472,12 +447,28 @@ var wPM = {
 		var message;
 		var timeStart, timeEnd, time;
 
+		wPM.wPlayer.stderr.on( "data" , function(data) {
+			var message = decoder.write(data);
+			message = message.trim();
+			for ( var i = 0; i < ignoreErrorMessagesLength; ++i ) {
+				if ( message === ignoreErrorMessages[i] ) {
+					ignore = true;
+				}
+			}
+			if ( !ignore ) {
+				//console.log(message);
+				wEmitter.emit( "mPlayerError" , message );
+			}
+		});
+
 		wPM.wPlayer.stdout.on( "data" , function(data) {	
 			
+			// Regular Messages
 			if ( data.indexOf('A:') != 0 )  {
+				
 				message = decoder.write(data);
 				message = message.trim();
-				console.log(message);
+				//console.log(message);
 				for ( var i = 0; i < ignoreMessagesLength; ++i ) {
 					if ( message === ignoreMessages[i] ) {
 						ignore = true;
@@ -487,8 +478,8 @@ var wPM = {
 					console.log(message);	
 				} 
 			}
-
-			if ( data.indexOf( 'A:' ) === 0 ) {
+			// Time Messages
+			else {
 
 				data = data.toString("binary");
 
@@ -498,49 +489,28 @@ var wPM = {
 	            } else {
 	                timeStart = data.indexOf('A:') + 2;
 	                timeEnd = data.indexOf(' (');
-	               	console.log(data);
 	            }
 
 				time = data.substring(timeStart, timeEnd).trim();
 				time = ( time * 1000 ).toFixed();
-	            console.log( time.toString() + " / " + wDuration.toString() );
+	            wPM.currentTime = time;
+	            //console.log( wPM.currentTime.toString() + " / " + wPM.duration.toString() );
+
+	            if ( ( wPM.duration - time ) <= 300 ) {
+	            	console.log("media over");
+	            	wPM.stop();
+	            }
 
 			}
 				
-		});
-
-		wPM.wPlayer.stderr.on( "data" , function(data) {
-			var message = decoder.write(data);
-			message = message.trim();
-			for ( var i = 0; i < ignoreErrorMessagesLength; ++i ) {
-				if ( message === ignoreErrorMessages[i] ) {
-					ignore = true;
-				}
-			}
-
-			if ( !ignore ) {
-				//console.log(message);
-				wEmitter.emit( "mPlayerError" , message );
-			} 
-
-		});
+		});		
 
 		wPM.wPlayer.on( "close" , function(code) {
 			wPM.active = false;
 			wPM.state.playing = false;
 			wPM.wPlayer = null;
-			if ( wPM.continuousWatching ) {
-				if (wPM.randomMode) {
-					wPM.playRandom( wPM.genre );
-				}
-				else{
-					wPM.playNextInTVShow();
-				}
-			}
-			else {
-				wPM.continuousWatching = false;
-				wEmitter.emit( "mPlayerClosed" , code );
-			}
+			console.log("we were closed");
+			wPM.playNext(code);
 		});
 
 	},
@@ -559,17 +529,38 @@ var wPM = {
 	},
 
 	stop: function() {
+
 		wPM.sendCMD( "stop" );
 		wPM.state.playing = false;
 		wPM.active = false;
-		wPM.continuousWatching = false;
 		wPM.wPlayer = null;
-		wEmitter.emit("mPlayerStopped");	
+		wEmitter.emit("mPlayerStopped");
+		wPM.playNext()
+
 	},
 
 	seek: function(seconds) {
 		wPM.sendCMD( "seek" , [ seconds , 2 ] );
     },
+
+    playNext: function(code) {
+ 
+		if ( wPM.continuousWatching ) {
+			if (wPM.randomMode) {
+				wPM.playRandom( wPM.genre );
+			}
+			else{
+				module.exports.playMedia( wPM.watchingMode , wPM.watchingShowName );
+			}
+		}
+		else {
+			wEmitter.emit( "mPlayerClosed" , code );
+		}
+    },
+
+    playPrevious: function() {
+
+    }
 
 };
 
@@ -590,6 +581,8 @@ module.exports.playMedia = function( wOption , wShowName ) {
 	if ( wPM.active ) { wPM.stop(); }
 
 	wPM.continuousWatching = true;
+	wPM.watchingMode = wOption;
+	wPM.watchingShowName = wShowName;
 
 	switch( wOption ) {
 
@@ -602,7 +595,12 @@ module.exports.playMedia = function( wOption , wShowName ) {
 			break;
 
 		case "nextTVShow":
-
+			wPM.playNextInTVShow();
+			setTimeout(function(){
+				//wPM.stop();
+				var wsec = ( wPM.duration / 1000 ) - 5;
+				wPM.seek(wsec);
+			} , 5000 );
 			break;
 
 		case "movie":
@@ -631,6 +629,7 @@ module.exports.previousMedia = function() {
 };
 
 module.exports.stopMedia = function() {
+	wPM.continuousWatching = false;
 	wPM.stop();
 };
 

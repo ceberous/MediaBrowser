@@ -37,6 +37,53 @@ function getUSBDeviceEventPath() {
 
 if ( !getUSBDeviceEventPath() ) { throw new Error( "[BUTTON_MAN] --> Cannot Find USB-Buttton Controller" ); }
 
+function cleanseButtonENV() {
+
+	function isButtonScriptOpen() {
+
+		var wPIDS = [];
+		var wCMD1 = "ps aux | grep python";
+		var findButton = exec( wCMD1 , { silent:true , async: false });
+		if ( findButton.stderr.length > 1 || findButton.stdout.length < 1 ) { return -1; }
+
+		var wOutput = findButton.stdout.split("\n");
+		for ( var i = 0; i < wOutput.length; ++i ) {
+			var wOut2 = wOutput[i].split(" ");
+			var wOut3 = wOut2[ wOut2.length - 1 ].split("/"); 
+			if ( wOut3[ wOut3.length - 1 ] === "buttonWatcher.py" ) {
+				for ( var j = 0; j < 8; ++j ) {
+					var wTest = wOut2[j].trim();
+					if ( wTest === " " ) { continue; }
+					wTest = parseInt( wTest );
+					if ( isNaN(wTest) ) { continue; }
+					if ( wTest < 300 ) { continue; }
+					console.log( "wTest = " + wTest.toString() +  " PID: " + wOut2[ j ] + " = " + wOut3[ wOut3.length - 1 ] );
+					wPIDS.push( wOut2[j] );
+				}
+				
+			}
+		}
+
+		return wPIDS;
+
+	}
+
+	var openResult = isButtonScriptOpen();
+	if ( openResult === -1 ) {
+		console.log("failed to find script");
+	}
+	else {
+		var wCMD2 = "sudo kill -9 ";
+		for ( var i = 0; i < openResult.length; ++i ) {
+			var wKillCMD = wCMD2 + openResult[i];
+			exec( wKillCMD , { silent: true , async: false } );
+			console.log( wKillCMD );
+		}
+	}
+
+}
+
+cleanseButtonENV();
 var buttonScript = path.join( __dirname , "py_scripts" , "buttonWatcher.py" );
 var ButtonManager = spawn( 'python' , [buttonScript] );
 console.log( "@@PID=" + ButtonManager.pid );
@@ -121,13 +168,17 @@ ButtonManager.stderr.on( "data" , function(data) {
 });
 
 
+module.exports.stop = function() {
+	var wCMD = "sudo kill -9 " + ButtonManager.pid.toString();
+	exec( wCMD , { silent: true , async: false } );
+};
 
-
-setTimeout( function() {
-	wEmitter.emit( "button11Press" );
-} , 10000 );
 
 /*
+setTimeout( function() {
+	wEmitter.emit( "button12Press" );
+} , 10000 );
+
 setTimeout( function() {
 	wEmitter.emit( "button7Press" );
 } , 20000 );
@@ -135,5 +186,4 @@ setTimeout( function() {
 setTimeout( function() {
 	wEmitter.emit( "button7Press" );
 } , 25000 );
-
 */

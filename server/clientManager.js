@@ -116,6 +116,8 @@ var wCM =  {
 					wEmitter.emit( 'socketSendTask' , wCM.state.firefoxClientTask.name );
 				}
 
+				//wEmitter.emit( 'socketSendTask' , "showToast" );
+
 				break;
 
 			case "youtubeFG":
@@ -173,7 +175,6 @@ var wCM =  {
 
 			case "odyssey":
 
-				
 				wCM.configureFirefox();
 				console.log("[CLIENT_MAN] --> preparing odyssey with YTLive Background Video".magenta);
 
@@ -209,6 +210,8 @@ var wCM =  {
 			//wIM.togglePower();
 			wCM.state.tvON = false;
 		}
+
+		wBM.stop();
 
 		wCM.state.lastAction = null;
 		wCM.state.currentAction = null;
@@ -382,7 +385,7 @@ var wCM =  {
 	wEmitter.on( 'skypeCallOver' , function() {
 		console.log("[CLIENT_MAN] --> skype call is over".magenta);
 		wCM.state.skype.activeCall = false;
-		if ( wCM.state.lastAction != "skype" ) {
+		if ( wCM.state.lastAction != null && wCM.state.lastAction != "skype" ) {
 			console.log( colors.magenta( "[CLIENT_MAN] --> restoring previous action --> " + wCM.state.lastAction ) );
 			wCM.prepare( wCM.state.lastAction );
 		}
@@ -415,7 +418,7 @@ var wCM =  {
 	wEmitter.on( "mPlayerPlaying" , function() { wCM.state.mPlayer.active = true; wCM.state.mPlayer.playing = true; });
 	wEmitter.on( "mPlayerPaused" , function() { wCM.state.mPlayer.paused = true; wCM.state.mPlayer.playing = false; });
 	wEmitter.on( "mPlayerStopped" , function() { wCM.state.mPlayer.playing = false; });
-	wEmitter.on( "mPlayerClosed" , function(wCode) { wCM.state.mPlayer.active = false; console.log( "mPlayer Exit Code = " + wCode.toString() ); });
+	wEmitter.on( "mPlayerClosed" , function(wCode) { wCM.state.mPlayer.active = false; if ( wCode != undefined ) { console.log( "mPlayer Exit Code = " + wCode.toString() ); } });
 
 // ---------------------------------------------------------------------------------
 
@@ -494,5 +497,3 @@ module.exports.returnStandardList = function() {
 module.exports.properShutdown = function() {
 	wCM.stopEverything();
 };
-
-
