@@ -31,8 +31,8 @@ var mediaFiles = {
 		mediaFiles.structure = jsonfile.readFileSync( mediaFiles.hardDrive.structureCacheFP );
 		mediaFiles.watchedList = jsonfile.readFileSync( mediaFiles.hardDrive.watchedListFP );
 
-		//mediaFiles.updateStructureCache();
-		//mediaFiles.updateWatchList();
+		mediaFiles.updateStructureCache();
+		mediaFiles.updateWatchList();
 		
 	},
 
@@ -316,7 +316,6 @@ var wPM = {
 		wPM.nowPlaying = mediaFiles.getRandom(wGenre);
 		wPM.tableMap.now = wPM.nowPlaying.tableMap;
 		wPM.startPlayer();
-		wEmitter.emit("mPlayerPlaying");
 
 	},
 
@@ -328,7 +327,6 @@ var wPM = {
 		wPM.nowPlaying.path = wEpisode.path;
 		wPM.nowPlaying.tableMap = wPM.tableMap.now;
 		wPM.startPlayer();
-		wEmitter.emit("mPlayerPlaying");
 
 	},
 
@@ -347,7 +345,6 @@ var wPM = {
 		wPM.nowPlaying.path = wEpisode.path;
 		wPM.nowPlaying.tableMap = wPM.tableMap.now;
 		wPM.startPlayer();
-		wEmitter.emit("mPlayerPlaying");
 
 	},
 
@@ -510,7 +507,8 @@ var wPM = {
 			wPM.state.playing = false;
 			wPM.wPlayer = null;
 			console.log("we were closed");
-			wPM.playNext(code);
+			wPM.continuousWatching = false;
+			wPM.playNext();
 		});
 
 	},
@@ -535,7 +533,7 @@ var wPM = {
 		wPM.active = false;
 		wPM.wPlayer = null;
 		wEmitter.emit("mPlayerStopped");
-		wPM.playNext()
+		//wPM.playNext()
 
 	},
 
@@ -572,6 +570,9 @@ mediaFiles.init();
 
 wEmitter.on( "mPlayerPlaying" , function(data) {
 
+	console.log("mplayer is playing");
+	wEmitter.emit( "updateNowPlayingOBJ" , { mode: wPM.watchingMode , string: wPM.nowPlaying.path } );
+
 });
 
 
@@ -596,11 +597,13 @@ module.exports.playMedia = function( wOption , wShowName ) {
 
 		case "nextTVShow":
 			wPM.playNextInTVShow();
+			/*
 			setTimeout(function(){
 				//wPM.stop();
 				var wsec = ( wPM.duration / 1000 ) - 5;
 				wPM.seek(wsec);
 			} , 5000 );
+			*/
 			break;
 
 		case "movie":

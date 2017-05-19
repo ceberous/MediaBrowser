@@ -1,3 +1,55 @@
+require('shelljs/global');
+function cleanseMain() {
+
+	function isMainOpen() {
+
+		var wPIDS = [];
+		var wCMD1 = "ps aux | grep node";
+		var findMain = exec( wCMD1 , { silent:true , async: false });
+		if ( findMain.stderr.length > 1 || findMain.stdout.length < 1 ) { return -1; }
+
+		var wOutput = findMain.stdout.split("\n");
+		for ( var i = 0; i < wOutput.length; ++i ) {
+			var wOut2 = wOutput[i].split(" ");
+			var wOut3 = wOut2[ wOut2.length - 1 ].split("/"); 
+			if ( wOut3[ wOut3.length - 1 ] === "main.js" ) {
+				for ( var j = 0; j < 8; ++j ) {
+					var wTest = wOut2[j].trim();
+					if ( wTest === " " ) { continue; }
+					wTest = parseInt( wTest );
+					if ( isNaN(wTest) ) { continue; }
+					if ( wTest < 300 ) { continue; }
+					console.log( "wTest = " + wTest.toString() +  " PID: " + wOut2[ j ] + " = " + wOut3[ wOut3.length - 1 ] );
+					wPIDS.push( wOut2[j] );
+				}
+				
+			}
+		}
+
+		return wPIDS;
+
+	}
+
+	var openResult = isMainOpen();
+	if ( openResult === -1 ) {
+		console.log("failed to find script");
+	}
+	else {
+		var wCMD2 = "sudo kill -9 ";
+		var wSavedCurrent = null;
+		if ( openResult.length > 1 ) { 
+			wSavedCurrent = openResult.pop(); 
+			for ( var i = 0; i < openResult.length; ++i ) {
+				var wKillCMD = wCMD2 + openResult[i];
+				exec( wKillCMD , { silent: true , async: false } );
+				console.log( wKillCMD );
+			}
+		}
+	}
+
+}
+cleanseMain();
+
 var fs = require('fs');
 var path = require("path");
 var sleep = require("sleep");
@@ -13,6 +65,7 @@ fs.writeFileSync( path.join( __dirname , "client" , "js" , "sockioServerAddress.
 var app = require("./server/expressApp.js");
 var server = require("http").createServer(app);
 
+var personalFiles = require("./personal.js");
 
 var clientManager = require("./server/clientManager.js");
 
@@ -60,7 +113,7 @@ io.sockets.on( 'connection' , function (socket) {
 	});
 
 	socket.on( 'ytStandardPlaying' , function( data ){
-		clientManager.ytStandard(true);
+		clientManager.ytStandard( true , data.id );
 	});
 
 	socket.on( 'updateYTStandardInfo' , function( data ) {
@@ -75,11 +128,48 @@ io.sockets.on( 'connection' , function (socket) {
 
 });
 
+var middleSock = require('socket.io-client')( personalFiles.middleSockIP );
+
+middleSock.on( 'connect' , function( socket ){ 
+	console.log("connected");
+});
+
+middleSock.on( 'newConnection' , function( data ) { 
+        console.log(data);
+});
+
+middleSock.on( 'event' , function(data) {
+	console.log(data);
+})
+
+middleSock.on( 'pressButton' , function( data ) {
+	console.log( "We should be pressing Button + " + data.button.toString() );
+	clientManager.pressButton( data.button );
+});
+
+function emitNowPlayingInfo() {
+	var nowPlayingInfo = clientManager.getNowPlayingInfo();
+	
+}
+
+middleSock.on( 'nowPlayingInfo' , function( data ) {
+	emitNowPlayingInfo();
+});
+
+wEmitter.on( 'nowPlayingInfo' , function( data ) {
+	middleSock.emit( "sendNowPlayingInfo" , data );
+})
+
+wEmitter.on( 'middleSockSend' , function( data ) {
+	middleSock.emit( data.command , data.options );
+});
+
+middleSock.on('disconnect', function(){console.log("disconnected");});
+
 
 server.listen( port , function() {
 	console.log( "[MAIN] --> Server Started on : \n\thttp://" + localIP + ":" + port + "\n \t\t or \n\thttp://localhost:" + port + "\n" );
 });
-
 
 
 process.on('SIGINT', function () {

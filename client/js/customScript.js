@@ -4,6 +4,7 @@ var ytLiveList , twitchLiveList , standardList = null;
 var usingPlaylist = true;
 var wPlaylist = [];
 var videoUpateOBJ = null;
+var nowPlayind = null;
 var ytLiveSwapDuration = null;
 
 var viewFiles = {
@@ -134,7 +135,7 @@ $(document).on( "closefirefoxtab" , function( event , einfo ) { closeChildView()
 $(document).on( "yt-player-destoyed" , function( event , einfo ) { socket.emit( 'yt-player-destoyed' ); });
 
 $(document).on( "ytLivePlaying" , function( event , einfo ) { socket.emit( 'ytLivePlaying' ); });
-$(document).on( "ytStandardPlaying" , function( event , einfo ) { socket.emit( 'ytStandardPlaying' ); });
+$(document).on( "ytStandardPlaying" , function( event , einfo ) { socket.emit( 'ytStandardPlaying' , nowPlayind ); });
 
 $(document).on( "updateYTStandardInfo" , function( event , efinfo ) { socket.emit( 'updateYTStandardInfo' , videoUpateOBJ ); });
 

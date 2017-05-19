@@ -31,6 +31,8 @@ var wCM =  {
 		firefoxClientTaskNeedQued: false,
 		firefoxClientTask: { online: false , name: null },
 		firefoxClientYTPlayerReady: false,
+		nowPlayingString: "",
+		nowPlayingOBJ: {  },
 	},
 
 	singleYTVideoID: null,
@@ -211,7 +213,7 @@ var wCM =  {
 			wCM.state.tvON = false;
 		}
 
-		wBM.stop();
+		//wBM.stop();
 
 		wCM.state.lastAction = null;
 		wCM.state.currentAction = null;
@@ -430,6 +432,12 @@ var wCM =  {
 		wEmitter.emit( 'socketSendTask' , 'closeChildView', { });
 	});
 
+	wEmitter.on( 'updateNowPlayingOBJ' , function( data ) {
+		wCM.state.nowPlayingOBJ = data;
+		wCM.state.nowPlayingOBJ.currentAction = wCM.state.currentAction;
+		wEmitter.emit( "nowPlayingInfo" , wCM.state.nowPlayingOBJ );
+	});
+
 	wEmitter.on( 'properShutdown' , function() {
 		console.log("[CLIENT_MAN] --> Proper Shutdown".magenta);
 		wCM.stopEverything();
@@ -462,17 +470,26 @@ module.exports.ytLive = function(wBool) {
 	if ( wCM.state.yt.background ) { setTimeout( ()=> { wTM.startYTShuffleTask(); } , 3000 ); }
 };
 
-module.exports.ytStandard = function(wBool) {
+module.exports.ytStandard = function( wBool , id ) {
 	wCM.state.yt.standard = wBool;
+	wCM.state.nowPlayingString = "YT Standard --> " + id;
 };
 
 module.exports.updateYTStandardInfo = function(wOBJ) { 
 	wVM.updateYTStandardInfo(wOBJ)
 };	
 
+module.exports.getNowPlayingInfo = function() { 
+	return {
+		currentAction: wCM.state.currentAction,
+		nowPlayingMode: wCM.state.nowPlayingOBJ.mode,
+		nowPlayingString: wCM.state.nowPlayingOBJ.string,
+	};
+};	
 
-
-
+module.exports.pressButton = function(wNum) {
+	wBM.pressButton( wNum );
+};
 
 module.exports.prepare = function(wAction) {
 	wCM.prepare(wAction);

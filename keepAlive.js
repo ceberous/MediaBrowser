@@ -5,6 +5,8 @@ var StringDecoder = require('string_decoder').StringDecoder;
 var decoder = new StringDecoder('utf8');
 require('shelljs/global');
 
+// https://www.npmjs.com/package/file-size-watcher
+
 var wChild = null;
 var wKillPIDS = [];
 var superKill = false;
@@ -158,7 +160,7 @@ function loadEventListeners() {
 function launchChild() {
 	wChild = null;
 	alreadyRespawning = false;
-	wChild = spawn( "/home/haley/.nvm/versions/node/v7.7.4/bin/node" , [ "/home/haley/WORKSPACE/MediaBrowser/main.js" , ">" , "/home/haley/WORKSPACE/MediaBrowser/wOut2.txt" ] );
+	wChild = spawn( "/home/haley/.nvm/versions/node/v7.7.4/bin/node" , [ "/home/haley/WORKSPACE/MediaBrowser/main.js" ] );
 	loadEventListeners();
 }
 

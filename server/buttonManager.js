@@ -92,6 +92,8 @@ var lastPressed = new Date().getTime();
 var timeNow;
 var handleButtonInput = function(wInput) {
 
+	wInput = wInput.toString();
+
 	timeNow = new Date().getTime();
 	if ( ( timeNow - lastPressed ) < 3000 ) { console.log("pressed too soon"); return; }
 	lastPressed = timeNow;
@@ -173,11 +175,16 @@ module.exports.stop = function() {
 	exec( wCMD , { silent: true , async: false } );
 };
 
+module.exports.pressButton = function( wNum ) {
+	handleButtonInput( wNum );
+};
+
 
 /*
 setTimeout( function() {
 	wEmitter.emit( "button12Press" );
 } , 10000 );
+
 
 setTimeout( function() {
 	wEmitter.emit( "button7Press" );

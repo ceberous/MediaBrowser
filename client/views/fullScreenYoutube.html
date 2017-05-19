@@ -25,7 +25,7 @@
 			$("#waitingMessage").hide();
 
 			var wThis = $(window);
-			var wOptions = { version: 3 , height: wThis.height() , width: wThis.width() , videoId: YTIFrameManager.playlist[0] };
+			var wOptions = { version: 3 , height: wThis.height() , width: wThis.width() , videoId: YTIFrameManager.playlist[0] , suggestedQuality: "hd720" };
 			
 			if ( YTIFrameManager.usingPlaylist ) { wOptions.loop = 1; }
 			
@@ -65,6 +65,7 @@
 			YTIFrameManager.nowPlaying.id = wID;
 			YTIFrameManager.nowPlaying.time = wT;
 
+			nowPlaying = { id: YTIFrameManager.nowPlaying.id };
 			videoUpateOBJ = { last: YTIFrameManager.lastPlayed , now: YTIFrameManager.nowPlaying };
 
 			switch ( event.data ) {
@@ -80,6 +81,7 @@
 					break;
 				case 1:
 					console.log(" video is now playing ");
+					YTIFrameManager.wPlayer.setPlaybackQuality("hd720");
 					$(document).trigger( "ytStandardPlaying" );
 					break;
 				case 2:
