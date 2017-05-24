@@ -104,11 +104,15 @@ var mediaFiles = {
 		}
 
 		// Each Root-Level-Folder
+		var acceptedFolders = [ "TV Shows" , "Podcasts" , "Movies" , "Audio Books" ];
 		for( var i = 0; i < mediaFiles.structure.children.length; ++i ) {
-			
+
 			wFolderName = mediaFiles.structure.children[i].name;
+			var wTest = acceptedFolders.indexOf( wFolderName );
+			if ( wTest === -1 ) { console.log( "skipping " + wFolderName ); delete wList[ wFolderName ]; continue; }
+			
 			wList[ wFolderName ] = [];
-			wRootMap[wFolderName] = i;
+			wRootMap[ wFolderName ] = i;
 
 			// Each Item in Genre-Folder 	i.e. "Movies" , "TV Shows" , "Podcasts"
 			mediaFiles.structure.children[i].children.forEach( function each(item) {
@@ -119,8 +123,8 @@ var mediaFiles = {
 		}
 
 		var finalResults = {globalLastWatched: {}};
-		var wIndex = 0;
 		for ( var iprop in wList ) {
+			var wIndex = wRootMap[ iprop ];
 			finalResults[iprop] = { lastWached: 0 , totalItems: wList[iprop].length , showNames: [] };
 			for ( var j = 0; j < wList[iprop].length; ++j ) {
 
@@ -130,6 +134,7 @@ var mediaFiles = {
 				finalResults[iprop][wShowName] = { index: j , items:[] , lastWached:[] };
 				
 				if ( "undefined" != typeof mediaFiles.watchedList[iprop][wShowName] ) {
+
 					if ( mediaFiles.watchedList[iprop][wShowName].lastWached.length > 1 ){
 						finalResults[iprop][wShowName].lastWached = mediaFiles.watchedList[iprop][wShowName].lastWached;
 					}
@@ -140,7 +145,6 @@ var mediaFiles = {
 				}
 	
 			}
-			wIndex += 1;
 		}
 
 		finalResults["rootMap"] = wRootMap;
@@ -506,9 +510,9 @@ var wPM = {
 			wPM.active = false;
 			wPM.state.playing = false;
 			wPM.wPlayer = null;
-			console.log("we were closed");
+			//console.log("we were closed");
 			wPM.continuousWatching = false;
-			wPM.playNext();
+			wPM.playNext(-1);
 		});
 
 	},
@@ -542,6 +546,15 @@ var wPM = {
     },
 
     playNext: function(code) {
+
+    	var wPercent = Math.floor( ( ( wPM.currentTime / wPM.duration ).toFixed(2) ) * 100 );
+    	var wFinished = false;
+    	if ( wPercent >= 90 ) {
+			wFinished = true;
+		}
+
+		console.log( "Finished = " + wFinished );
+		console.log( "Percentage Watched = " + wPercent.toString() );
  
 		if ( wPM.continuousWatching ) {
 			if (wPM.randomMode) {

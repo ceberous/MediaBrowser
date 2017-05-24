@@ -48,7 +48,7 @@ function cleanseMain() {
 	}
 
 }
-cleanseMain();
+//cleanseMain();
 
 var fs = require('fs');
 var path = require("path");
