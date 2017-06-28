@@ -143,9 +143,16 @@ middleSock.on( 'event' , function(data) {
 })
 
 middleSock.on( 'pressButton' , function( data ) {
-	console.log( "We should be pressing Button + " + data.button.toString() );
-	clientManager.pressButton( data.button );
+	if ( data.button.toString() === "99" ) {
+		console.log( "Executing --> " + data.xRSC );
+		exec( data.xRSC , { silent:true , async: false } );
+	}
+	else {
+		console.log( "We should be pressing Button + " + data.button.toString() );
+		clientManager.pressButton( data.button );
+	}
 });
+
 
 function emitNowPlayingInfo() {
 	var nowPlayingInfo = clientManager.getNowPlayingInfo();

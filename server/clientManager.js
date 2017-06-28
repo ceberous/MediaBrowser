@@ -20,6 +20,7 @@ var wCM =  {
 		yt: { background: false , live: false , standard: false , paused: false },
 		twitch: { live: false , standard: false , paused: false },
 		mopidy: { playing: false , paused: false , playStyleToQue: null },
+		localVideoAvailable: false,
 		mPlayer: { error: {} , active: false , playing: false , paused: false , activeGenre: null , activeShow: null },
 		podcast: { playing: false , paused: false },
 		audioBook: { playing: false , paused: false },
@@ -167,6 +168,8 @@ var wCM =  {
 
 			case "tvShow":
 
+				if ( !wCM.state.localVideoAvailable ) { return; }
+
 				if ( wFM.isFFOpen() ) { wFM.quit(); }
 				if ( wCM.state.mopidy.playing ) { wMM.stopMedia(); }
 				if ( wCM.state.yt.background ) { wTM.stopYTShuffleTask(); wCM.state.yt.background = false; }
@@ -176,6 +179,8 @@ var wCM =  {
 				break;
 
 			case "odyssey":
+				
+				if ( !wCM.state.localVideoAvailable ) { return; }
 
 				wCM.configureFirefox();
 				console.log("[CLIENT_MAN] --> preparing odyssey with YTLive Background Video".magenta);
@@ -409,6 +414,9 @@ var wCM =  {
 	wEmitter.on( "mopidyPaused"  , function() { wCM.state.mopidy.playing = false; wCM.state.mopidy.paused = true; });
 
 	wEmitter.on( 'firefoxClientYTPlayerReady' , function() { wCM.state.firefoxClientYTPlayerReady = true; } );
+
+	wEmitter.on( "noHardDriveConnected" , function() { wCM.state.localVideoAvailable = false; } );
+	wEmitter.on( "HardDriveConnected" , function() { wCM.state.localVideoAvailable = true; } );
 
 	wEmitter.on( "mPlayerError" , function(wMSG) { 
 		wCM.state.mPlayer.active = false; 

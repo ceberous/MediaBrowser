@@ -1,5 +1,7 @@
 var colors = require("colors");
+
 var wEmitter = require('../main.js').wEmitter;
+//var wEmitter = new (require('events').EventEmitter);
 
 var fs = require('fs');
 var path = require("path");
@@ -73,6 +75,7 @@ var mediaFiles = {
 	},
 
 	updateStructureCache: function() {
+		if (  mediaFiles.hardDrive.baseDIR === null || mediaFiles.hardDrive.baseDIR.length < 2 ) { wEmitter.emit("noHardDriveConnected"); return; } 
 		console.log( mediaFiles.hardDrive.baseDIR );
 		mediaFiles.structure = dirTree( mediaFiles.hardDrive.baseDIR );
 		jsonfile.writeFileSync( mediaFiles.hardDrive.structureCacheFP , mediaFiles.structure );
@@ -109,7 +112,7 @@ var mediaFiles = {
 
 			wFolderName = mediaFiles.structure.children[i].name;
 			var wTest = acceptedFolders.indexOf( wFolderName );
-			if ( wTest === -1 ) { console.log( "skipping " + wFolderName ); delete wList[ wFolderName ]; continue; }
+			if ( wTest === -1 ) { /*console.log( "skipping " + wFolderName );*/ delete wList[ wFolderName ]; continue; }
 			
 			wList[ wFolderName ] = [];
 			wRootMap[ wFolderName ] = i;
@@ -150,6 +153,7 @@ var mediaFiles = {
 		finalResults["rootMap"] = wRootMap;
 		mediaFiles.watchedList = finalResults;
 		jsonfile.writeFileSync( mediaFiles.hardDrive.watchedListFP , finalResults );
+		wEmitter.emit("HardDriveConnected");
 
 	},
 
@@ -528,6 +532,16 @@ var wPM = {
 		wPM.sendCMD( "pause" );
 		wPM.state.paused = !wPM.state.paused;
 		wEmitter.emit("mPlayerPaused");
+
+		var wPercent = Math.floor( ( ( wPM.currentTime / wPM.duration ).toFixed(2) ) * 100 );
+    	var wFinished = false;
+    	if ( wPercent >= 90 ) {
+			wFinished = true;
+		}
+
+		console.log( "Finished = " + wFinished );
+		console.log( "Percentage Watched = " + wPercent.toString() );
+
 	},
 
 	stop: function() {
@@ -538,6 +552,15 @@ var wPM = {
 		wPM.wPlayer = null;
 		wEmitter.emit("mPlayerStopped");
 		//wPM.playNext()
+
+		var wPercent = Math.floor( ( ( wPM.currentTime / wPM.duration ).toFixed(2) ) * 100 );
+    	var wFinished = false;
+    	if ( wPercent >= 90 ) {
+			wFinished = true;
+		}
+
+		console.log( "Finished = " + wFinished );
+		console.log( "Percentage Watched = " + wPercent.toString() );
 
 	},
 
